@@ -38,13 +38,13 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
+    'aisetu_erp.apps.MongoAdminConfig',
+    'aisetu_erp.apps.MongoAuthConfig',
+    'aisetu_erp.apps.MongoContentTypesConfig',
+    'aisetu_erp.apps.MongoSessionsConfig',
+    'aisetu_erp.apps.MongoMessagesConfig',
     'django.contrib.staticfiles',
-    'website',
+    'website.apps.WebsiteConfig',
     'rest_framework',
     'corsheaders',
 ]
@@ -92,15 +92,9 @@ WSGI_APPLICATION = 'aisetu_erp.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',              
-        'USER': 'postgres',              
-        'PASSWORD': 'ai_setu@2005',
-        'HOST': 'db.yqivuuimhtpuddpeoqby.supabase.co',
-        'PORT': '5432',
-        "OPTIONS": {
-            "sslmode": "require",  
-        },
+        'ENGINE': 'django_mongodb_backend',
+        'NAME': '',
+        'HOST': 'mongodb+srv://HK_Digiverse:HK%40Digiverse%40123@cluster0.lcbyqbq.mongodb.net/aisetu_db?retryWrites=true&w=majority&appName=Cluster0',
     }
 }
 
@@ -144,7 +138,8 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = 'django_mongodb_backend.fields.ObjectIdAutoField'
+
 CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = [

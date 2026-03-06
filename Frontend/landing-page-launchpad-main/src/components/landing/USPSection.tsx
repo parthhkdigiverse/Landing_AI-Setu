@@ -16,7 +16,7 @@ const USPSection = () => (
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true }}
       >
-        <span className="text-accent font-semibold text-sm uppercase tracking-wider">AI-Powered (Beta Feature)</span>
+        <span className="text-accent font-semibold text-sm uppercase tracking-wider">AI-Powered</span>
         <h2 className="text-3xl lg:text-4xl font-bold mt-2 mb-6">
           No Barcode? <span className="text-gradient-gold">No Problem.</span>
         </h2>

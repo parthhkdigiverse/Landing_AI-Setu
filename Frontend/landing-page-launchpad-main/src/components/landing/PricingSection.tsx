@@ -36,9 +36,12 @@ const PricingSection = () => {
         >
           <div className="text-center mb-6">
             <p className="text-muted-foreground text-sm mb-2">All-Inclusive Package</p>
-            <div className="flex items-baseline justify-center gap-1">
-              <span className="text-5xl font-extrabold text-foreground">₹12,000</span>
-              <span className="text-muted-foreground text-sm">+ GST</span>
+            <div className="flex flex-col items-center justify-center gap-1">
+              <span className="text-muted-foreground line-through text-lg font-medium tracking-wide">₹29,999</span>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-5xl font-extrabold text-foreground">₹12,000</span>
+                <span className="text-muted-foreground text-sm">+ GST</span>
+              </div>
             </div>
           </div>
           <div className="space-y-3 mb-8">

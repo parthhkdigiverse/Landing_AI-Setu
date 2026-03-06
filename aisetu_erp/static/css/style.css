@@ -1,0 +1,62 @@
+.hero-section {
+  background: radial-gradient(circle at top left, #eef2ff, #f8fafc);
+}
+
+.hero-visual {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-control, .form-select {
+  padding: 12px;
+  border-radius: 10px;
+}
+
+.card {
+  background: #ffffff;
+}
+
+.pricing-section {
+  background: #f7f9fc;
+}
+
+.pricing-box {
+  background: white;
+  border-radius: 20px;
+  padding: 40px 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  transition: 0.3s;
+}
+
+.pricing-box:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.price {
+  font-size: 36px;
+  font-weight: bold;
+  color: #4e73df;
+}
+
+.price span {
+  font-size: 18px;
+  color: gray;
+}
+
+.btn-custom {
+  background: #4e73df;
+  color: white;
+  padding: 14px 40px;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.btn-custom:hover {
+  background: #2e59d9;
+  transform: scale(1.05);
+}

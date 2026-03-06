@@ -26,6 +26,8 @@ const Footer = () => (
               { label: "Pricing", href: "/pricing" },
               { label: "About Us", href: "/about" },
               { label: "Blog", href: "/blog" },
+              { label: "Career", href: "/career" },
+              { label: "Contact Us", href: "/contact" },
             ].map((l) => (
               <Link key={l.href} to={l.href} className="block text-sm text-primary-foreground/60 hover:text-accent transition-colors">
                 {l.label}

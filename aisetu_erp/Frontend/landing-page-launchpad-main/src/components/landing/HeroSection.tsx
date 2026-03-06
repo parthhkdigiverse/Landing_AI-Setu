@@ -1,0 +1,198 @@
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Play, Sparkles, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import DemoForm from "@/components/DemoForm";
+import heroImg from "@/assets/image.png";
+import aiScanImg from "@/assets/ai-scan.jpg";
+
+const highlights = [
+  "GST-Ready Billing",
+  "Real-time Inventory",
+  "AI-Powered Insights",
+];
+
+const HeroSection = () => {
+  const [demoOpen, setDemoOpen] = useState(false);
+
+  return (
+    <>
+      <section className="bg-hero text-primary-foreground relative overflow-hidden min-h-[90vh] flex items-center">
+
+        {/* Decorative background blobs */}
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full opacity-10 blur-3xl pointer-events-none"
+          style={{ background: "radial-gradient(circle, hsl(43 96% 56% / 0.6), transparent 70%)", transform: "translate(-30%, -40%)" }}
+        />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full opacity-10 blur-3xl pointer-events-none"
+          style={{ background: "radial-gradient(circle, hsl(220 80% 60% / 0.5), transparent 70%)", transform: "translate(20%, 30%)" }}
+        />
+
+        <div className="container relative z-10 py-16 lg:py-24 grid lg:grid-cols-2 gap-16 items-center">
+
+          {/* Left Column */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+          >
+            {/* Eyebrow badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.15, duration: 0.4 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6
+                glass-card border border-yellow-400/30 text-yellow-300 text-sm font-semibold"
+            >
+              <Sparkles className="w-4 h-4 animate-pulse" />
+              India's Smartest Retail ERP
+            </motion.div>
+
+            <h1 className="text-4xl lg:text-5xl xl:text-[3.8rem] font-extrabold leading-[1.1] mb-6 tracking-tight">
+              Smart ERP for{" "}
+              <span className="text-gradient-animate">
+                Indian Retailers
+              </span>
+            </h1>
+
+            <p className="text-lg lg:text-xl text-primary-foreground/75 mb-8 max-w-lg leading-relaxed">
+              AI-powered billing, inventory & store management — built specifically for Indian retail businesses. Save time, reduce errors, grow faster.
+            </p>
+
+            {/* Highlight pills */}
+            <div className="flex flex-wrap gap-3 mb-10">
+              {highlights.map((h) => (
+                <span key={h} className="inline-flex items-center gap-1.5 text-sm px-3 py-1 rounded-full
+                  bg-white/10 text-primary-foreground/90 border border-white/15 font-medium">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-yellow-400" />
+                  {h}
+                </span>
+              ))}
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-wrap gap-4">
+              <Button
+                size="lg"
+                onClick={() => setDemoOpen(true)}
+                className="bg-gold-gradient text-accent-foreground font-bold text-base px-8 py-6
+                  transition-all duration-200 shadow-lg
+                  hover:scale-105 hover:shadow-[0_0_28px_rgba(255,200,50,0.55)]
+                  active:scale-95 animate-pulse-glow group"
+              >
+                Book Free Demo
+                <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white/25 text-primary-foreground bg-white/5 backdrop-blur-sm
+                  hover:bg-white/15 hover:border-white/40 transition-all duration-200 px-8 py-6 font-semibold"
+              >
+                <Play className="mr-2 h-4 w-4 fill-current" /> Watch Demo
+              </Button>
+            </div>
+
+            {/* Social proof */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="mt-8 text-sm text-primary-foreground/50"
+            >
+              ⭐⭐⭐⭐⭐ Trusted by <span className="text-yellow-400 font-semibold">500+</span> Indian retailers
+            </motion.p>
+          </motion.div>
+
+          {/* Right Column: Premium Image Showcase */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            className="relative hidden lg:flex items-center justify-center pb-12 pr-4"
+          >
+            {/* Glow ring behind image */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-[420px] h-[420px] rounded-full opacity-25 blur-2xl"
+                style={{ background: "radial-gradient(circle, hsl(43 96% 56%), transparent 70%)" }}
+              />
+            </div>
+
+            {/* Main image with premium frame */}
+            <div className="relative w-full max-w-[480px] animate-float">
+              {/* Outer glow border */}
+              <div className="absolute -inset-[3px] rounded-3xl opacity-60 blur-sm pointer-events-none"
+                style={{ background: "linear-gradient(135deg, hsl(43 96% 56% / 0.6), transparent 60%)" }}
+              />
+              <img
+                src={heroImg}
+                alt="AI-Setu ERP Dashboard"
+                className="relative rounded-2xl shadow-2xl w-full object-cover border border-white/15"
+              />
+
+              {/* Floating stat card top-right */}
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8, duration: 0.5 }}
+                className="absolute -top-5 -right-5 glass-card rounded-xl px-4 py-2.5 shadow-xl border border-yellow-400/20"
+              >
+                <p className="text-xs text-primary-foreground/60 font-medium">Today's Sales</p>
+                <p className="text-xl font-bold text-yellow-400">₹1,24,500</p>
+              </motion.div>
+
+              {/* Floating AI badge bottom-right */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1.0, duration: 0.5 }}
+                className="absolute -bottom-4 -right-4 glass-card rounded-xl px-3 py-2 shadow-xl
+                  border border-white/15 flex items-center gap-2"
+              >
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                <span className="text-xs font-semibold text-primary-foreground/80">AI Active</span>
+              </motion.div>
+
+              {/* Floating mini image overlay bottom-left */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: 0.9 }}
+                className="absolute -bottom-8 -left-8 w-40 rounded-xl overflow-hidden shadow-2xl
+                  border-2 border-white/15 ring-2 ring-yellow-400/20"
+              >
+                <img src={aiScanImg} alt="AI Scan Feature" className="w-full object-cover" />
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Bottom fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background/20 to-transparent pointer-events-none" />
+      </section>
+
+      {/* Demo Dialog Modal */}
+      <Dialog open={demoOpen} onOpenChange={setDemoOpen}>
+        <DialogContent className="sm:max-w-sm bg-card border border-border">
+          <DialogHeader>
+            <DialogTitle className="font-heading font-bold text-2xl text-foreground">
+              Book A Free Demo
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+              Fill the form and our team will contact you shortly.
+            </DialogDescription>
+          </DialogHeader>
+          <DemoForm />
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
+
+export default HeroSection;

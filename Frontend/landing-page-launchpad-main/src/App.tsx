@@ -13,6 +13,8 @@ import PricingSignup from "./pages/PricingSignup";
 import { PrivacyPolicy, TermsConditions, RefundPolicy, DataSecurity, SupportService } from "./pages/PolicyPages";
 import { About, Blog, Career, Contact } from "./pages/ComingSoon";
 import NotFound from "./pages/NotFound";
+import JobDetails from "@/pages/JobDetails";
+import ApplyJob from "./pages/ApplyJob";
 
 const queryClient = new QueryClient();
 
@@ -37,9 +39,11 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/career" element={<Career />} />
+          <Route path="/career/:jobId" element={<JobDetails />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/pricing-signup" element={<PricingSignup />} />
+          <Route path="/career/apply/:jobId" element={<ApplyJob />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

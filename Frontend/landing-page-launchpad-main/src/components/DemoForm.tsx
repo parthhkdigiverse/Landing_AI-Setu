@@ -79,11 +79,11 @@ const DemoForm = ({ variant = "default" }: { variant?: "default" | "compact" }) 
         className="bg-card border-border text-black placeholder-black/70"
       />
       <Button
-        type="submit"
-        disabled={loading}
+        type="button" // <-- change from submit to button
         className="w-full bg-gold-gradient text-accent-foreground font-semibold hover:opacity-90"
+        onClick={() => window.location.href = "/"} // <-- redirect to home
       >
-        {loading ? "Submitting..." : "Book Free Demo"}
+        Book Free Demo
       </Button>
     </form>
   );

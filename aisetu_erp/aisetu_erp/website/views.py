@@ -8,9 +8,12 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import PricingSignup
+from .models import PricingSignup,ContactSubmission
 import random
 import string
+from rest_framework.views import APIView
+from .serializers import ContactSubmissionSerializer
+
 
 @csrf_exempt
 def book_demo_api(request):
@@ -263,3 +266,20 @@ def phonepe_callback(request):
     
     return JsonResponse({"error": "Invalid method"}, status=405)
     
+# @api_view(['POST'])
+def submit_contact(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            ContactSubmission.objects.create(
+                name=data.get("name"),
+                country_code=data.get("countryCode"),
+                phone=data.get("phone"),
+                email=data.get("email"),
+                office_address=data.get("officeAddress"),
+                message=data.get("message")
+            )
+            return JsonResponse({"success": True, "message": "Contact submitted successfully"})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=500)
+    return JsonResponse({"error": "Invalid method"}, status=400)

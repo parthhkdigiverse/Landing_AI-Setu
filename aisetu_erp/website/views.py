@@ -7,8 +7,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.response import Response
 from rest_framework import status
-from .models import PricingSignup
+from rest_framework.decorators import api_view
+from .models import ContactSubmission, PricingSignup, LandingPageContent
+from .serializers import LandingPageContentSerializer,JobApplicationSerializer
+
 import random
 import string
 
@@ -262,4 +266,73 @@ def phonepe_callback(request):
             return JsonResponse({"error": str(e)}, status=500)
     
     return JsonResponse({"error": "Invalid method"}, status=405)
+
+@api_view(['GET'])
+def landing_page_content_api(request):
+    try:
+        content = LandingPageContent.objects.first()
+        if not content:
+            # Create default content if not exists
+            content = LandingPageContent.objects.create()
+        serializer = LandingPageContentSerializer(content)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+
+from django.http import HttpResponse
+
+@csrf_exempt
+def submit_contact(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+
+            # Save contact form
+            contact = ContactSubmission.objects.create(
+                name=data.get("name"),
+                phone=data.get("phone"),
+                email=data.get("email"),
+                officeAddress=data.get("officeAddress"),
+                message=data.get("message"),
+            )
+
+            # Prepare response
+            response = {
+                "id": str(contact.id),  # Convert ObjectId to string
+                "message": "Form submitted successfully!"
+            }
+
+            # Return JSON as HttpResponse
+            return HttpResponse(
+                json.dumps(response),
+                content_type="application/json",
+                status=201
+            )
+
+        except Exception as e:
+            response = {"error": str(e)}
+            return HttpResponse(
+                json.dumps(response),
+                content_type="application/json",
+                status=500
+            )
+
+    response = {"error": "Invalid request"}
+    return HttpResponse(
+        json.dumps(response),
+        content_type="application/json",
+        status=400
+    )
+
+
+@api_view(["POST"])
+def apply_job(request):
+
+    serializer = JobApplicationSerializer(data=request.data)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "Application submitted successfully"})
+
+    return Response(serializer.errors)

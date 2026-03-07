@@ -56,7 +56,14 @@ const ReferralSection = () => {
             </motion.div>
           ))}
         </div>
-
+        <div className="text-center">
+          <Button
+            onClick={() => navigate("/referral")}
+            className="bg-gold-gradient text-accent-foreground font-semibold hover:opacity-90 px-8"
+          >
+            Join Referral Program
+          </Button>
+        </div>
       </div>
     </section>
   );

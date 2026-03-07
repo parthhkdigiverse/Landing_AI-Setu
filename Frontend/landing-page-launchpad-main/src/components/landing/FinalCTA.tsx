@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,20 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import DemoForm from "@/components/DemoForm";
+import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
 const FinalCTA = () => {
   const [demoOpen, setDemoOpen] = useState(false);
+  const [content, setContent] = useState<LandingPageContent | null>(null);
+
+  useEffect(() => {
+    const loadContent = async () => {
+      const data = await fetchLandingPageContent();
+      if (data) setContent(data);
+    };
+    loadContent();
+  }, []);
+
 
   return (
     <>
@@ -35,7 +46,7 @@ const FinalCTA = () => {
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6
               glass-card border border-yellow-400/30 text-yellow-300 text-sm font-semibold">
               <Sparkles className="w-4 h-4" />
-              Join 500+ Happy Retailers
+              Join {content?.trusted_retailers_count || "500+"} Happy Retailers
             </div>
 
             <h2 className="text-3xl lg:text-5xl font-extrabold mb-5 leading-tight tracking-tight">
@@ -54,7 +65,7 @@ const FinalCTA = () => {
                 hover:scale-105 hover:shadow-[0_0_40px_rgba(255,200,50,0.5)]
                 active:scale-95 animate-pulse-glow group"
             >
-              Book Your Free Demo
+              {content?.primary_cta_text || "Book Your Free Demo"}
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
 

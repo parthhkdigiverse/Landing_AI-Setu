@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,10 +10,21 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import DemoForm from "@/components/DemoForm";
+import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
+  const [content, setContent] = useState<LandingPageContent | null>(null);
+
+  useEffect(() => {
+    const loadContent = async () => {
+      const data = await fetchLandingPageContent();
+      if (data) setContent(data);
+    };
+    loadContent();
+  }, []);
+
 
   const navItems = [
     { label: "Features", href: "/features" },
@@ -51,7 +62,7 @@ const Header = () => {
                 hover:scale-105 hover:shadow-[0_0_20px_rgba(255,200,50,0.5)] hover:opacity-100
                 active:scale-95"
             >
-              Get A Free Demo
+              {content?.primary_cta_text || "Get A Free Demo"}
             </Button>
           </nav>
 
@@ -81,7 +92,7 @@ const Header = () => {
                 hover:scale-105 hover:shadow-[0_0_20px_rgba(255,200,50,0.5)]
                 active:scale-95"
             >
-              Get A Free Demo
+              {content?.primary_cta_text || "Get A Free Demo"}
             </Button>
           </nav>
         )}

@@ -13,9 +13,11 @@ import ComparisonSection from "@/components/landing/ComparisonSection";
 import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import FAQSection from "@/components/landing/FAQSection";
 import FinalCTA from "@/components/landing/FinalCTA";
+import DemoPopup from "@/components/DemoPopup";
 
 const Index = () => (
   <>
+    <DemoPopup />
     <Header />
     <main>
       <HeroSection />
@@ -33,6 +35,7 @@ const Index = () => (
       <FinalCTA />
     </main>
     <Footer />
+    
   </>
 );
 

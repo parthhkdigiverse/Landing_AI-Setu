@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 import { Gift, RefreshCw, Infinity, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import ReferralPopup from "@/components/ReferralPopup";
 
 const perks = [
   { icon: Gift, title: "₹2,000", desc: "Per Successful Sale" },
@@ -11,7 +12,13 @@ const perks = [
 ];
 
 const ReferralSection = () => {
-  const navigate = useNavigate();
+  const [openPopup, setOpenPopup] = useState(false);
+
+  // New: Reset popup state each time it opens
+  const handleOpenPopup = () => {
+    setOpenPopup(false); // reset first
+    setTimeout(() => setOpenPopup(true), 10); // reopen with fresh state
+  };
 
   return (
     <section className="py-16 lg:py-24 bg-hero text-primary-foreground">
@@ -56,15 +63,21 @@ const ReferralSection = () => {
             </motion.div>
           ))}
         </div>
+
         <div className="text-center">
           <Button
-            onClick={() => navigate("/referral")}
+            onClick={handleOpenPopup} // use new handler
             className="bg-gold-gradient text-accent-foreground font-semibold hover:opacity-90 px-8"
           >
             Join Referral Program
           </Button>
         </div>
       </div>
+
+      <ReferralPopup
+        open={openPopup}
+        onClose={() => setOpenPopup(false)}
+      />
     </section>
   );
 };

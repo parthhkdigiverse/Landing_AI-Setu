@@ -1,4 +1,4 @@
-from website.models import DemoRequest,UserLogin
+from website.models import DemoRequest,UserLogin, ReferralUser
 from django.http import JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from .models import ContactSubmission, PricingSignup, LandingPageContent
-from .serializers import LandingPageContentSerializer,JobApplicationSerializer
+from .serializers import LandingPageContentSerializer,JobApplicationSerializer,ReferralUserSerializer
 
 import random
 import string
@@ -336,3 +336,33 @@ def apply_job(request):
         return Response({"message": "Application submitted successfully"})
 
     return Response(serializer.errors)
+
+@api_view(['POST'])
+def check_referral(request):
+    mobile = request.data.get("mobile_number")
+
+    if not mobile:
+        return Response({"error": "Mobile number required"}, status=400)
+
+    # Check PricingSignup
+    try:
+        user = PricingSignup.objects.get(mobile_number=mobile)
+
+        if user.referral_code:
+            return Response({
+                "referral_code": user.referral_code,
+                "status": "existing_pricing_user"
+            })
+
+    except PricingSignup.DoesNotExist:
+        pass
+
+    # Check ReferralMobile
+    referral_user, created = ReferralUser.objects.get_or_create(
+        mobile_number=mobile
+    )
+
+    return Response({
+        "referral_code": referral_user.referral_code,
+        "status": "new_user" if created else "existing_referral_user"
+    })

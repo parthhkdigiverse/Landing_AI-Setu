@@ -15,6 +15,7 @@ import { About, Blog, Career, Contact } from "./pages/ComingSoon";
 import NotFound from "./pages/NotFound";
 import JobDetails from "@/pages/JobDetails";
 import ApplyJob from "./pages/ApplyJob";
+import ReferralPage from "@/components/landing/ReferralSection";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
           <Route path="/pricing-signup" element={<PricingSignup />} />
           <Route path="/career/apply/:jobId" element={<ApplyJob />} />
+          <Route path="/referral" element={<ReferralPage />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

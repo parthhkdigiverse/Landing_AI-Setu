@@ -2,16 +2,20 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ContactUsPage from "@/components/ContactUs";
 import CareerPage from "@/components/Career";
-
+import AboutUs from "@/pages/AboutUs"; // import the about page
 
 const ComingSoon = ({ title }: { title: string }) => {
+
   if (title === "Career") {
     return <CareerPage />;
   }
 
-
   if (title === "Contact") {
     return <ContactUsPage />;
+  }
+
+  if (title === "About Us") {
+    return <AboutUs />;
   }
 
   return (
@@ -21,7 +25,9 @@ const ComingSoon = ({ title }: { title: string }) => {
       <main className="min-h-[60vh] flex items-center justify-center bg-background">
         <div className="text-center">
           <h1 className="font-bold text-4xl mb-3">{title}</h1>
-          <p className="text-gray-500">This page is coming soon. Stay tuned!</p>
+          <p className="text-gray-500">
+            This page is coming soon. Stay tuned!
+          </p>
         </div>
       </main>
 

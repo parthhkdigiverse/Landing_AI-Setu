@@ -1,4 +1,6 @@
 from django.db import models
+import random
+import string
     
 class DemoRequest(models.Model):
     name = models.CharField(max_length=100)
@@ -110,3 +112,21 @@ class JobApplication(models.Model):
 
     def __str__(self):
         return f"{self.first_name} - {self.job_position}"
+
+def generate_referral_code():
+    characters = string.ascii_uppercase + string.digits
+    return ''.join(random.choices(characters, k=6))
+
+
+class ReferralUser(models.Model):
+    mobile_number = models.CharField(max_length=15, unique=True)
+    referral_code = models.CharField(max_length=6, unique=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.referral_code:
+            self.referral_code = generate_referral_code()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.mobile_number

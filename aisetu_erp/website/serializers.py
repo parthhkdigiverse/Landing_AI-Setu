@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication
+from .models import PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser
 
 
 class DemoRequestSerializer(serializers.ModelSerializer):
@@ -27,4 +27,9 @@ class ContactSubmissionSerializer(serializers.ModelSerializer):
 class JobApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobApplication
+        fields = "__all__"
+
+class ReferralUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReferralUser
         fields = "__all__"

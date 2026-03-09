@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import ContactUsPage from "@/components/ContactUs";
 import CareerPage from "@/components/Career";
 import AboutUs from "@/pages/AboutUs"; // import the about page
+import BlogPage from "@/pages/Blog"; // import the blog page (renamed to avoid collisions)
 
 const ComingSoon = ({ title }: { title: string }) => {
 
@@ -16,6 +17,10 @@ const ComingSoon = ({ title }: { title: string }) => {
 
   if (title === "About Us") {
     return <AboutUs />;
+  }
+
+  if (title === "Blog") {
+    return <BlogPage />; // render the actual blog component
   }
 
   return (
@@ -37,7 +42,7 @@ const ComingSoon = ({ title }: { title: string }) => {
 };
 
 export const About = () => <ComingSoon title="About Us" />;
-export const Blog = () => <ComingSoon title="Blog" />;
+export const Blog = () => <ComingSoon title="Blog" />; // now renders the real blog component
 export const Career = () => <ComingSoon title="Career" />;
 export const Contact = () => <ComingSoon title="Contact" />;
 

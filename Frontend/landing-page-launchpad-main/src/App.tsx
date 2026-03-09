@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import JobDetails from "@/pages/JobDetails";
 import ApplyJob from "./pages/ApplyJob";
 import ReferralPage from "@/components/landing/ReferralSection";
+import BlogPost from "./pages/BlogPost"; // import new blog post detail component
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/support" element={<SupportService />} />
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:postId" element={<BlogPost />} />
           <Route path="/career" element={<Career />} />
           <Route path="/career/:jobId" element={<JobDetails />} />
           <Route path="/contact" element={<Contact />} />

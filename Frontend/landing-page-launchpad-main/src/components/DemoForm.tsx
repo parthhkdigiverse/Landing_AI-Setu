@@ -85,7 +85,7 @@ const DemoForm = ({ variant = "default" }: { variant?: "default" | "compact" }) 
         className="w-full bg-gold-gradient text-accent-foreground font-semibold hover:opacity-90"
         // <-- redirect to home
       >
-        Book Free Demo
+        {loading ? "Submitting..." : "Book Free Demo"}
       </Button>
     </form>
   );

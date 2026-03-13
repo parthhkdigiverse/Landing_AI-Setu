@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser
+from .models import AboutPageContent, CareerPageContent, ContactPageContent, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser
 
 
 class DemoRequestSerializer(serializers.ModelSerializer):
@@ -33,3 +33,27 @@ class ReferralUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = ReferralUser
         fields = "__all__"
+
+class AboutPageSerializer(serializers.ModelSerializer):
+    # This line converts the MongoDB ObjectId into a string
+    id = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = AboutPageContent
+        fields = '__all__' # Or list your specific fields
+
+class CareerPageSerializer(serializers.ModelSerializer):
+    # This MUST be CharField to handle MongoDB's string-based IDs
+    id = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = CareerPageContent
+        fields = '__all__'
+
+class ContactPageContentSerializer(serializers.ModelSerializer):
+    # This MUST be CharField to handle MongoDB's string-based IDs
+    id = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = ContactPageContent
+        fields = '__all__'

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import book_demo_api,login_view,pricing_signup, landing_page_content_api, submit_contact, apply_job, check_referral, initiate_payment, payment_callback
+from .views import about_page_content, book_demo_api,login_view,pricing_signup, landing_page_content_api, submit_contact, apply_job, check_referral, initiate_payment, payment_callback
 from . import views 
 urlpatterns = [    
     path("book-demo/", book_demo_api, name="book_demo_api"),
@@ -15,4 +15,7 @@ urlpatterns = [
     # path("admin/login/", views.admin_login),
     # path("admin/demos/", views.admin_demo_list),
     # path("admin/delete-demo/<int:id>/", views.delete_demo),
+    path("api/about-page/", about_page_content, name="about-page"),
+    path("api/career-page/", views.career_page_content, name="career-page"),
+    path("api/contactus-page/", views.contactus_page_content, name="contactus-page"),
 ]

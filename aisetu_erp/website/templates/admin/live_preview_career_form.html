@@ -1,0 +1,123 @@
+{% extends "admin/change_form.html" %}
+
+{% block content %}
+
+<style>
+
+.admin-preview-layout{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:20px;
+}
+
+.admin-edit-section{
+    min-width:0;
+}
+
+.preview-section{
+    border-left:1px solid #ddd;
+    padding-left:20px;
+}
+
+.preview-header{
+    font-size:18px;
+    font-weight:600;
+    margin-bottom:10px;
+}
+
+.preview-section iframe{
+    width:100%;
+    height:85vh;
+    border:1px solid #ddd;
+    border-radius:6px;
+}
+
+</style>
+
+<div class="admin-preview-layout">
+
+    <!-- LEFT SIDE : DJANGO ADMIN FIELDS -->
+    <div class="admin-edit-section">
+
+        {{ block.super }}
+
+    </div>
+
+    <!-- RIGHT SIDE : WEBSITE PREVIEW -->
+    <div class="preview-section">
+
+        <div class="preview-header">
+            Live Website Preview
+        </div>
+
+        <iframe
+            id="livePreview"
+            src="http://127.0.0.1:8000/career"
+        ></iframe>
+
+    </div>
+
+</div>
+
+
+<script>
+// 1. Helper to get the form data
+function getFormData() {
+    const data = {};
+    document.querySelectorAll("input, textarea, select").forEach(field => {
+        if (field.id) {
+            const key = field.id.replace("id_", "");
+            data[key] = field.value;
+        }
+    });
+    return data;
+}
+
+// 2. Function to send data to React for Live Preview
+function sendPreviewData() {
+    const iframe = document.getElementById("livePreview");
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage(getFormData(), "*");
+    }
+}
+
+/* --- LIVE PREVIEW WHILE TYPING --- */
+document.addEventListener("input", function() {
+    clearTimeout(window.previewTimer);
+    window.previewTimer = setTimeout(sendPreviewData, 300);
+});
+
+/* --- HANDLE THE SAVE ACTION --- */
+document.addEventListener("DOMContentLoaded", function() {
+    const adminForm = document.getElementById("aboutpagecontent_form") || 
+                     document.getElementById("careerpagecontent_form") || 
+                     document.querySelector("form");
+
+    if (adminForm) {
+        adminForm.addEventListener("submit", function() {
+            // This runs the moment "Save" is clicked.
+            // We tell the React app one last time what the data is.
+            sendPreviewData();
+            
+            // We also set a flag in sessionStorage that we are currently saving
+            sessionStorage.setItem("just_saved", "true");
+        });
+    }
+
+    // When the page reloads after a successful save:
+    if (sessionStorage.getItem("just_saved") === "true") {
+        const iframe = document.getElementById("livePreview");
+        if (iframe) {
+            // Force the iframe to bypass cache and get fresh DB data
+            const currentSrc = new URL(iframe.src);
+            currentSrc.searchParams.set("t", Date.now()); // Cache buster
+            iframe.src = currentSrc.toString();
+            
+            // Clear the flag
+            sessionStorage.removeItem("just_saved");
+        }
+    }
+});
+</script>
+
+{% endblock %}

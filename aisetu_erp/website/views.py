@@ -2,11 +2,11 @@ from website.models import DemoRequest,UserLogin, ReferralUser
 from django.http import JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view
+from rest_framework.decorators import APIView, api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import ContactSubmission, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser
-from .serializers import LandingPageContentSerializer,JobApplicationSerializer,ReferralUserSerializer
+from .models import ContactPageContent, ContactSubmission, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, CareerPageContent
+from .serializers import AboutPageSerializer, CareerPageSerializer, LandingPageContentSerializer,JobApplicationSerializer,ReferralUserSerializer, ContactPageContentSerializer
 from .utils import generate_invoice, admin_required
 import random
 import string
@@ -392,3 +392,41 @@ def payment_callback(request):
         return JsonResponse({"error": "Payment not found"}, status=404)
     except Exception as e:
         return JsonResponse({"error": "Internal server error", "details": str(e)}, status=500)
+    
+@api_view(["GET"])
+def about_page_content(request):
+    # Use .first() to get the object, not a queryset
+    content = AboutPageContent.objects.first()
+
+    if not content:
+        # Create default if it doesn't exist
+        content = AboutPageContent.objects.create()
+
+    serializer = AboutPageSerializer(content)
+    return Response(serializer.data)
+
+@api_view(["GET"])
+def career_page_content(request):
+    # Fetch the ONLY record
+    content = CareerPageContent.objects.first()
+
+    if not content:
+        # Only happens the very first time
+        content = CareerPageContent.objects.create()
+    
+    serializer = CareerPageSerializer(content)
+    return Response(serializer.data)
+
+
+
+@api_view(["GET"])
+def contactus_page_content(request):
+    # Fetch the ONLY record
+    content = ContactPageContent.objects.first()
+
+    if not content:
+        # Only happens the very first time
+        content = ContactPageContent.objects.create()
+    
+    serializer = ContactPageContentSerializer(content)
+    return Response(serializer.data)

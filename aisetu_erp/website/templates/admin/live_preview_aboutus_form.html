@@ -1,0 +1,155 @@
+{% extends "admin/change_form.html" %}
+
+{% block content %}
+
+<style>
+
+.admin-preview-layout{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:20px;
+}
+
+.admin-edit-section{
+    min-width:0;
+}
+
+.preview-section{
+    border-left:1px solid #ddd;
+    padding-left:20px;
+}
+
+.preview-header{
+    font-size:18px;
+    font-weight:600;
+    margin-bottom:10px;
+}
+
+.preview-section iframe{
+    width:100%;
+    height:85vh;
+    border:1px solid #ddd;
+    border-radius:6px;
+}
+
+</style>
+
+<div class="admin-preview-layout">
+
+    <!-- LEFT SIDE : DJANGO ADMIN FIELDS -->
+    <div class="admin-edit-section">
+
+        {{ block.super }}
+
+    </div>
+
+    <!-- RIGHT SIDE : WEBSITE PREVIEW -->
+    <div class="preview-section">
+
+        <div class="preview-header">
+            Live Website Preview
+        </div>
+
+        <iframe
+            id="livePreview"
+            src="http://127.0.0.1:8000/about"
+        ></iframe>
+
+    </div>
+
+</div>
+
+
+<script>
+
+function reloadPreview(){
+    const iframe = document.getElementById("livePreview")
+    if(iframe){
+        iframe.src = iframe.src
+    }
+}
+
+function sendPreviewData(){
+
+    const data = {}
+
+    document.querySelectorAll("input, textarea").forEach(field => {
+
+        if(field.id){
+            const key = field.id.replace("id_","")
+            data[key] = field.value
+        }
+
+    })
+
+    const iframe = document.getElementById("livePreview")
+
+    if(iframe && iframe.contentWindow){
+        iframe.contentWindow.postMessage(data, "*")
+    }
+
+}
+
+function sendLivePreview(){
+
+    const data = {}
+
+    document.querySelectorAll("input, textarea").forEach(field => {
+
+        if(field.id){
+            const key = field.id.replace("id_","")
+            data[key] = field.value
+        }
+
+    })
+
+    const iframe = document.getElementById("livePreview")
+
+    if(iframe && iframe.contentWindow){
+        iframe.contentWindow.postMessage(data, "*")
+    }
+
+}
+
+/* live preview when typing */
+document.addEventListener("input", function(){
+
+    clearTimeout(window.previewTimer)
+
+    window.previewTimer = setTimeout(sendPreviewData, 400)
+
+})
+
+/* reload preview when admin clicks save */
+/* reload preview when admin clicks save */
+document.addEventListener("DOMContentLoaded", function(){
+    const saveButtons = document.querySelectorAll("input[name=_save], input[name=_continue], input[name=_addanother]");
+
+    saveButtons.forEach(btn => {
+        btn.addEventListener("click", function(){
+            // Give the server 1 second to finish writing to the DB
+            setTimeout(() => {
+                const iframe = document.getElementById("livePreview");
+                if (iframe && iframe.contentWindow) {
+                    // Option A: Hard Refresh the iframe
+                    iframe.src = iframe.src; 
+                    
+                    // Option B: Tell React to re-fetch
+                    iframe.contentWindow.postMessage("reload_full_data", "*");
+                }
+            }, 1000); 
+        });
+    });
+});
+
+document.addEventListener("input", function(){
+
+    clearTimeout(window.livePreviewTimer)
+
+    window.livePreviewTimer = setTimeout(sendLivePreview, 300)
+
+})
+
+</script>
+
+{% endblock %}

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "@/services/api";
 
 const storeTypes = ["Kirana Store", "General Store", "Medical Store", "Hardware Store", "Margin Business"];
 
@@ -21,7 +22,7 @@ const DemoForm = ({ variant = "default" }: { variant?: "default" | "compact" }) 
 
     try {
       setLoading(true);
-      const response = await fetch("http://127.0.0.1:8000/book-demo/", {
+      const response = await fetch(`${API_BASE_URL}/book-demo/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

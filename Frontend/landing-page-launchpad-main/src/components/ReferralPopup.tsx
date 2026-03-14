@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { ClipboardCopy } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
+import { API_BASE_URL } from "@/services/api";
 
 const ReferralPopup = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const [mobile, setMobile] = useState("");
@@ -26,7 +27,7 @@ const ReferralPopup = ({ open, onClose }: { open: boolean; onClose: () => void }
     try {
 
       const res = await axios.post(
-        "http://127.0.0.1:8000/referral-check/",
+        `${API_BASE_URL}/referral-check/`,
         { mobile_number: mobile }
       );
 

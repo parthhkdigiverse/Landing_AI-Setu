@@ -7,12 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Clock, Send, MessageSquare, Users, Zap } from "lucide-react";
-// Import the specific function from your api.ts
-import { fetchContactPageContent, ContactPageContent } from "@/services/api";
+// Import the specific function and API_BASE_URL from your api.ts
+import { fetchContactPageContent, ContactPageContent, API_BASE_URL } from "@/services/api";
 
 // Assuming submitContactForm is also in your api.ts, if not, define it here
 export const submitContactForm = async (data: any) => {
-  const response = await fetch("http://127.0.0.1:8000/api/contact/submit/", {
+  const response = await fetch(`${API_BASE_URL}/api/contact/submit/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
-import { fetchLandingPageContent } from "@/services/api";
+import { fetchLandingPageContent, fetchReferralPerks } from "@/services/api";
 
 const iconMap: any = {
   gift: Gift,
@@ -34,13 +34,18 @@ const ReferralSection = () => {
   // Fetch perks (CRUD)
   useEffect(() => {
     const loadPerks = async () => {
-      try {
+
+      try{
+
         const res = await fetch("http://127.0.0.1:8000/api/referral-perks/");
         const data = await res.json();
+
         setPerks(data);
-      } catch (err) {
+
+      }catch(err){
         console.error("Referral perks error", err);
       }
+
     };
     loadPerks();
   }, []);

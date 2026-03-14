@@ -2,61 +2,24 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import Blog1 from "@/assets/blog1.jpeg";
-import Blog2 from "@/assets/blog2.jpg";
-import Blog3 from "@/assets/blog3.png";
-import Blog4 from "@/assets/blog4.jpg";
-import Blog5 from "@/assets/blog5.jpg";
-import Blog6 from "@/assets/blog6.png";
-
-const posts = [
-  {
-    id: 1,
-    title: "How AI is Transforming Retail",
-    excerpt:
-      "Discover how artificial intelligence is helping small retailers forecast demand, manage inventory, and personalize customer experiences.",
-    image: Blog1,
-  },
-  {
-    id: 2,
-    title: "5 Tips to Boost Your Store’s Efficiency",
-    excerpt:
-      "Simple operational changes that can make a big difference in how your shop runs, from mobile billing to automated reports.",
-    image: Blog2,
-  },
-  {
-    id: 3,
-    title: "Why Cloud ERP Matters for SMEs",
-    excerpt:
-      "Learn why migrating your business systems to the cloud is a game‑changer for scalability and cost control.",
-    image: Blog3,
-  },
-  {
-    id: 4,
-    title: "AI-Setu Success Story: A Kirana Shop’s Growth",
-    excerpt:
-      "Read how one small kirana store cut billing times in half and increased monthly revenue by adopting AI-Setu ERP.",
-    image: Blog4,
-  },
-  {
-    id: 5,
-    title: "Going Mobile with AI-Setu ERP",
-    excerpt:
-      "Explore the benefits of managing your store on the go using AI-Setu’s mobile dashboard and WhatsApp integrations.",
-    image: Blog5,
-  },
-  {
-    id: 6,
-    title: "Top 5 Features of AI-Setu ERP You Shouldn’t Miss",
-    excerpt:
-      "From smart reorder suggestions to GST-compliant invoicing, discover the features that make AI-Setu ERP a must-have for retailers.",
-    image: Blog6,
-  },
-];
+import { useState, useEffect } from "react";
+import { fetchBlogPosts, BlogPost } from "@/services/api";
 
 const Blog = () => {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadPosts = async () => {
+      setLoading(true);
+      const data = await fetchBlogPosts();
+      setPosts(data);
+      setLoading(false);
+    };
+    loadPosts();
+  }, []);
+
   const filtered = posts.filter(
     (p) =>
       p.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -88,38 +51,47 @@ const Blog = () => {
             Our Blog
           </motion.h1>
 
-          <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((post, idx) => (
-              <motion.div
-                key={post.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.2, duration: 0.6, ease: "easeOut" }}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300"
-              >
-                <div className="h-48 overflow-hidden">
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-6">
-                  <h2 className="text-xl font-semibold text-[#1F2E4D] mb-4">
-                    {post.title}
-                  </h2>
-                  <p className="text-gray-600 mb-6">{post.excerpt}</p>
-                  <Link
-                    to={`/blog/${post.id}`}
-                    className="text-[#F4B400] font-bold hover:underline"
-                  >
-                    Read more →
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="text-center py-20 text-gray-500">Loading posts...</div>
+          ) : filtered.length > 0 ? (
+            <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+              {filtered.map((post, idx) => (
+                <motion.div
+                  key={post.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.2, duration: 0.6, ease: "easeOut" }}
+                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300"
+                >
+                  <div className="h-48 overflow-hidden">
+                    <img
+                      src={post.featured_image_url || "/placeholder.svg"}
+                      alt={post.title}
+                      className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="p-6">
+                    <div className="mb-2">
+                       <span className="text-xs font-bold text-[#F4B400] uppercase tracking-wider">{post.category_name}</span>
+                    </div>
+                    <h2 className="text-xl font-semibold text-[#1F2E4D] mb-4">
+                      {post.title}
+                    </h2>
+                    <p className="text-gray-600 mb-6">{post.excerpt}</p>
+                    <Link
+                      to={`/blog/${post.slug}`}
+                      className="text-[#F4B400] font-bold hover:underline"
+                    >
+                      Read more →
+                    </Link>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20 text-gray-500">No posts found.</div>
+          )}
         </section>
       </main>
 

@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
+import { API_BASE_URL } from "@/services/api";
 
 const ApplyJob = () => {
-
   const navigate = useNavigate();
   const { jobId } = useParams();
 
@@ -61,7 +61,7 @@ const ApplyJob = () => {
 
     try {
 
-      const response = await fetch("http://127.0.0.1:8000/apply-job/", {
+      const response = await fetch(`${API_BASE_URL}/apply-job/`, {
         method: "POST",
         body: data
       });

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Camera, Cpu, Zap, Sparkles } from "lucide-react";
 import aiScan from "@/assets/ai-scan.jpg";
+import { fetchUSPFeatures } from "@/services/api";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
 const iconMap: any = {

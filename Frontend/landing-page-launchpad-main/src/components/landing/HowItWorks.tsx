@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CalendarCheck, Settings, Rocket } from "lucide-react";
+import { fetchHowItWorks } from "@/services/api";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
 const iconMap: any = {
@@ -26,13 +27,10 @@ const HowItWorks = () => {
   // Fetch steps from API
   useEffect(() => {
     const loadSteps = async () => {
-      try {
-        const res = await fetch("http://127.0.0.1:8000/api/how-it-works/");
-        const data = await res.json();
-        setSteps(data);
-      } catch (err) {
-        console.error("Error loading steps", err);
-      }
+
+      const data = await fetchHowItWorks();
+      setSteps(data);
+
     };
     loadSteps();
   }, []);

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { fetchLandingPageContent, fetchAllTestimonials } from "@/services/api";
 import { fetchLandingPageContent } from "@/services/api";
 
 const AllTestimonials = () => {
@@ -13,22 +14,13 @@ const AllTestimonials = () => {
 
   // 1. Fetch Content (for Title/Desc) & All Testimonials
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        // Fetch static page text (titles, descriptions)
-        const data = await fetchLandingPageContent();
-        if (data) setContent(data);
-
-        // Fetch the list of reviews
-        const res = await fetch("http://127.0.0.1:8000/api/testimonials/");
-        const tData = await res.json();
-        setReviews(tData);
-      } catch (error) {
-        console.error("Error loading data:", error);
-      }
-    };
-    loadData();
-  }, []);
+  const interval = setInterval(async () => {
+    const res = await fetch("http://127.0.0.1:8000/api/landing-page/");
+    const data = await res.json();
+    setContent(data);
+  }, 5000); // fetch every 5 seconds
+  return () => clearInterval(interval);
+}, []);
 
   // 2. Listen for live preview messages (admin updates)
   useEffect(() => {
@@ -39,6 +31,14 @@ const AllTestimonials = () => {
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
+  }, []);
+
+  useEffect(() => {
+    const loadReviews = async () => {
+      const data = await fetchAllTestimonials();
+      setReviews(data);
+    };
+    loadReviews();
   }, []);
 
   return (

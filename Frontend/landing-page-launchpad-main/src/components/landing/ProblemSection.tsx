@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Clock, Package, TrendingDown, Users, Barcode } from "lucide-react";
-import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
+import { fetchLandingPageContent, LandingPageContent, fetchProblems } from "@/services/api";
 
 const iconMap: any = {
   clock: Clock,
@@ -39,19 +39,8 @@ const ProblemSection = () => {
 
     const loadProblems = async () => {
 
-      try {
-
-        const res = await fetch("http://127.0.0.1:8000/api/problems/");
-
-        const data = await res.json();
-
-        setProblems(data);
-
-      } catch (error) {
-
-        console.error("Failed to load problems:", error);
-
-      }
+      const data = await fetchProblems();
+      setProblems(data);
 
     };
 

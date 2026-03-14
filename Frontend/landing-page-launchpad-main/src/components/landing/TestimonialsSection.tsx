@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
-import { fetchLandingPageContent } from "@/services/api";
+import { fetchLandingPageContent, fetchHomeTestimonials } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -18,8 +18,7 @@ const TestimonialsSection = () => {
       const data = await fetchLandingPageContent();
       if (data) setContent(data);
       
-      const res = await fetch("http://127.0.0.1:8000/api/testimonials/");
-      const tData = await res.json();
+      const tData = await fetchHomeTestimonials();
       setTestimonials(tData);
     };
     loadData();

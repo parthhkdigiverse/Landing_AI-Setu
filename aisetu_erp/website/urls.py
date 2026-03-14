@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import about_page_content, book_demo_api, get_all_testimonials, get_demo_video, get_features, get_home_testimonials, get_how_it_works_steps, get_problems, get_referral_perks, get_store_types, get_usp_features,login_view,pricing_signup, landing_page_content_api, submit_contact, apply_job, check_referral, initiate_payment, payment_callback
+from .views import about_page_content, book_demo_api, get_all_testimonials, get_demo_video, get_features, get_home_testimonials, get_how_it_works_steps, get_problems, get_referral_perks, get_store_types, get_usp_features,login_view,pricing_signup, landing_page_content_api, submit_contact, apply_job, check_referral, initiate_payment, payment_callback, get_blog_posts, get_blog_post_detail, get_blog_categories
 from . import views 
 urlpatterns = [    
     path("book-demo/", book_demo_api, name="book_demo_api"),
@@ -26,6 +26,9 @@ urlpatterns = [
     path("api/referral-perks/", get_referral_perks),
     path("api/home-testimonials/", get_home_testimonials),
     path("api/testimonials/", get_all_testimonials),
+    path("api/blogs/", get_blog_posts, name="get_blog_posts"),
+    path("api/blogs/<slug:slug>/", get_blog_post_detail, name="get_blog_post_detail"),
+    path("api/blog-categories/", get_blog_categories, name="get_blog_categories"),
     path('api/comparison-features/', views.get_comparison_features, name='comparison-features'),
     path("api/faqs/", views.get_faqs, name="faqs"),
     path("api/login-link/", views.get_login_link, name="login-link"),

@@ -2,11 +2,42 @@ from website.models import DemoRequest,UserLogin, ReferralUser
 from django.http import JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import APIView, api_view
+from rest_framework.decorators import APIView, api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from .models import FAQ, ComparisonFeature, ContactPageContent, ContactSubmission, DemoVideo, Feature, HowItWorksStep, LoginLink, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, CareerPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature
-from .serializers import AboutPageSerializer, CareerPageSerializer, ComparisonFeatureSerializer, FAQSerializer, LandingPageContentSerializer,JobApplicationSerializer, LoginLinkSerializer,ReferralUserSerializer, ContactPageContentSerializer
+from .models import FAQ, ComparisonFeature, ContactPageContent, ContactSubmission, DemoVideo, Feature, HowItWorksStep, LoginLink, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, CareerPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
+from .serializers import AboutPageSerializer, CareerPageSerializer, ComparisonFeatureSerializer, FAQSerializer, LandingPageContentSerializer,JobApplicationSerializer, LoginLinkSerializer,ReferralUserSerializer, ContactPageContentSerializer, BlogCategorySerializer, BlogPostSerializer
+
+# ... rest of file until the end ...
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_blog_posts(request):
+    posts = BlogPost.objects.filter(is_published=True)
+    category_slug = request.GET.get('category')
+    if category_slug:
+        posts = posts.filter(category__slug=category_slug)
+        
+    serializer = BlogPostSerializer(posts, many=True, context={'request': request})
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_blog_post_detail(request, slug):
+    try:
+        post = BlogPost.objects.get(slug=slug, is_published=True)
+        serializer = BlogPostSerializer(post, context={'request': request})
+        return Response(serializer.data)
+    except BlogPost.DoesNotExist:
+        return Response({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_blog_categories(request):
+    categories = BlogCategory.objects.all()
+    serializer = BlogCategorySerializer(categories, many=True)
+    return Response(serializer.data)
 from .utils import generate_invoice, admin_required
 import random
 import string
@@ -531,6 +562,7 @@ def get_referral_perks(request):
     return Response(data)
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_home_testimonials(request):
 
     testimonials = Testimonial.objects.filter(is_active=True)[:3]
@@ -550,6 +582,7 @@ def get_home_testimonials(request):
     return Response(data)
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_all_testimonials(request):
 
     testimonials = Testimonial.objects.filter(is_active=True)

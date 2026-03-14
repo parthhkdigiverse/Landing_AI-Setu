@@ -1,13 +1,41 @@
 from rest_framework import serializers
-from .models import FAQ, AboutPageContent, CareerPageContent, ComparisonFeature, ContactPageContent, LoginLink, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser
+from .models import AboutPageContent, CareerPageContent, ContactPageContent, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost
+
+# ... rest of file until the end ...
+
+class BlogCategorySerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    class Meta:
+        model = BlogCategory
+        fields = '__all__'
+
+class BlogPostSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    category = serializers.CharField(source='category.id', read_only=True)
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    featured_image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BlogPost
+        fields = '__all__'
+
+    def get_featured_image_url(self, obj):
+        if obj.featured_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.featured_image.url)
+            return obj.featured_image.url
+        return None
 
 
 class DemoRequestSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     class Meta:
         model = DemoRequest
         fields = '__all__'
 
 class PricingSignupSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     class Meta:
         model = PricingSignup
         fields = '__all__'
@@ -20,16 +48,19 @@ class LandingPageContentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ContactSubmissionSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     class Meta:
         model = ContactSubmission
         fields = "__all__"
 
 class JobApplicationSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     class Meta:
         model = JobApplication
         fields = "__all__"
 
 class ReferralUserSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     class Meta:
         model = ReferralUser
         fields = "__all__"

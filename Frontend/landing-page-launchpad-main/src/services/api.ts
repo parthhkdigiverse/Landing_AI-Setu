@@ -1,5 +1,5 @@
-// Use relative URL so it works regardless of host (dev or production)
-export const API_BASE_URL = '';
+// Use hardcoded backend URL for local development
+export const API_BASE_URL = 'http://127.0.0.1:8000';
 
 export interface LandingPageContent {
     id: number;
@@ -76,7 +76,7 @@ export interface LandingPageContent {
 
 export const fetchLandingPageContent = async (): Promise<LandingPageContent | null> => {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/landing-content/`);
+        const response = await fetch(`${API_BASE_URL}/api/landing-content/?t=${Date.now()}`);
         if (!response.ok) {
             throw new Error("Network response was not ok");
         }
@@ -85,6 +85,94 @@ export const fetchLandingPageContent = async (): Promise<LandingPageContent | nu
     } catch (error) {
         console.error("Failed to fetch landing page content:", error);
         return null;
+    }
+};
+
+export const fetchProblems = async (): Promise<any[]> => {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/problems/?t=${Date.now()}`);
+        if (!res.ok) throw new Error("Failed to fetch problems");
+        return await res.json();
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+};
+
+export const fetchSolutions = async (): Promise<any[]> => {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/features/?t=${Date.now()}`);
+        if (!res.ok) throw new Error("Failed to fetch solutions");
+        return await res.json();
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+};
+
+export const fetchUSPFeatures = async (): Promise<any[]> => {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/usp-features/?t=${Date.now()}`);
+        if (!res.ok) throw new Error("Failed to fetch USP features");
+        return await res.json();
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+};
+
+export const fetchHowItWorks = async (): Promise<any[]> => {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/how-it-works/?t=${Date.now()}`);
+        if (!res.ok) throw new Error("Failed to fetch how it works steps");
+        return await res.json();
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+};
+
+export const fetchStoreTypes = async (): Promise<any[]> => {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/store-types/?t=${Date.now()}`);
+        if (!res.ok) throw new Error("Failed to fetch store types");
+        return await res.json();
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+};
+
+export const fetchReferralPerks = async (): Promise<any[]> => {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/referral-perks/?t=${Date.now()}`);
+        if (!res.ok) throw new Error("Failed to fetch referral perks");
+        return await res.json();
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+};
+
+export const fetchHomeTestimonials = async (): Promise<any[]> => {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/home-testimonials/?t=${Date.now()}`);
+        if (!res.ok) throw new Error("Failed to fetch home testimonials");
+        return await res.json();
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+};
+
+export const fetchAllTestimonials = async (): Promise<any[]> => {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/testimonials/?t=${Date.now()}`);
+        if (!res.ok) throw new Error("Failed to fetch all testimonials");
+        return await res.json();
+    } catch (error) {
+        console.error(error);
+        return [];
     }
 };
 
@@ -120,7 +208,7 @@ export interface AboutPageContent {
 
 export const fetchAboutPageContent = async (): Promise<AboutPageContent | null> => {
   try {
-    const res = await fetch("http://127.0.0.1:8000/api/about-page/");
+    const res = await fetch(`${API_BASE_URL}/api/about-page/?t=${Date.now()}`);
     if (!res.ok) throw new Error("Failed");
 
     return await res.json();
@@ -166,7 +254,7 @@ export interface CareerPageContent {
 export const fetchCareerPageContent = async (): Promise<CareerPageContent | null> => {
   try {
     // Adding a timestamp here also helps prevent stale data
-    const res = await fetch(`http://127.0.0.1:8000/api/career-page/?t=${Date.now()}`);
+    const res = await fetch(`${API_BASE_URL}/api/career-page/?t=${Date.now()}`);
     if (!res.ok) throw new Error("Failed");
     return await res.json();
   } catch (error) {
@@ -219,7 +307,7 @@ export interface ContactPageContent {
 export const fetchContactPageContent = async (): Promise<ContactPageContent | null> => {
   try {
     // Adding a timestamp here also helps prevent stale data
-    const res = await fetch(`http://127.0.0.1:8000/api/contactus-page/?t=${Date.now()}`);
+    const res = await fetch(`${API_BASE_URL}/api/contactus-page/?t=${Date.now()}`);
     if (!res.ok) throw new Error("Failed");
     return await res.json();
   } catch (error) {
@@ -227,6 +315,62 @@ export const fetchContactPageContent = async (): Promise<ContactPageContent | nu
     return null;
   }
 };
+
+export interface BlogCategory {
+    id: number;
+    name: string;
+    slug: string;
+}
+
+export interface BlogPost {
+    id: number;
+    title: string;
+    slug: string;
+    category_name: string;
+    featured_image_url: string;
+    excerpt: string;
+    content: string;
+    author: string;
+    created_at: string;
+    is_published: boolean;
+}
+
+export const fetchBlogPosts = async (categorySlug?: string): Promise<BlogPost[]> => {
+    try {
+        const url = categorySlug 
+            ? `${API_BASE_URL}/api/blogs/?category=${categorySlug}&t=${Date.now()}`
+            : `${API_BASE_URL}/api/blogs/?t=${Date.now()}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Failed to fetch blog posts");
+        return await response.json();
+    } catch (error) {
+        console.error("Failed to fetch blog posts:", error);
+        return [];
+    }
+};
+
+export const fetchBlogPostDetail = async (slug: string): Promise<BlogPost | null> => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/blogs/${slug}/?t=${Date.now()}`);
+        if (!response.ok) throw new Error("Failed to fetch blog post detail");
+        return await response.json();
+    } catch (error) {
+        console.error("Failed to fetch blog post detail:", error);
+        return null;
+    }
+};
+
+export const fetchBlogCategories = async (): Promise<BlogCategory[]> => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/blog-categories/?t=${Date.now()}`);
+        if (!response.ok) throw new Error("Failed to fetch blog categories");
+        return await response.json();
+    } catch (error) {
+        console.error("Failed to fetch blog categories:", error);
+        return [];
+    }
+};
+
 
 
 export interface DemoVideo {

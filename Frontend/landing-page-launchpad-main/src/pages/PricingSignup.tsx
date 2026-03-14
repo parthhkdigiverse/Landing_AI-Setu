@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { API_BASE_URL } from "@/services/api";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -39,7 +40,7 @@ const PricingSignup = () => {
 
     try {
       // 1️⃣ Submit signup form
-      const response = await fetch("http://127.0.0.1:8000/pricing-signup/", {
+      const response = await fetch(`${API_BASE_URL}/pricing-signup/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -62,7 +63,7 @@ const PricingSignup = () => {
 
       // 2️⃣ Initiate payment via PhonePe
       const paymentResponse = await fetch(
-        "http://127.0.0.1:8000/phonepe/initiate/",
+        `${API_BASE_URL}/phonepe/initiate/`,
         {
           method: "POST",
           headers: {

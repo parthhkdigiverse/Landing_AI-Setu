@@ -269,13 +269,16 @@ export interface ContactPageContent {
   hero_description: string;
   call_title: string;
   call_phone: string;
+  call_phone_number: string;
   call_subtext: string;
   email_title: string;
   email_address: string;
+  email_address_link: string;
   email_subtext: string;
   visit_title: string;
   visit_address: string;
   visit_subtext: string;
+  visit_map_url: string;
   support_title: string;
   support_time: string;
   support_subtext: string;

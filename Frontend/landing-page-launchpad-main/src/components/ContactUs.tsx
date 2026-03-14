@@ -88,10 +88,38 @@ const ContactUsPage = () => {
 
   // Helper for dynamic cards
   const contactInfo = [
-    { icon: Phone, title: content.call_title, details: content.call_phone, sub: content.call_subtext, color: "from-blue-500 to-cyan-500" },
-    { icon: Mail, title: content.email_title, details: content.email_address, sub: content.email_subtext, color: "from-purple-500 to-pink-500" },
-    { icon: MapPin, title: content.visit_title, details: content.visit_address, sub: content.visit_subtext, color: "from-green-500 to-emerald-500" },
-    { icon: Clock, title: content.support_title, details: content.support_time, sub: content.support_subtext, color: "from-orange-500 to-red-500" }
+    { 
+      icon: Phone, 
+      title: content.call_title, 
+      details: content.call_phone, 
+      sub: content.call_subtext, 
+      color: "from-blue-500 to-cyan-500",
+      action: () => window.location.href = `tel:${content.call_phone_number.replace(/\s+/g, '')}`
+    },
+    { 
+      icon: Mail, 
+      title: content.email_title, 
+      details: content.email_address, 
+      sub: content.email_subtext, 
+      color: "from-purple-500 to-pink-500",
+      action: () => window.location.href = `mailto:${content.email_address_link}`
+    },
+    { 
+      icon: MapPin, 
+      title: content.visit_title, 
+      details: content.visit_address, 
+      sub: content.visit_subtext, 
+      color: "from-green-500 to-emerald-500",
+      action: () => window.open(content.visit_map_url, '_blank')
+    },
+    { 
+      icon: Clock, 
+      title: content.support_title, 
+      details: content.support_time, 
+      sub: content.support_subtext, 
+      color: "from-orange-500 to-red-500",
+      action: null 
+    }
   ];
 
   return (
@@ -115,7 +143,12 @@ const ContactUsPage = () => {
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 -mt-24 relative z-20">
             {contactInfo.map((info, idx) => (
-              <motion.div key={idx} whileHover={{ y: -5 }} className="bg-white rounded-2xl p-6 shadow-xl border border-gray-100">
+              <motion.div 
+                key={idx} 
+                whileHover={{ y: -5, scale: info.action ? 1.02 : 1 }} 
+                onClick={info.action || undefined}
+                className={`bg-white rounded-2xl p-6 shadow-xl border border-gray-100 ${info.action ? 'cursor-pointer hover:shadow-2xl transition-all duration-300' : ''}`}
+              >
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${info.color} flex items-center justify-center mb-4`}>
                   <info.icon className="w-6 h-6 text-white" />
                 </div>

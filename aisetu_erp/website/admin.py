@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import FAQ, AboutPageContent, CareerPageContent, ComparisonFeature, ContactPageContent, ContactPageContent, DemoVideo, Feature, HowItWorksStep, LandingPageContent, LoginLink, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
+from .models import FAQ, AboutPageContent, CareerPageContent, ComparisonFeature, ContactPageContent, DemoVideo, Feature, HowItWorksStep, LandingPageContent, LoginLink, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
 
 # ... existing code ...
 

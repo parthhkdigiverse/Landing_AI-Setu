@@ -764,6 +764,12 @@ class ContactPageContent(models.Model):
         default="+91 98765 43210"
     )
 
+    call_phone_number = models.CharField(
+        max_length=20,
+        default="+919876543210",
+        blank=True
+    )
+
     call_subtext = models.CharField(
         max_length=100,
         default="Mon–Sat 9:30AM to 6:30PM"
@@ -777,6 +783,11 @@ class ContactPageContent(models.Model):
 
     email_address = models.EmailField(
         default="hello@aisetuerp.com"
+    )
+
+    email_address_link = models.EmailField(
+        default="hello@aisetuerp.com",
+        blank=True
     )
 
     email_subtext = models.CharField(
@@ -798,6 +809,11 @@ class ContactPageContent(models.Model):
     visit_subtext = models.CharField(
         max_length=100,
         default="Schedule a meeting"
+    )
+
+    visit_map_url = models.URLField(
+        default="https://goo.gl/maps/example",
+        blank=True
     )
 
     # Support Hours

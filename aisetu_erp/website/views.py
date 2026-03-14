@@ -5,8 +5,35 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import APIView, api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import ContactPageContent, ContactSubmission, Feature, HowItWorksStep, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, CareerPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature
-from .serializers import AboutPageSerializer, CareerPageSerializer, LandingPageContentSerializer,JobApplicationSerializer,ReferralUserSerializer, ContactPageContentSerializer
+from .models import ContactPageContent, ContactSubmission, Feature, HowItWorksStep, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, CareerPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
+from .serializers import AboutPageSerializer, CareerPageSerializer, LandingPageContentSerializer,JobApplicationSerializer,ReferralUserSerializer, ContactPageContentSerializer, BlogCategorySerializer, BlogPostSerializer
+
+# ... rest of file until the end ...
+
+@api_view(['GET'])
+def get_blog_posts(request):
+    posts = BlogPost.objects.filter(is_published=True)
+    category_slug = request.GET.get('category')
+    if category_slug:
+        posts = posts.filter(category__slug=category_slug)
+        
+    serializer = BlogPostSerializer(posts, many=True, context={'request': request})
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def get_blog_post_detail(request, slug):
+    try:
+        post = BlogPost.objects.get(slug=slug, is_published=True)
+        serializer = BlogPostSerializer(post, context={'request': request})
+        return Response(serializer.data)
+    except BlogPost.DoesNotExist:
+        return Response({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def get_blog_categories(request):
+    categories = BlogCategory.objects.all()
+    serializer = BlogCategorySerializer(categories, many=True)
+    return Response(serializer.data)
 from .utils import generate_invoice, admin_required
 import random
 import string

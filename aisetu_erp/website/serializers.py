@@ -1,5 +1,28 @@
 from rest_framework import serializers
-from .models import AboutPageContent, CareerPageContent, ContactPageContent, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser
+from .models import AboutPageContent, CareerPageContent, ContactPageContent, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost
+
+# ... rest of file until the end ...
+
+class BlogCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BlogCategory
+        fields = '__all__'
+
+class BlogPostSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    featured_image_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = BlogPost
+        fields = '__all__'
+
+    def get_featured_image_url(self, obj):
+        if obj.featured_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.featured_image.url)
+            return obj.featured_image.url
+        return None
 
 
 class DemoRequestSerializer(serializers.ModelSerializer):

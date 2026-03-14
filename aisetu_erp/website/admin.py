@@ -1,5 +1,20 @@
 from django.contrib import admin
-from .models import AboutPageContent, CareerPageContent, ContactPageContent, ContactPageContent, Feature, HowItWorksStep, LandingPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature
+from .models import AboutPageContent, CareerPageContent, ContactPageContent, ContactPageContent, Feature, HowItWorksStep, LandingPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
+
+# ... existing code ...
+
+@admin.register(BlogCategory)
+class BlogCategoryAdmin(admin.ModelAdmin):
+    list_display = ["name", "slug"]
+    prepopulated_fields = {"slug": ("name",)}
+
+@admin.register(BlogPost)
+class BlogPostAdmin(admin.ModelAdmin):
+    list_display = ["title", "category", "author", "created_at", "is_published"]
+    list_filter = ["is_published", "category", "author"]
+    search_fields = ["title", "content", "excerpt"]
+    prepopulated_fields = {"slug": ("title",)}
+    date_hierarchy = "created_at"
 
 # @admin.register(LandingPageContent)
 # class LandingPageContentAdmin(admin.ModelAdmin):

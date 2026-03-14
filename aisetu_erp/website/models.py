@@ -467,6 +467,39 @@ class ContactSubmission(models.Model):
     def __str__(self):
         return self.name
 
+
+class BlogCategory(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True)
+
+    class Meta:
+        verbose_name_plural = "Blog Categories"
+
+    def __str__(self):
+        return self.name
+
+class BlogPost(models.Model):
+    title = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=255, unique=True)
+    category = models.ForeignKey(BlogCategory, on_delete=models.SET_NULL, null=True, related_name="posts")
+    
+    featured_image = models.ImageField(upload_to="blogs/", blank=True, null=True)
+    excerpt = models.TextField(help_text="A short summary of the post.")
+    content = models.TextField()
+    
+    author = models.CharField(max_length=100, default="Admin")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    is_published = models.BooleanField(default=False)
+    
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.title
+
 class JobApplication(models.Model):
 
     job_position = models.CharField(max_length=200)

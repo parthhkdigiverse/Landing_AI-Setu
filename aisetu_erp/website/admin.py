@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import FAQ, AboutPageContent, CareerPageContent, ComparisonFeature, ContactPageContent, ContactPageContent, Feature, HowItWorksStep, LandingPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature
+from .models import FAQ, AboutPageContent, CareerPageContent, ComparisonFeature, ContactPageContent, ContactPageContent, DemoVideo, Feature, HowItWorksStep, LandingPageContent, LoginLink, Problem, ReferralPerk, StoreType, Testimonial, USPFeature
 
 # @admin.register(LandingPageContent)
 # class LandingPageContentAdmin(admin.ModelAdmin):
@@ -100,3 +100,13 @@ class FAQAdmin(admin.ModelAdmin):
     list_editable = ["is_active", "order"]
     ordering = ["order"]
     search_fields = ["question", "answer"]
+
+@admin.register(LoginLink)
+class LoginLinkAdmin(admin.ModelAdmin):
+    list_display = ["label", "url", "is_active"]
+    list_editable = ["is_active"]
+    search_fields = ["label"]
+
+@admin.register(DemoVideo)
+class DemoVideoAdmin(admin.ModelAdmin):
+    list_display = ("title", "video_url", "is_active", "created_at")

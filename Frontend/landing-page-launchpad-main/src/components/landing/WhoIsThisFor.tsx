@@ -1,65 +1,73 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Store, ShoppingBag, Pill, Wrench, TrendingUp } from "lucide-react";
+import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
 const iconMap: any = {
   store: Store,
   shopping: ShoppingBag,
   medical: Pill,
   hardware: Wrench,
-  growth: TrendingUp
+  growth: TrendingUp,
 };
 
 const WhoIsThisFor = () => {
-
+  const [content, setContent] = useState<LandingPageContent | null>(null);
+  const [livePreview, setLivePreview] = useState<any>(null);
   const [types, setTypes] = useState<any[]>([]);
 
+  // Load section headings from LandingPageContent
   useEffect(() => {
+    const loadContent = async () => {
+      const data = await fetchLandingPageContent();
+      if (data) setContent(data);
+    };
+    loadContent();
+  }, []);
 
+  // Fetch store types from API
+  useEffect(() => {
     const loadStoreTypes = async () => {
-
       try {
-
         const res = await fetch("http://127.0.0.1:8000/api/store-types/");
         const data = await res.json();
-
         setTypes(data);
-
       } catch (err) {
-
         console.error("Error loading store types", err);
-
       }
-
     };
-
     loadStoreTypes();
+  }, []);
 
+  // Live preview listener
+  useEffect(() => {
+    const handler = (event: any) => {
+      if (event.data) {
+        setLivePreview((prev: any) => ({ ...prev, ...event.data }));
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
   }, []);
 
   return (
     <section className="py-16 lg:py-24 bg-secondary">
-
       <div className="container">
-
+        {/* Section Header */}
         <div className="text-center mb-12">
-
           <span className="text-accent font-semibold text-sm uppercase tracking-wider">
-            Perfect For
+            {livePreview?.who_main_title || content?.who_main_title || "Perfect For"}
           </span>
 
           <h2 className="text-3xl lg:text-4xl font-bold mt-2 text-foreground">
-            Who Is This For?
+            {livePreview?.who_title || content?.who_title || "Who Is This For?"}
           </h2>
-
         </div>
 
+        {/* Store Type Cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-
           {types.map((t, i) => {
-
             const Icon = iconMap[t.icon];
-
             return (
               <motion.div
                 key={i}
@@ -68,7 +76,6 @@ const WhoIsThisFor = () => {
                 transition={{ delay: i * 0.08 }}
                 className="bg-card rounded-xl p-6 text-center shadow-card border border-border hover:shadow-card-hover transition-shadow"
               >
-
                 <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
                   {Icon && <Icon className="h-7 w-7 text-primary" />}
                 </div>
@@ -76,16 +83,11 @@ const WhoIsThisFor = () => {
                 <h3 className="font-heading font-semibold text-sm text-foreground">
                   {t.title}
                 </h3>
-
               </motion.div>
             );
-
           })}
-
         </div>
-
       </div>
-
     </section>
   );
 };

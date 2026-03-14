@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import AboutPageContent, CareerPageContent, ContactPageContent, ContactPageContent, Feature, HowItWorksStep, LandingPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature
+from .models import FAQ, AboutPageContent, CareerPageContent, ComparisonFeature, ContactPageContent, ContactPageContent, Feature, HowItWorksStep, LandingPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature
 
 # @admin.register(LandingPageContent)
 # class LandingPageContentAdmin(admin.ModelAdmin):
@@ -87,3 +87,16 @@ class TestimonialAdmin(admin.ModelAdmin):
     list_display = ["name", "role", "rating", "is_active", "order"]
 
     list_editable = ["rating", "is_active", "order"]
+
+@admin.register(ComparisonFeature)
+class ComparisonFeatureAdmin(admin.ModelAdmin):
+    list_display = ["feature_name", "has_ai_setu", "has_traditional", "is_active", "order"]
+    list_editable = ["has_ai_setu", "has_traditional", "is_active", "order"]
+    ordering = ["order"]  
+
+@admin.register(FAQ)
+class FAQAdmin(admin.ModelAdmin):
+    list_display = ["question", "is_active", "order"]
+    list_editable = ["is_active", "order"]
+    ordering = ["order"]
+    search_fields = ["question", "answer"]

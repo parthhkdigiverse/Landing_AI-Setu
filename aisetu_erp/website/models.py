@@ -303,15 +303,6 @@ class LandingPageContent(models.Model):
     comparison_title2 = models.CharField(max_length=200, default="AI-Setu ERP")
     comparison_title3 = models.CharField(max_length=200, default="Traditional")
 
-    comparison_feature1 = models.CharField(max_length=200, default="AI Photo Billing")
-    comparison_feature2 = models.CharField(max_length=200, default="Simple Interface")
-    comparison_feature3 = models.CharField(max_length=200, default="One Package Pricing")
-    comparison_feature4 = models.CharField(max_length=200, default="Retail-Focused")
-    comparison_feature5 = models.CharField(max_length=200, default="GST Ready")
-    comparison_feature6 = models.CharField(max_length=200, default="Cloud Access")
-    comparison_feature7 = models.CharField(max_length=200, default="24/7 Support")
-
-
     # ----------------------------
     # Testimonials Section
     # ----------------------------
@@ -1113,3 +1104,28 @@ class Testimonial(models.Model):
 
     def __str__(self):
         return self.name
+
+class ComparisonFeature(models.Model):
+    feature_name = models.CharField(max_length=255)
+    has_ai_setu = models.BooleanField(default=True)
+    has_traditional = models.BooleanField(default=False)
+    order = models.IntegerField(default=0)  # display sequence
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.feature_name
+
+class FAQ(models.Model):
+    question = models.CharField(max_length=500)
+    answer = models.TextField()
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.question

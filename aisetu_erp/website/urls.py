@@ -26,4 +26,8 @@ urlpatterns = [
     path("api/referral-perks/", get_referral_perks),
     path("api/home-testimonials/", get_home_testimonials),
     path("api/testimonials/", get_all_testimonials),
+    path('api/comparison-features/', views.get_comparison_features, name='comparison-features'),
+    path("api/faqs/", views.get_faqs, name="faqs"),
+
+
 ]

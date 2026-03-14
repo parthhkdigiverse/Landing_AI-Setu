@@ -1,65 +1,72 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CalendarCheck, Settings, Rocket } from "lucide-react";
+import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
 const iconMap: any = {
   calendar: CalendarCheck,
   settings: Settings,
-  rocket: Rocket
+  rocket: Rocket,
 };
 
 const HowItWorks = () => {
-
+  const [content, setContent] = useState<LandingPageContent | null>(null);
+  const [livePreview, setLivePreview] = useState<any>(null);
   const [steps, setSteps] = useState<any[]>([]);
 
+  // Load section headings from LandingPageContent
   useEffect(() => {
+    const loadContent = async () => {
+      const data = await fetchLandingPageContent();
+      if (data) setContent(data);
+    };
+    loadContent();
+  }, []);
 
+  // Fetch steps from API
+  useEffect(() => {
     const loadSteps = async () => {
-
       try {
-
         const res = await fetch("http://127.0.0.1:8000/api/how-it-works/");
         const data = await res.json();
-
         setSteps(data);
-
       } catch (err) {
-
         console.error("Error loading steps", err);
-
       }
-
     };
-
     loadSteps();
+  }, []);
 
+  // Live preview listener
+  useEffect(() => {
+    const handler = (event: any) => {
+      if (event.data) {
+        setLivePreview((prev: any) => ({ ...prev, ...event.data }));
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
   }, []);
 
   return (
     <section className="py-16 lg:py-24 bg-background">
-
       <div className="container">
-
+        {/* Section Header */}
         <div className="text-center mb-12">
-
           <span className="text-accent font-semibold text-sm uppercase tracking-wider">
-            Simple Process
+            {livePreview?.howitworks_label || content?.howitworks_label || "Simple Process"}
           </span>
 
           <h2 className="text-3xl lg:text-4xl font-bold mt-2 text-foreground">
-            How It Works
+            {livePreview?.howitworks_title || content?.howitworks_title || "How It Works"}
           </h2>
-
         </div>
 
+        {/* Steps */}
         <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-
           {steps.map((s, i) => {
-
             const Icon = iconMap[s.icon];
-
             return (
-
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -67,7 +74,6 @@ const HowItWorks = () => {
                 transition={{ delay: i * 0.15 }}
                 className="text-center relative"
               >
-
                 <div className="w-16 h-16 rounded-2xl bg-gold-gradient flex items-center justify-center mx-auto mb-4">
                   {Icon && <Icon className="h-7 w-7 text-accent-foreground" />}
                 </div>
@@ -80,20 +86,12 @@ const HowItWorks = () => {
                   {s.title}
                 </h3>
 
-                <p className="text-sm text-muted-foreground">
-                  {s.description}
-                </p>
-
+                <p className="text-sm text-muted-foreground">{s.description}</p>
               </motion.div>
-
             );
-
           })}
-
         </div>
-
       </div>
-
     </section>
   );
 };

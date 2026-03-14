@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import AboutPageContent, CareerPageContent, ContactPageContent, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser
+from .models import FAQ, AboutPageContent, CareerPageContent, ComparisonFeature, ContactPageContent, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser
 
 
 class DemoRequestSerializer(serializers.ModelSerializer):
@@ -56,4 +56,19 @@ class ContactPageContentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ContactPageContent
+        fields = '__all__'
+
+class ComparisonFeatureSerializer(serializers.ModelSerializer):
+    id = serializers.SerializerMethodField()  # override id to string
+
+    class Meta:
+        model = ComparisonFeature
+        fields = ['id', 'feature_name', 'has_ai_setu', 'has_traditional']
+
+    def get_id(self, obj):
+        return str(obj.id)
+    
+class FAQSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FAQ
         fields = '__all__'

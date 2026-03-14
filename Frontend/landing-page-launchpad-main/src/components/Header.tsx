@@ -28,7 +28,7 @@ const Header = () => {
 
   const navItems = [
     { label: "Features", href: "/features" },
-    { label: "Pricing", href: "/pricing" },
+    { label: "Pricing", href: "/pricing-signup" },
     { label: "Referral Program", href: "/referral" },
     { label: "Login", href: "https://ai-setu.com/auth/signin" },
     // { label: "Login", href: "/login" },

@@ -58,13 +58,6 @@ export interface LandingPageContent {
     comparison_title1: string;
     comparison_title2: string;
     comparison_title3: string;
-    comparison_feature1: string;
-    comparison_feature2: string;
-    comparison_feature3: string;
-    comparison_feature4: string;
-    comparison_feature5: string;
-    comparison_feature6: string;
-    comparison_feature7: string;
     testimonial_label: string;
     testimonial_title: string;
     review_button: string;

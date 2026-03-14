@@ -5,8 +5,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import APIView, api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import ContactPageContent, ContactSubmission, Feature, HowItWorksStep, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, CareerPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature
-from .serializers import AboutPageSerializer, CareerPageSerializer, LandingPageContentSerializer,JobApplicationSerializer,ReferralUserSerializer, ContactPageContentSerializer
+from .models import FAQ, ComparisonFeature, ContactPageContent, ContactSubmission, Feature, HowItWorksStep, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, AboutPageContent, CareerPageContent, Problem, ReferralPerk, StoreType, Testimonial, USPFeature
+from .serializers import AboutPageSerializer, CareerPageSerializer, ComparisonFeatureSerializer, FAQSerializer, LandingPageContentSerializer,JobApplicationSerializer,ReferralUserSerializer, ContactPageContentSerializer
 from .utils import generate_invoice, admin_required
 import random
 import string
@@ -112,7 +112,7 @@ def login_view(request):
 
     return JsonResponse({"error": "Only POST allowed"}, status=405)
         
-
+@csrf_exempt
 @api_view(['POST'])
 def pricing_signup(request):
 
@@ -566,4 +566,29 @@ def get_all_testimonials(request):
             "image": request.build_absolute_uri(t.image.url) if t.image else None
         })
 
+    return Response(data)
+
+@api_view(["GET"])
+def get_comparison_features(request):
+    features = ComparisonFeature.objects.filter(is_active=True).order_by('order')
+    data = []
+    for f in features:
+        data.append({
+            "id": str(f.id),  # convert ObjectId to string
+            "feature_name": f.feature_name,
+            "has_ai_setu": f.has_ai_setu,
+            "has_traditional": f.has_traditional,
+        })
+    return Response(data)
+
+@api_view(["GET"])
+def get_faqs(request):
+    faqs = FAQ.objects.filter(is_active=True).order_by('order')
+    data = []
+    for f in faqs:
+        data.append({
+            "id": str(f.id),  # convert ObjectId to string
+            "question": f.question,
+            "answer": f.answer,
+        })
     return Response(data)

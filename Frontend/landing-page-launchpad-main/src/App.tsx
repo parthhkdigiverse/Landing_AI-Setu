@@ -10,7 +10,7 @@ import Referral from "./pages/Referral";
 import Login from "./pages/Login";
 import Demo from "./pages/Demo";
 import PricingSignup from "./pages/PricingSignup";
-import { PrivacyPolicy, TermsConditions, RefundPolicy, DataSecurity, SupportService } from "./pages/PolicyPages";
+// import { PrivacyPolicy, TermsConditions, RefundPolicy, DataSecurity, SupportService } from "./pages/PolicyPages";
 import { About, Blog, Career, Contact } from "./pages/ComingSoon";
 import NotFound from "./pages/NotFound";
 import JobDetails from "@/pages/JobDetails";
@@ -20,6 +20,7 @@ import BlogPost from "./pages/BlogPost"; // import new blog post detail componen
 import DemoSuccess from "./pages/DemoSuccess";
 import AllTestimonials from "./pages/AllTestimonials";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import PolicyPage from "./pages/PolicyPages";
 
 const queryClient = new QueryClient();
 
@@ -36,11 +37,11 @@ const App = () => (
           <Route path="/referral" element={<Referral />} />
           <Route path="/login" element={<Login />} />
           <Route path="/demo" element={<Demo />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
+          {/* <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsConditions />} />
           <Route path="/refund" element={<RefundPolicy />} />
           <Route path="/data-security" element={<DataSecurity />} />
-          <Route path="/support" element={<SupportService />} />
+          <Route path="/support" element={<SupportService />} /> */}
           <Route path="/about" element={<About />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:postId" element={<BlogPost />} />
@@ -53,6 +54,7 @@ const App = () => (
            <Route path="/demo-success" element={<DemoSuccess />} />
            <Route path="/reviews" element={<AllTestimonials />} />
            <Route path="/payment-success" element={<PaymentSuccess />} />
+           <Route path="/policy/:slug" element={<PolicyPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

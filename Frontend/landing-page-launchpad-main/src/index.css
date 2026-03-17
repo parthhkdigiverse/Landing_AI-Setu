@@ -210,3 +210,13 @@
 .animate-scroll {
   animation: scrollTestimonials 25s linear infinite;
 }
+
+/* Hide scrollbar but keep scroll working */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE & Edge */
+  scrollbar-width: none;     /* Firefox */
+}

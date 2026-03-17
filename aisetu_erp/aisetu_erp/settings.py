@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'website.apps.WebsiteConfig',
     'rest_framework',
     'corsheaders',
+    'nested_admin',
 ]
 
 MIDDLEWARE = [

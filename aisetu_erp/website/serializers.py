@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FAQ, AboutPageContent, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, Culture, DemoVideo, JobDescription, JobPosition, JobSkill, LoginLink, Perk, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost
+from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, Culture, DemoVideo, JobDescription, JobPosition, JobSkill, LoginLink, Page, Perk, Policy, PolicySection, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost, Section, SectionItem
 
 # ... rest of file until the end ...
 
@@ -65,13 +65,13 @@ class ReferralUserSerializer(serializers.ModelSerializer):
         model = ReferralUser
         fields = "__all__"
 
-class AboutPageSerializer(serializers.ModelSerializer):
-    # This line converts the MongoDB ObjectId into a string
-    id = serializers.CharField(read_only=True)
+# class AboutPageSerializer(serializers.ModelSerializer):
+#     # This line converts the MongoDB ObjectId into a string
+#     id = serializers.CharField(read_only=True)
 
-    class Meta:
-        model = AboutPageContent
-        fields = '__all__' # Or list your specific fields
+#     class Meta:
+#         model = AboutPageContent
+#         fields = '__all__' # Or list your specific fields
 
 # class CareerPageSerializer(serializers.ModelSerializer):
 #     # This MUST be CharField to handle MongoDB's string-based IDs
@@ -109,12 +109,6 @@ class LoginLinkSerializer(serializers.ModelSerializer):
         model = LoginLink
         fields = "__all__"
 
-class AllStoreTypeSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(source="_id", read_only=True)
-    
-    class Meta:
-        model = AllStoreType
-        fields = ["id", "name"]
 
 class DemoVideoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -128,6 +122,12 @@ class ObjectIdField(serializers.Field):
     def to_internal_value(self, data):
         return ObjectId(data)
 
+class AllStoreTypeSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()    
+    
+    class Meta:
+        model = AllStoreType
+        fields = ["id", "name"]
 
 class CultureSerializer(serializers.ModelSerializer):
     id = ObjectIdField()
@@ -193,3 +193,51 @@ class ChildJobPositionSerializer(serializers.ModelSerializer):
             "descriptions",
             "skills"
         ]
+
+# class ObjectIdField(serializers.Field):
+#     def to_representation(self, value):
+#         return str(value)
+
+
+class SectionItemSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()
+    section = ObjectIdField()  # ✅ FIX FK
+
+    class Meta:
+        model = SectionItem
+        fields = "__all__"
+
+
+class SectionSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()
+    page = ObjectIdField()     # ✅ FIX FK
+    items = SectionItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Section
+        fields = "__all__"
+
+
+class PageSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()
+    sections = SectionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Page
+        fields = "__all__"
+
+class PolicySectionSerializer(serializers.ModelSerializer):
+    id = serializers.CharField() 
+
+    class Meta:
+        model = PolicySection
+        fields = ["id", "heading", "content", "order"]
+
+
+class PolicySerializer(serializers.ModelSerializer):
+    id = serializers.CharField()   
+    sections = PolicySectionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Policy
+        fields = ["id", "title", "slug", "description", "sections"]

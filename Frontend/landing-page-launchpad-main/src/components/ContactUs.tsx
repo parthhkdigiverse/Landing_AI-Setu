@@ -181,15 +181,15 @@ const ContactUsPage = () => {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-[#1F2E4D]">{content.email_label}</label>
-                <Input name="email" type="email" placeholder={content.email_placeholder} value={formData.email} onChange={handleChange} required />
+                <Input name="email" type="email" placeholder={content.email_placeholder} value={formData.email} onChange={handleChange} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-[#1F2E4D]">{content.company_label}</label>
-                <Input name="officeAddress" placeholder={content.company_placeholder} value={formData.officeAddress} onChange={handleChange} required />
+                <Input name="officeAddress" placeholder={content.company_placeholder} value={formData.officeAddress} onChange={handleChange} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-[#1F2E4D]">{content.message_label}</label>
-                <Textarea name="message" placeholder={content.message_placeholder} value={formData.message} onChange={handleChange} required className="min-h-[120px] resize-none" />
+                <Textarea name="message" placeholder={content.message_placeholder} value={formData.message} onChange={handleChange} className="min-h-[120px] resize-none" />
               </div>
               <Button type="submit" className="w-full h-14 bg-[#F4B400] text-white font-bold text-lg rounded-xl shadow-lg hover:bg-[#E6A800] transition-all">
                 <Send className="w-5 h-5 mr-2" />

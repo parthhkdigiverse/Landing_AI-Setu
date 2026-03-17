@@ -1,20 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "@/services/api";
 
-const storeTypes = ["Kirana Store", "General Store", "Medical Store", "Hardware Store", "Margin Business"];
-
-const DemoForm = ({ variant = "default" }: { variant?: "default" | "compact" }) => {
+const DemoForm = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", mobile: "", storeType: "", city: "" });
   const [loading, setLoading] = useState(false);
+  
+  // State for dynamic store types
+  const [storeTypes, setStoreTypes] = useState<{id: number, name: string}[]>([]);
+
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        // Ensure this URL exactly matches your urls.py path
+        const response = await fetch(`${API_BASE_URL}/api/all-storetype/`);
+        const data = await response.json();
+        console.log("Data from Admin:", data); // Check F12 console
+        setStoreTypes(data);
+      } catch (error) {
+        console.error("Could not load store types from API", error);
+      }
+    };
+
+    fetchTypes();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!form.name || !form.mobile || !form.storeType || !form.city) {
       toast.error("Please fill all fields");
       return;
@@ -33,17 +49,13 @@ const DemoForm = ({ variant = "default" }: { variant?: "default" | "compact" }) 
         }),
       });
 
-      // const data = await response.json();
-
       if (response.ok) {
-        // Use navigate instead of window.location.href
         navigate("/demo-success"); 
       } else {
-        const data = await response.json();
-        toast.error(data.error || "Something went wrong");
+        toast.error("Submission failed");
       }
     } catch (error) {
-      toast.error("Server error. Please try again.");
+      toast.error("Server error");
     } finally {
       setLoading(false);
     }
@@ -63,27 +75,36 @@ const DemoForm = ({ variant = "default" }: { variant?: "default" | "compact" }) 
         onChange={(e) => setForm({ ...form, mobile: e.target.value })}
         className="bg-card border-border text-black placeholder-black/70"
       />
+      
+      {/* Dropdown now pulls from 'storeTypes' state */}
       <select
         value={form.storeType}
         onChange={(e) => setForm({ ...form, storeType: e.target.value })}
-        className="w-full h-10 rounded-md border border-border bg-card px-3 text-sm text-foreground text-black placeholder-black/70"
+        className="w-full h-10 rounded-md border border-border bg-card px-3 text-sm text-black"
       >
         <option value="">Select Store Type</option>
-        {storeTypes.map((s) => (
-          <option key={s} value={s}>{s}</option>
-        ))}
+        {storeTypes.length > 0 ? (
+          storeTypes.map((s) => (
+            <option key={s.id} value={s.name}>
+              {s.name}
+            </option>
+          ))
+        ) : (
+          <option disabled>Loading types...</option>
+        )}
       </select>
+
       <Input
         placeholder="City"
         value={form.city}
         onChange={(e) => setForm({ ...form, city: e.target.value })}
         className="bg-card border-border text-black placeholder-black/70"
       />
+      
       <Button
         type="submit"
         disabled={loading}
-        className="w-full bg-gold-gradient text-accent-foreground font-semibold hover:opacity-90"
-        // <-- redirect to home
+        className="w-full bg-gold-gradient text-accent-foreground font-semibold"
       >
         {loading ? "Submitting..." : "Book Free Demo"}
       </Button>

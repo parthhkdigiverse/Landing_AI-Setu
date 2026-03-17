@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CareerPageAPIView, JobDetailAPIView, about_page_content, all_store_type, book_demo_api, get_all_testimonials, get_demo_video, get_features, get_footer, get_home_testimonials, get_how_it_works_steps, get_problems, get_referral_perks, get_store_types, get_usp_features,login_view,pricing_signup, landing_page_content_api, submit_contact, apply_job, check_referral, initiate_payment, payment_callback, get_blog_posts, get_blog_post_detail, get_blog_categories
+from .views import CareerPageAPIView, JobDetailAPIView, PolicyDetailAPIView, PolicyListAPIView, about_page_api, all_store_type, book_demo_api, get_all_testimonials, get_demo_video, get_features, get_footer, get_home_testimonials, get_how_it_works_steps, get_problems, get_referral_perks, get_store_types, get_usp_features,login_view,pricing_signup, landing_page_content_api, submit_contact, apply_job, check_referral, initiate_payment, payment_callback, get_blog_posts, get_blog_post_detail, get_blog_categories
 from . import views 
 urlpatterns = [    
     path("book-demo/", book_demo_api, name="book_demo_api"),
@@ -16,7 +16,9 @@ urlpatterns = [
     # path("admin/login/", views.admin_login),
     # path("admin/demos/", views.admin_demo_list),
     # path("admin/delete-demo/<int:id>/", views.delete_demo),
-    path("api/about-page/", about_page_content, name="about-page"),
+    # path("api/about-page/", about_page_content, name="about-page"),
+    # path('pages/about/', .as_view(), name='about-page'),
+    path('api/pages/about/', about_page_api),
     path("api/career/", CareerPageAPIView.as_view(), name="career-page"),
     path("api/contactus-page/", views.contactus_page_content, name="contactus-page"),
     path("api/problems/", get_problems),
@@ -37,5 +39,7 @@ urlpatterns = [
     path("api/all-storetype/", all_store_type, name="all-storetype"),
     path("api/footer/", get_footer),
     path("api/job/<slug:slug>/", JobDetailAPIView.as_view(), name="job-detail"),
+    path("api/policies/", PolicyListAPIView.as_view()),
+    path("api/policies/<slug:slug>/", PolicyDetailAPIView.as_view()),
 
 ]

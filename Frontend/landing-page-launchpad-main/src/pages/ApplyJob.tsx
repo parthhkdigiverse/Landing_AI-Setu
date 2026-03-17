@@ -37,7 +37,7 @@ const ApplyJob = () => {
 
   const handleSubmit = async () => {
 
-    if (!formData.first_name || !formData.email) {
+    if (!formData.first_name || !formData.last_name || !formData.email || !formData.phone || !resume ) {
       toast.error("Please fill required fields");
       return;
     }
@@ -138,11 +138,12 @@ const ApplyJob = () => {
               <div>
 
                 <h2 className="text-xl font-semibold text-[#1F2E4D] mb-4">
-                  Upload Resume
+                  Upload Resume *
                 </h2>
 
                 <input
                   type="file"
+                  required
                   onChange={handleFileChange}
                   className="w-full border rounded-lg p-4"
                 />

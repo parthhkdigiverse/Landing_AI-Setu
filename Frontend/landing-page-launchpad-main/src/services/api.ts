@@ -179,92 +179,46 @@ export const fetchAllTestimonials = async (): Promise<any[]> => {
 };
 
 
-export interface AboutPageContent {
-    id: number;
-    hero_title: string;
-    hero_description: string;
-    about_label: string;
-    about_heading: string;
-    about_description_1: string;
-    about_description_2: string;
-    about_description_3: string;
-    mission_title: string;
-    mission_description: string;
-    why_choose_title: string;
-    why_point_1: string;
-    why_point_2: string;
-    why_point_3: string;
-    why_point_4: string;
-    why_point_5: string;
-    serve_title: string;
-    serve_subtitle: string;
-    serve1_title: string;
-    serve2_title: string;
-    serve3_title: string;
-    serve4_title: string;
-    cta_title: string;
-    cta_description: string;
-    cta_button_text: string;
-    
-}
-
-export const fetchAboutPageContent = async (): Promise<AboutPageContent | null> => {
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/about-page/?t=${Date.now()}`);
-    if (!res.ok) throw new Error("Failed");
-
-    return await res.json();
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-};
-
-// export interface CareerPageContent {
-//     id: string;
+// export interface AboutPageContent {
+//     id: number;
 //     hero_title: string;
 //     hero_description: string;
-//     culture_title: string;
-//     culture_1_title: string;
-//     culture_1_desc: string;
-//     culture_2_title: string;
-//     culture_2_desc: string;
-//     culture_3_title: string;
-//     culture_3_desc: string;
-//     culture_4_title: string;
-//     culture_4_desc: string;
-//     benefits_title: string;
-//     benefit_1: string;
-//     benefit_2: string;
-//     benefit_3: string;
-//     benefit_4: string;
-//     benefit_5: string;
-//     benefit_6: string;
-//     positions_title: string;
-//     job_1_role: string;
-//     job_1_details: string;
-//     job_2_role: string;
-//     job_2_details: string;
-//     job_3_role: string;
-//     job_3_details: string;
+//     about_label: string;
+//     about_heading: string;
+//     about_description_1: string;
+//     about_description_2: string;
+//     about_description_3: string;
+//     mission_title: string;
+//     mission_description: string;
+//     why_choose_title: string;
+//     why_point_1: string;
+//     why_point_2: string;
+//     why_point_3: string;
+//     why_point_4: string;
+//     why_point_5: string;
+//     serve_title: string;
+//     serve_subtitle: string;
+//     serve1_title: string;
+//     serve2_title: string;
+//     serve3_title: string;
+//     serve4_title: string;
 //     cta_title: string;
 //     cta_description: string;
 //     cta_button_text: string;
-
+    
 // }
 
-// export const fetchCareerPageContent = async (): Promise<CareerPageContent | null> => {
+// export const fetchAboutPageContent = async (): Promise<AboutPageContent | null> => {
 //   try {
-//     // Adding a timestamp here also helps prevent stale data
-//     const res = await fetch(`${API_BASE_URL}/api/career-page/?t=${Date.now()}`);
+//     const res = await fetch(`${API_BASE_URL}/api/about-page/?t=${Date.now()}`);
 //     if (!res.ok) throw new Error("Failed");
+
 //     return await res.json();
 //   } catch (error) {
 //     console.error(error);
 //     return null;
 //   }
 // };
-
 
 export interface ContactPageContent {
   hero_title: string;
@@ -418,8 +372,11 @@ export interface Perk {
 export interface Job {
   title: string;
   experience: string;
+  total_positions: number;
+  work_place: string;
   location: string;
   slug: string;
+  job_slug: string;
 }
 
 export interface CareerPageContent {
@@ -459,4 +416,118 @@ export const fetchJobDetails = async (slug: string) => {
   );
 
   return res.json();
+};
+
+// const API_BASE = "http://127.0.0.1:8000/api";
+
+// ================= TYPES =================
+
+export interface SectionItem {
+  id: number;
+  title?: string;
+  description?: string;
+  image?: string;
+  order: number;
+}
+
+export interface Section {
+  id: number;
+  name: string;
+  title?: string;
+  subtitle?: string;
+  image?: string;
+  order: number;
+  items: SectionItem[];
+}
+
+export interface AboutPageContent {
+  id: number;
+  title: string;
+  slug: string;
+  sections: Section[];
+}
+
+// ================= API =================
+
+export const fetchAboutPageContent = async (): Promise<AboutPageContent | null> => {
+  try {
+    const res = await fetch(`${API_BASE}/pages/about/?t=${Date.now()}`);
+
+    if (!res.ok) throw new Error("Failed to fetch");
+
+    const data = await res.json();
+
+    // ✅ FIX IMAGE URLS
+    data.sections = data.sections.map((section: Section) => ({
+      ...section,
+      image: section.image
+        ? `http://127.0.0.1:8000${section.image}`
+        : null,
+      items: section.items.map((item: SectionItem) => ({
+        ...item,
+        image: item.image
+          ? `http://127.0.0.1:8000${item.image}`
+          : null,
+      })),
+    }));
+
+    return data;
+  } catch (error) {
+    console.error("API ERROR:", error);
+    return null;
+  }
+};
+
+const BASE_URL = "http://127.0.0.1:8000/api";
+
+// ==============================
+// TYPES
+// ==============================
+
+export interface PolicySection {
+  id: number;
+  heading: string;
+  content: string;
+  order: number;
+}
+
+export interface Policy {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  sections: PolicySection[];
+}
+
+// ==============================
+// COMMON FETCH FUNCTION
+// ==============================
+
+const fetchAPI = async (endpoint: string) => {
+  try {
+    const res = await fetch(`${BASE_URL}${endpoint}`);
+
+    if (!res.ok) {
+      throw new Error(`Error: ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("API ERROR:", error);
+    return null;
+  }
+};
+
+// ==============================
+// POLICY APIs
+// ==============================
+
+// ✅ Get ALL policies
+export const fetchPolicies = async (): Promise<Policy[] | null> => {
+  return fetchAPI("/policies/");
+};
+
+// ✅ Get SINGLE policy by slug
+export const fetchPolicy = async (slug: string): Promise<Policy | null> => {
+  return fetchAPI(`/policies/${slug}/`);
 };

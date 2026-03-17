@@ -128,7 +128,7 @@ const CareerPage = () => {
               <motion.div
                 key={index}
                 whileHover={{ scale: 1.02 }}
-                onClick={() => navigate(`/career/${job.slug}`)}
+                onClick={() => navigate(`/career/${job.job_slug}`)}
                 className="bg-white shadow-md rounded-lg p-6 flex justify-between items-center cursor-pointer hover:border hover:border-[#F4B400] transition"
               >
                 <div>
@@ -136,7 +136,7 @@ const CareerPage = () => {
                     {job.title}
                   </h3>
                   <p className="text-gray-500">
-                    {job.experience} • {job.location}
+                    {job.experience} • {job.total_positions} Positions • {job.work_place} • {job.location}
                   </p>
                 </div>
                 <span className="text-[#F4B400] font-semibold">View →</span>

@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import FAQ, AboutPageContent, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactPageContent, Culture, DemoVideo, Feature, Footer, HowItWorksStep, JobDescription, JobPosition, JobSkill, LandingPageContent, LoginLink, Perk, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
+from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactPageContent, Culture, DemoVideo, Feature, Footer, HowItWorksStep, JobDescription, JobPosition, JobSkill, LandingPageContent, LoginLink, Page, Perk, Policy, PolicySection, Problem, ReferralPerk, Section, SectionItem, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
+import nested_admin
 
 # ... existing code ...
 
@@ -29,10 +30,10 @@ class LandingPageContentAdmin(admin.ModelAdmin):
 
     change_form_template = "admin/live_preview_change_form.html"
 
-@admin.register(AboutPageContent)
-class AboutPageContentAdmin(admin.ModelAdmin):
+# @admin.register(AboutPageContent)
+# class AboutPageContentAdmin(admin.ModelAdmin):
 
-    change_form_template = "admin/live_preview_aboutus_form.html"
+#     change_form_template = "admin/live_preview_aboutus_form.html"
 
 # @admin.register(CareerPageContent)
 # class CareerPageContentAdmin(admin.ModelAdmin):
@@ -155,6 +156,7 @@ class JobPositionInline(admin.TabularInline):
 class CareerPageAdmin(admin.ModelAdmin):
     inlines = [CultureInline, PerkInline, JobPositionInline]
 
+
 class JobDescriptionInline(admin.TabularInline):
     model = JobDescription
     extra = 1
@@ -169,6 +171,7 @@ class ChildJobPositionInline(admin.StackedInline):
 
     model = ChildJobPosition
     extra = 1
+    
 
 @admin.register(ChildJobPosition)
 class ChildJobPositionAdmin(admin.ModelAdmin):
@@ -179,3 +182,34 @@ class ChildJobPositionAdmin(admin.ModelAdmin):
         JobDescriptionInline,
         JobSkillInline
     ]
+
+class SectionItemInline(nested_admin.NestedTabularInline):
+    model = SectionItem
+    extra = 1
+
+
+# SECTION inside Page
+class SectionInline(nested_admin.NestedStackedInline):
+    model = Section
+    extra = 1
+    inlines = [SectionItemInline]
+
+
+# PAGE (MAIN)
+@admin.register(Page)
+class PageAdmin(nested_admin.NestedModelAdmin):
+    inlines = [SectionInline]
+    prepopulated_fields = {"slug": ("title",)}
+
+class PolicySectionInline(admin.TabularInline):
+    model = PolicySection
+    extra = 1
+
+
+class PolicyAdmin(admin.ModelAdmin):
+    list_display = ["title", "slug"]
+    prepopulated_fields = {"slug": ("title",)}
+    inlines = [PolicySectionInline]
+
+
+admin.site.register(Policy, PolicyAdmin)

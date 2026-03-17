@@ -85,7 +85,7 @@ const FinalCTA = () => {
                 "Join hundreds of Indian retailers who've switched to smarter billing with AI-Setu ERP. Get started in minutes, no tech skills needed."}
             </p>
 
-            <Button
+            <Button 
               size="lg"
               onClick={() => setDemoOpen(true)}
               className="bg-gold-gradient text-accent-foreground font-bold text-lg px-10 py-6

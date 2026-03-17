@@ -11,6 +11,7 @@ urlpatterns = [
     path('referral-check/', check_referral, name='check_referral'),
     # path("initiate-payment/", initiate_payment),
     path("payment-callback/", payment_callback),
+    path("payment-success/", views.payment_success, name="payment_success"),
     path("phonepe/initiate/", initiate_payment, name="initiate_payment"),
     # path("admin/login/", views.admin_login),
     # path("admin/demos/", views.admin_demo_list),

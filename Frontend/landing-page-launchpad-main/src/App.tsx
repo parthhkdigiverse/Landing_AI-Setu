@@ -19,6 +19,7 @@ import ReferralPage from "@/components/landing/ReferralSection";
 import BlogPost from "./pages/BlogPost"; // import new blog post detail component
 import DemoSuccess from "./pages/DemoSuccess";
 import AllTestimonials from "./pages/AllTestimonials";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const App = () => (
           <Route path="/referral" element={<ReferralPage />} />
            <Route path="/demo-success" element={<DemoSuccess />} />
            <Route path="/reviews" element={<AllTestimonials />} />
+           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

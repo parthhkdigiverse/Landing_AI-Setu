@@ -349,6 +349,7 @@ def initiate_payment(request):
         # -------------------------------
         # Validate Merchant Keys
         # -------------------------------
+        print("### ANTIGRAVITY REAL CODE STARTING ###")
         if not getattr(settings, "PHONEPE_MERCHANT_ID", None) or \
            not getattr(settings, "PHONEPE_SALT_KEY", None) or \
            not getattr(settings, "PHONEPE_SALT_INDEX", None) or \
@@ -366,36 +367,43 @@ def initiate_payment(request):
         # -------------------------------
         # Prepare Payload
         # -------------------------------
+        base_url = request.build_absolute_uri('/')[:-1]
         payload = {
             "merchantId": settings.PHONEPE_MERCHANT_ID,
             "merchantTransactionId": str(payment.transaction_id),
             "merchantUserId": str(signup.id),
             "amount": int(amount) * 100,  # in paise
-            "redirectUrl": "http://localhost:8000/payment-success/",
+            "redirectUrl": f"{base_url}/payment-success/",
             "redirectMode": "POST",
-            "callbackUrl": "http://localhost:8000/payment-callback/",
+            "callbackUrl": f"{base_url}/payment-callback/",
             "paymentInstrument": {
                 "type": "PAY_PAGE"
             }
         }
         print("Payment Payload:", payload)
-        payload_base64 = base64.b64encode(json.dumps(payload).encode()).decode()
+        # PhonePe requires compact JSON (no spaces after commas/colons) for correct checksum
+        payload_json = json.dumps(payload, separators=(',', ':'))
+        payload_base64 = base64.b64encode(payload_json.encode()).decode()
 
         # -------------------------------
         # Generate Checksum
         # -------------------------------
-        string = payload_base64 + "/pg/v1/pay" + settings.PHONEPE_SALT_KEY
+        endpoint = "/pg/v1/pay"
+        string = payload_base64 + endpoint + settings.PHONEPE_SALT_KEY
+        print(f"String to hash: {string}")
+        
         sha256 = hashlib.sha256(string.encode()).hexdigest()
         checksum = sha256 + "###" + str(settings.PHONEPE_SALT_INDEX)
+        print(f"Generated X-VERIFY: {checksum}")
 
         headers = {
             "Content-Type": "application/json",
             "X-VERIFY": checksum
         }
 
-        url = settings.PHONEPE_BASE_URL + "/pg/v1/pay"
+        url = settings.PHONEPE_BASE_URL + endpoint
+        print("Requesting PhonePe URL:", url)
 
-        print("Request URL:", url)
         # -------------------------------
         # Make Request to PhonePe
         # -------------------------------
@@ -435,19 +443,61 @@ def initiate_payment(request):
 @csrf_exempt
 def payment_callback(request):
     try:
+        # PhonePe usually sends a base64 encoded 'response' in the POST body
         data = json.loads(request.body)
-        transaction_id = data["data"]["merchantTransactionId"]
+        
+        if "response" in data:
+            response_payload = data["response"]
+            decoded_response = base64.b64decode(response_payload).decode()
+            data = json.loads(decoded_response)
 
-        payment = Payment.objects.get(transaction_id=transaction_id)
-        payment.status = "SUCCESS"
+        transaction_id = data["data"]["merchantTransactionId"]
+        code = data.get("code")
+        
+        print(f"Processing callback for Transaction ID: {transaction_id}, Code: {code}")
+
+        from uuid import UUID
+        try:
+            # Explicitly convert to UUID if it's a string, as required by some DB backends
+            if isinstance(transaction_id, str):
+                payment_lookup_id = UUID(transaction_id)
+            else:
+                payment_lookup_id = transaction_id
+                
+            payment = Payment.objects.get(transaction_id=payment_lookup_id)
+        except (ValueError, Payment.DoesNotExist):
+            print(f"Payment not found for ID: {transaction_id}")
+            return JsonResponse({"error": "Payment record not found"}, status=404)
+        
+        if code == "PAYMENT_SUCCESS":
+            payment.status = "SUCCESS"
+            # Optional: Generate invoice here
+            try:
+                from .utils import generate_invoice
+                generate_invoice(payment)
+            except Exception as invoice_error:
+                print(f"Invoice generation failed for {transaction_id}: {invoice_error}")
+        else:
+            payment.status = "FAILED"
+            
         payment.save()
 
-        return JsonResponse({"message": "Payment verified"})
+        return JsonResponse({"message": "Payment processed", "status": payment.status})
 
     except Payment.DoesNotExist:
-        return JsonResponse({"error": "Payment not found"}, status=404)
+        return JsonResponse({"error": "Payment record not found"}, status=404)
     except Exception as e:
-        return JsonResponse({"error": "Internal server error", "details": str(e)}, status=500)
+        print(f"Callback Error: {str(e)}")
+        return JsonResponse({"error": "Failed to process callback", "details": str(e)}, status=500)
+
+@csrf_exempt
+def payment_success(request):
+    """
+    Handle the redirect from PhonePe. Renders the frontend index.html
+    so React Router can take over and show the success UI.
+    """
+    from django.shortcuts import render
+    return render(request, "index.html")
     
 # @api_view(["GET"])
 # def about_page_content(request):

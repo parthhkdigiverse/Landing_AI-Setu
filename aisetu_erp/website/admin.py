@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactPageContent, Culture, DemoVideo, Feature, Footer, HowItWorksStep, JobDescription, JobPosition, JobSkill, LandingPageContent, LoginLink, Page, Perk, Policy, PolicySection, Problem, ReferralPerk, Section, SectionItem, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
+from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactPageContent, Culture, DemoVideo, Feature, Footer, HowItWorksStep, JobDescription, JobPosition, JobSkill, LandingPageContent, LoginLink, Page, Perk, Policy, PolicySection, Problem, ReferralPerk, Section, SectionItem, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost, DemoRequest, PricingSignup, ContactSubmission, JobApplication, Payment
 import nested_admin
 
 # ... existing code ...
@@ -213,3 +213,35 @@ class PolicyAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Policy, PolicyAdmin)
+
+@admin.register(DemoRequest)
+class DemoRequestAdmin(admin.ModelAdmin):
+    list_display = ["name", "contact_number", "store_type", "city"]
+    search_fields = ["name", "contact_number", "city"]
+    list_filter = ["store_type"]
+
+@admin.register(ContactSubmission)
+class ContactSubmissionAdmin(admin.ModelAdmin):
+    list_display = ["name", "phone", "email", "created_at"]
+    search_fields = ["name", "phone", "email"]
+    date_hierarchy = "created_at"
+
+@admin.register(JobApplication)
+class JobApplicationAdmin(admin.ModelAdmin):
+    list_display = ["first_name", "last_name", "job_position", "email", "applied_at"]
+    search_fields = ["first_name", "last_name", "email", "phone"]
+    list_filter = ["job_position"]
+    date_hierarchy = "applied_at"
+
+@admin.register(PricingSignup)
+class PricingSignupAdmin(admin.ModelAdmin):
+    list_display = ["shop_name", "owner_name", "mobile_number", "referral_code", "created_at"]
+    search_fields = ["shop_name", "owner_name", "mobile_number", "referral_code"]
+    date_hierarchy = "created_at"
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ["transaction_id", "pricing_signup", "amount", "status", "created_at"]
+    list_filter = ["status"]
+    search_fields = ["transaction_id", "pricing_signup__shop_name"]
+    date_hierarchy = "created_at"

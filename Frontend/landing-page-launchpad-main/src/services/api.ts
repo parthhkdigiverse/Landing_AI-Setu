@@ -65,6 +65,7 @@ export interface LandingPageContent {
     review_button: string;
     all_reviews_title: string;
     all_reviews_desc: string;
+    faq_label: string;
     faq_title: string;
     cta_badge: string;
     cta_title: string;

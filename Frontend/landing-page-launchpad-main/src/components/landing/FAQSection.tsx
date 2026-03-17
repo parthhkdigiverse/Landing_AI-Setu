@@ -86,7 +86,9 @@ const FAQSection = () => {
         >
 
           <span className="text-accent font-semibold text-sm uppercase tracking-wider">
-            FAQ
+            {livePreview?.faq_label ||
+             content?.faq_label ||
+             "FAQ"}
           </span>
 
           <h2 className="text-3xl lg:text-4xl font-bold mt-2 text-foreground">

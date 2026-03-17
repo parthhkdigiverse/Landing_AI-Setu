@@ -148,7 +148,6 @@ def login_view(request):
 @csrf_exempt
 @api_view(['POST'])
 def pricing_signup(request):
-
     shop_name = request.data.get('shop_name')
     owner_name = request.data.get('owner_name')
     mobile_number = request.data.get('mobile_number')
@@ -157,15 +156,14 @@ def pricing_signup(request):
 
     price = 14160  # default price
 
-    # ✅ ONLY CHECK REFERRAL (Apply button)
+    # --- 1. REFERRAL VALIDATION ONLY (Apply Button) ---
     if check_referral:
-
         if referral_code_input:
-            exists = PricingSignup.objects.filter(
-                referral_code=referral_code_input
-            ).exists()
+            # Check if input code exists in PricingSignup OR ReferralUser
+            exists_in_pricing = PricingSignup.objects.filter(referral_code=referral_code_input).exists()
+            exists_in_referral = ReferralUser.objects.filter(referral_code=referral_code_input).exists()
 
-            if exists:
+            if exists_in_pricing or exists_in_referral:
                 return Response({
                     "valid": True,
                     "price": 12980
@@ -176,55 +174,58 @@ def pricing_signup(request):
             "price": 14160
         })
 
+    # --- 2. NORMAL SIGNUP FLOW ---
 
-    # -------------------------------
-    # NORMAL SIGNUP FLOW
-    # -------------------------------
-
+    # Check if this mobile is already registered in PricingSignup
     if PricingSignup.objects.filter(mobile_number=mobile_number).exists():
         return Response({
-            "error": "This mobile number already registered"
+            "error": "This mobile number is already registered"
         }, status=400)
 
-    generated_code = ''.join(random.choices(
-        string.ascii_uppercase + string.digits, k=6
-    ))
+    # --- CHANGE START: Check for existing code from ReferralUser ---
+    existing_referral_user = ReferralUser.objects.filter(mobile_number=mobile_number).first()
+    
+    if existing_referral_user and existing_referral_user.referral_code:
+        # Use the code they already have
+        final_referral_code = existing_referral_user.referral_code
+    else:
+        # Generate a new code ONLY if they don't have one
+        final_referral_code = ''.join(random.choices(
+            string.ascii_uppercase + string.digits, k=6
+        ))
+    # --- CHANGE END ---
 
-    # Referral discount logic
+    # Referral discount logic (Applying the input code from the friend)
     if referral_code_input:
-        try:
-            ref_user = PricingSignup.objects.get(
-                referral_code=referral_code_input
-            )
-
-            ref_user.total_referrals += 1
-            ref_user.save()
-
+        # Check PricingSignup
+        ref_pricing = PricingSignup.objects.filter(referral_code=referral_code_input).first()
+        if ref_pricing:
+            ref_pricing.total_referrals += 1
+            ref_pricing.save()
             price = 12980
+        else:
+            # Also check ReferralUser table for the discount
+            ref_user = ReferralUser.objects.filter(referral_code=referral_code_input).first()
+            if ref_user:
+                # If your ReferralUser model has a total_referrals field, increment it here
+                # ref_user.total_referrals += 1 
+                # ref_user.save()
+                price = 12980
 
-        except PricingSignup.DoesNotExist:
-            pass
-
+    # Create the new entry with the final_referral_code (either existing or new)
     signup = PricingSignup.objects.create(
         shop_name=shop_name,
         owner_name=owner_name,
         mobile_number=mobile_number,
-        referral_code=generated_code
+        referral_code=final_referral_code
     )
 
     return Response({
         "message": "Signup successful",
-        "referral_code": generated_code,
+        "referral_code": final_referral_code, # Returns the existing code to the user
         "signup_id": str(signup.id),
         "price": price
     })
-
-from rest_framework import status
-from .models import ContactSubmission, PricingSignup, LandingPageContent
-from django.views.decorators.csrf import csrf_exempt
-
-from .models import PricingSignup
-
 
 @api_view(['GET'])
 def landing_page_content_api(request):

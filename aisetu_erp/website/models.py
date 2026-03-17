@@ -331,6 +331,12 @@ class LandingPageContent(models.Model):
     # ----------------------------
     # FAQ Section
     # ----------------------------
+    faq_label = models.CharField(
+        max_length=255,
+        default="FAQ",
+        
+    )
+
 
     faq_title = models.CharField(
         max_length=255,
@@ -942,7 +948,7 @@ class Problem(models.Model):
         return self.title
 
     class Meta:
-        verbose_name_plural = "Challanges"
+        verbose_name_plural = "Challenges"
         ordering = ["order"]
 
 class Feature(models.Model):
@@ -1219,6 +1225,10 @@ class ChildJobPosition(models.Model):
 
     def __str__(self):
         return self.title
+    
+    class Meta:
+        verbose_name_plural = "All Job Positions"
+
 
 
 class JobDescription(models.Model):
@@ -1252,6 +1262,10 @@ class Page(models.Model):
 
     def __str__(self):
         return self.title
+    
+    class Meta:
+        verbose_name_plural = "AboutUs Content"
+
 
 
 # SECTION (Hero, About, Mission, etc.)

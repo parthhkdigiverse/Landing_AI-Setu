@@ -244,4 +244,5 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = ["transaction_id", "pricing_signup", "amount", "status", "created_at"]
     list_filter = ["status"]
     search_fields = ["transaction_id", "pricing_signup__shop_name"]
+    readonly_fields = ["response_data"]
     date_hierarchy = "created_at"

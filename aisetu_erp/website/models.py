@@ -484,6 +484,8 @@ class Payment(models.Model):
 
     invoice = models.FileField(upload_to="invoices/", null=True, )
 
+    response_data = models.JSONField(null=True, blank=True)
+
     def __str__(self):
         return str(self.transaction_id)
 

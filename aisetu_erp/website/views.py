@@ -375,7 +375,7 @@ def initiate_payment(request):
             "merchantUserId": str(signup.id),
             "amount": int(amount) * 100,  # in paise
             "redirectUrl": f"{base_url}/payment-success/",
-            "redirectMode": "POST",
+            "redirectMode": "REDIRECT",  # Changed to REDIRECT (GET) for better compatibility
             "callbackUrl": f"{base_url}/payment-callback/",
             "paymentInstrument": {
                 "type": "PAY_PAGE"
@@ -444,51 +444,88 @@ def initiate_payment(request):
 @csrf_exempt
 def payment_callback(request):
     try:
-        # PhonePe usually sends a base64 encoded 'response' in the POST body
-        data = json.loads(request.body)
+        print("--- PHONEPE CALLBACK RECEIVED ---")
+        print("Method:", request.method)
+        print("GET Data:", request.GET.dict())
+        print("POST Data:", request.POST.dict())
+        print("Body:", request.body.decode('utf-8', errors='ignore')[:500])
         
+        # PhonePe can send data as JSON body OR as Form-Encoded data in POST
+        data = {}
+        
+        # 1. Try JSON Body
+        try:
+            body_data = json.loads(request.body)
+            data = body_data
+            print("Parsed JSON body")
+        except (ValueError, json.JSONDecodeError):
+            print("Not a JSON body or empty")
+
+        # 2. Try POST Form Data if body didn't have what we need
+        if not data or "response" not in data:
+            if request.POST:
+                data = request.POST.dict()
+                print("Using POST form data")
+
+        # PhonePe usually sends a base64 encoded 'response'
         if "response" in data:
             response_payload = data["response"]
             decoded_response = base64.b64decode(response_payload).decode()
             data = json.loads(decoded_response)
+            print("Successfully decoded base64 response")
+        
+        # Log the final data for debugging
+        print(f"Callback Data: {json.dumps(data, indent=2)}")
 
-        transaction_id = data["data"]["merchantTransactionId"]
+        # Extract transaction ID and code
+        # Structure is usually: {"success": true, "code": "PAYMENT_SUCCESS", "data": {"merchantTransactionId": "..."}}
+        transaction_id = data.get("data", {}).get("merchantTransactionId")
         code = data.get("code")
         
+        if not transaction_id:
+            print("Error: No transaction_id found in callback data")
+            return JsonResponse({"error": "No transaction ID found"}, status=400)
+
         print(f"Processing callback for Transaction ID: {transaction_id}, Code: {code}")
 
         from uuid import UUID
         try:
-            # Explicitly convert to UUID if it's a string, as required by some DB backends
+            # Explicitly convert to UUID if it's a string
             if isinstance(transaction_id, str):
                 payment_lookup_id = UUID(transaction_id)
             else:
                 payment_lookup_id = transaction_id
                 
             payment = Payment.objects.get(transaction_id=payment_lookup_id)
+            # Store the full response data
+            payment.response_data = data
         except (ValueError, Payment.DoesNotExist):
             print(f"Payment not found for ID: {transaction_id}")
-            return JsonResponse({"error": "Payment record not found"}, status=404)
+            return JsonResponse({"error": f"Payment record {transaction_id} not found"}, status=404)
         
+        # Update status
         if code == "PAYMENT_SUCCESS":
             payment.status = "SUCCESS"
             # Optional: Generate invoice here
             try:
                 from .utils import generate_invoice
                 generate_invoice(payment)
+                print(f"Invoice generated for {transaction_id}")
             except Exception as invoice_error:
                 print(f"Invoice generation failed for {transaction_id}: {invoice_error}")
         else:
-            payment.status = "FAILED"
+            payment.status = code if code else "FAILED"
+            print(f"Status updated to: {payment.status}")
             
+        # Final log before saving
+        print(f"Saving payment {payment.transaction_id} with status {payment.status} and response_data present: {payment.response_data is not None}")
         payment.save()
-
         return JsonResponse({"message": "Payment processed", "status": payment.status})
 
-    except Payment.DoesNotExist:
-        return JsonResponse({"error": "Payment record not found"}, status=404)
     except Exception as e:
-        print(f"Callback Error: {str(e)}")
+        import traceback
+        print(f"Callback Critical Error: {str(e)}")
+        traceback.print_exc()
         return JsonResponse({"error": "Failed to process callback", "details": str(e)}, status=500)
 
 @csrf_exempt
@@ -500,13 +537,16 @@ def payment_success(request):
     import base64
     import json
 
-    # 1. If we already have a status parameter, it means we've already 
-    # processed the PG response. Serve the frontend index.html.
-    if request.GET.get('status'):
-        return render(request, "index.html")
-
     print("--- PAYMENT REDIRECT FROM PG ---")
     print("Method:", request.method)
+    print("GET params:", request.GET.dict())
+    print("POST data:", request.POST.dict())
+
+    # 1. Check if this is an internal redirect (we've already processed it)
+    # We check for tid and status but NO response/code/encoded fields
+    if request.GET.get('status') and not (request.GET.get('response') or request.POST.get('response')):
+        print("Internal redirect detected, serving frontend")
+        return render(request, "index.html")
     
     status_code = "UNKNOWN"
     transaction_id = "UNKNOWN"
@@ -515,21 +555,52 @@ def payment_success(request):
     # Check POST first, then GET
     encoded_response = request.POST.get('response') or request.GET.get('response')
     response_code = request.POST.get('code') or request.GET.get('code')
+    # Sometimes transactionId is sent directly in query params or we can get it from 'mt' or similar if custom
+    transaction_id_param = request.GET.get('transactionId') or request.GET.get('mt') or request.POST.get('transactionId') or request.GET.get('merchantTransactionId')
     
     if encoded_response:
         try:
             decoded_response = base64.b64decode(encoded_response).decode()
             data = json.loads(decoded_response)
+            print(f"Decoded redirect response: {json.dumps(data, indent=2)}")
             status_code = data.get('code', 'UNKNOWN')
             transaction_id = data.get('data', {}).get('merchantTransactionId', 'UNKNOWN')
         except Exception as e:
             print(f"Error parsing redirect response: {e}")
-    elif response_code:
+    
+    # Fallback for status and ID if base64 failed or was missing
+    if status_code == "UNKNOWN" and response_code:
         status_code = response_code
+    
+    if transaction_id == "UNKNOWN" and transaction_id_param:
+        transaction_id = transaction_id_param
 
     # Map to simplified frontend statuses
     if status_code == "PAYMENT_SUCCESS":
         frontend_status = "SUCCESS"
+        # Update database status immediately on success redirect (backup for callback)
+        if transaction_id != "UNKNOWN":
+            try:
+                from uuid import UUID
+                payment = Payment.objects.get(transaction_id=UUID(transaction_id))
+                save_flag = False
+                if encoded_response:
+                    try:
+                        decoded_response = base64.b64decode(encoded_response).decode()
+                        payment.response_data = json.loads(decoded_response)
+                        save_flag = True
+                    except:
+                        pass
+                
+                if payment.status == "PENDING":
+                    payment.status = "SUCCESS"
+                    save_flag = True
+                
+                if save_flag:
+                    payment.save()
+                    print(f"Payment {transaction_id} updated/saved via redirect. Status: {payment.status}")
+            except Exception as e:
+                print(f"Could not update status via redirect: {e}")
     elif status_code in ["PAYMENT_ERROR", "PAYMENT_DECLINED", "TIMED_OUT"]:
         frontend_status = "FAILURE"
     elif status_code == "PAYMENT_PENDING":

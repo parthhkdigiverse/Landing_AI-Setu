@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'nested_admin',
     'forms_data',
+    'import_export',
 ]
 
 MIDDLEWARE = [
@@ -163,3 +164,4 @@ PHONEPE_SALT_INDEX = "1"
 PHONEPE_BASE_URL = "https://api-preprod.phonepe.com/apis/pg-sandbox"
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
+IMPORT_EXPORT_USE_TRANSACTIONS = True

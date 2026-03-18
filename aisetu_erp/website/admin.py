@@ -1,6 +1,18 @@
+import csv
+from importlib import resources
+import io
+
 from django.contrib import admin
+from django.http import FileResponse, HttpResponse
 from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactPageContent, Culture, DemoVideo, Feature, Footer, HowItWorksStep, JobDescription, JobPosition, JobSkill, LandingPageContent, LoginLink, Page, Perk, Policy, PolicySection, Problem, ReferralPerk, Section, SectionItem, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost, DemoRequestProxy, PricingSignupProxy, ContactSubmissionProxy, JobApplicationProxy, PaymentProxy
 import nested_admin
+
+from import_export.resources import ModelResource
+from import_export.admin import ExportMixin
+from import_export.formats.base_formats import XLSX, CSV
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import landscape, letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 
 # ... existing code ...
 
@@ -336,35 +348,114 @@ class PolicyAdmin(admin.ModelAdmin):
 
 admin.site.register(Policy, PolicyAdmin)
 
+
+class ReadOnlyExportAdmin(ExportMixin, admin.ModelAdmin):
+    # Default fields to export if the child class doesn't define specific ones
+    export_fields = [] 
+
+    def get_export_formats(self):
+        return [XLSX, CSV]
+
+    actions = ["export_as_pdf", "export_as_csv"]
+
+    # 1. Logic for the 'EXPORT' Button (Top Right)
+    def get_export_resource_class(self):
+        model_to_use = self.model
+        field_list = self.export_fields if self.export_fields else [f.name for f in model_to_use._meta.fields]
+        
+        class GeneratedResource(ModelResource):
+            class Meta:
+                model = model_to_use
+                fields = field_list # Only exports these specific columns
+        return GeneratedResource
+
+    # 2. Logic for 'Export Selected to CSV'
+    def export_as_csv(self, request, queryset):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{self.model._meta.verbose_name_plural}.csv"'
+        writer = csv.writer(response)
+        
+        # Use export_fields if defined, otherwise use all fields
+        fields = self.export_fields if self.export_fields else [f.name for f in self.model._meta.fields]
+        writer.writerow(fields) # Header row
+        
+        for obj in queryset:
+            writer.writerow([getattr(obj, field) for field in fields])
+        return response
+    export_as_csv.short_description = "Export Selected to CSV"
+
+    # 3. Logic for 'Export Selected to PDF'
+    def export_as_pdf(self, request, queryset):
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=landscape(letter))
+        elements = []
+        
+        fields = self.export_fields if self.export_fields else [f.name for f in self.model._meta.fields]
+        data = [fields] # Header row
+        
+        for obj in queryset:
+            data.append([str(getattr(obj, field)) for field in fields])
+
+        pdf_table = Table(data)
+        pdf_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.cadetblue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('FONTSIZE', (0, 0), (-1, -1), 7),
+        ]))
+        
+        elements.append(pdf_table)
+        doc.build(elements)
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename=f'{self.model._meta.model_name}.pdf')
+    export_as_pdf.short_description = "Export Selected to PDF"
+
+    # Read-only permissions
+    def has_add_permission(self, request): return False
+    def has_change_permission(self, request, obj=None): return False
+    def has_delete_permission(self, request, obj=None): return False
+    def has_view_permission(self, request, obj=None): return True
+    def get_readonly_fields(self, request, obj=None):
+        return [f.name for f in self.model._meta.fields]
+
+
+# --- YOUR ACTUAL ADMIN REGISTRATIONS ---
+
 @admin.register(DemoRequestProxy)
-class DemoRequestAdmin(admin.ModelAdmin):
+class DemoRequestAdmin(ReadOnlyExportAdmin):
+    # --- 1. UI Layout ---
     list_display = ["name", "contact_number", "store_type", "city"]
     search_fields = ["name", "contact_number", "city"]
+    export_fields = ["name", "contact_number", "store_type", "city"]
     list_filter = ["store_type"]
 
 @admin.register(ContactSubmissionProxy)
-class ContactSubmissionAdmin(admin.ModelAdmin):
+class ContactSubmissionAdmin(ReadOnlyExportAdmin):
     list_display = ["name", "phone", "email", "created_at"]
+    export_fields = ["name", "phone", "email", "OfficeAddress", "Message"]
     search_fields = ["name", "phone", "email"]
     date_hierarchy = "created_at"
 
 @admin.register(JobApplicationProxy)
-class JobApplicationAdmin(admin.ModelAdmin):
+class JobApplicationAdmin(ReadOnlyExportAdmin):
     list_display = ["first_name", "last_name", "job_position", "email", "applied_at"]
+    export_fields = ["first_name", "last_name", "email", "phone", "job_position", "experience", "available_to_join", "current_salary", "expected_salary", "location", "applied_at"]
     search_fields = ["first_name", "last_name", "email", "phone"]
     list_filter = ["job_position"]
     date_hierarchy = "applied_at"
 
 @admin.register(PricingSignupProxy)
-class PricingSignupAdmin(admin.ModelAdmin):
+class PricingSignupAdmin(ReadOnlyExportAdmin):
     list_display = ["shop_name", "owner_name", "mobile_number", "referral_code", "created_at"]
+    export_fields = ["shop_name", "owner_name", "mobile_number", "referral_code", "total_referrals"]
     search_fields = ["shop_name", "owner_name", "mobile_number", "referral_code"]
     date_hierarchy = "created_at"
 
 @admin.register(PaymentProxy)
-class PaymentAdmin(admin.ModelAdmin):
+class PaymentAdmin(ReadOnlyExportAdmin):
     list_display = ["transaction_id", "pricing_signup", "amount", "status", "created_at"]
+    export_fields = ["transaction_id", "pricing_signup", "amount", "status"]
     list_filter = ["status"]
     search_fields = ["transaction_id", "pricing_signup__shop_name"]
     readonly_fields = ["response_data"]
-    date_hierarchy = "created_at"
+    date_hierarchy = "created_at"

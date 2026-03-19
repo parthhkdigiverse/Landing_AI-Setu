@@ -62,33 +62,29 @@ def run_frontend_build():
         # Check if node_modules exists, if not run npm install
         if not (frontend_dir / 'node_modules').exists():
             print("node_modules not found. Running 'npm install'...")
-            # Capture output to help debug
-            result = subprocess.run(['npm', 'install'], cwd=frontend_dir, check=True, shell=True, capture_output=True, text=True)
-            print(result.stdout)
+            # Use default stdout/stderr so output is visible in real-time
+            subprocess.run(['npm', 'install'], cwd=frontend_dir, check=True, shell=True)
             
         # Run build
         print("Running 'npm run build'...")
-        result = subprocess.run(['npm', 'run', 'build'], cwd=frontend_dir, check=True, shell=True, capture_output=True, text=True)
-        print(result.stdout)
+        subprocess.run(['npm', 'run', 'build'], cwd=frontend_dir, check=True, shell=True)
         print("Frontend build successful.")
     except subprocess.CalledProcessError as e:
         print(f"--- ERROR: Frontend build failed (exit code {e.returncode}) ---")
-        print("STDOUT:", e.stdout)
-        print("STDERR:", e.stderr)
         print("------------------------------------------------------")
     except Exception as e:
         print(f"An unexpected error occurred during frontend build: {e}")
 
 def main():
     """Run administrative tasks."""
+    print("--- DEBUG: manage.py starting ---")
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'aisetu_erp.settings')
     
     # --- AUTOMATED FRONTEND BUILD ---
     # Run build for commands that need it (runserver, collectstatic)
     if len(sys.argv) > 1 and sys.argv[1] in ['runserver', 'collectstatic']:
-        # Avoid running build twice when using runserver's auto-reload
-        if os.environ.get('RUN_MAIN') != 'true':
-            run_frontend_build()
+        # Removing RUN_MAIN check for now to ensure this triggers on the server
+        run_frontend_build()
     # --------------------------------
     
     try:

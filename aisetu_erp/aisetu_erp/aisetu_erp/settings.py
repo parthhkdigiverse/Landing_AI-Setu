@@ -143,8 +143,8 @@ DEFAULT_AUTO_FIELD = 'django_mongodb_backend.fields.ObjectIdAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8080",
-    "http://127.0.0.1:8080",
+    "http://localhost:5004",
+    "http://127.0.0.1:5004",
 ]
 
 # PhonePe Settings (UAT / Test Environment)

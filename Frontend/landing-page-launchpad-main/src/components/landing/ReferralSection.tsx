@@ -70,8 +70,17 @@ const ReferralSection = () => {
       const res = await axios.post("http://127.0.0.1:8000/referral-check/", {
         mobile_number: mobile
       });
-      setReferralCode(res.data.referral_code);
-      toast.success("Referral code generated!");
+      const newCode = res.data.referral_code;
+      setReferralCode(newCode);
+
+      // --- NEW LOGIC: Auto-copy to clipboard ---
+      await navigator.clipboard.writeText(newCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+
+      // --- Updated Toast Message ---
+      toast.success("Referral code generated and copied to clipboard!");
+      
     } catch (error: any) {
       if (error.response?.data?.error) {
         toast.error(error.response.data.error);

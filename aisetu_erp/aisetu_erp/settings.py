@@ -66,10 +66,21 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'aisetu_erp.urls'
 
+# Final template directory check
+if DEBUG:
+    print(f"DEBUG: BASE_DIR = {BASE_DIR}")
+    print(f"DEBUG: REACT_BUILD_DIR = {REACT_BUILD_DIR}")
+    if not REACT_BUILD_DIR.exists():
+        print(f"WARNING: REACT_BUILD_DIR does not exist! Creating logic to check alternate paths if needed.")
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [REACT_BUILD_DIR],
+        'DIRS': [
+            REACT_BUILD_DIR,
+            BASE_DIR / "website" / "templates",
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

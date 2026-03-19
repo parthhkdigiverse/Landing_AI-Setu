@@ -33,16 +33,14 @@ const Features = () => {
   // LIVE ADMIN PREVIEW
   useEffect(() => {
 
-    const handler = (event:any) => {
-
-      if(event.data){
-        setContent((prev:any)=>({
+    const handler = (event: MessageEvent) => {
+      if (event.data && typeof event.data === 'object' && !Array.isArray(event.data) && event.data.source === 'django-admin') {
+        setContent((prev: any) => ({
           ...prev,
-          ...event.data
-        }))
+          ...event.data.payload
+        }));
       }
-
-    }
+    };
 
     window.addEventListener("message", handler)
 

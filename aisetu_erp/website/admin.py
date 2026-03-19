@@ -4,7 +4,7 @@ import io
 
 from django.contrib import admin
 from django.http import FileResponse, HttpResponse
-from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactPageContent, Culture, DemoVideo, Feature, Footer, HowItWorksStep, JobDescription, JobPosition, JobSkill, LandingPageContent, LoginLink, Page, Perk, Policy, PolicySection, Problem, ReferralPerk, Section, SectionItem, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost, DemoRequestProxy, PricingSignupProxy, ContactSubmissionProxy, JobApplicationProxy, PaymentProxy
+from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, Culture, DemoVideo, Feature, Footer, HowItWorksStep, JobDescription, JobPosition, JobSkill, LandingPageContent, LoginLink, Page, Perk, Policy, PolicySection, Problem, ReferralPerk, Section, SectionItem, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost, DemoRequestProxy, PricingSignupProxy, ContactSubmissionProxy, JobApplicationProxy, PaymentProxy
 import nested_admin
 
 from import_export.resources import ModelResource
@@ -432,7 +432,7 @@ class DemoRequestAdmin(ReadOnlyExportAdmin):
 @admin.register(ContactSubmissionProxy)
 class ContactSubmissionAdmin(ReadOnlyExportAdmin):
     list_display = ["name", "phone", "email", "created_at"]
-    export_fields = ["name", "phone", "email", "OfficeAddress", "Message"]
+    export_fields = ["name", "phone", "email", "officeAddress", "message"]
     search_fields = ["name", "phone", "email"]
     date_hierarchy = "created_at"
 

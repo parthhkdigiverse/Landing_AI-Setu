@@ -77,7 +77,10 @@ function getFormData() {
 function sendPreviewData() {
     const iframe = document.getElementById("livePreview");
     if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage(getFormData(), "*");
+        iframe.contentWindow.postMessage({
+            source: 'django-admin',
+            payload: getFormData()
+        }, "*");
     }
 }
 

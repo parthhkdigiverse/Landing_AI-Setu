@@ -85,7 +85,10 @@ function sendPreviewData(){
     const iframe = document.getElementById("livePreview")
 
     if(iframe && iframe.contentWindow){
-        iframe.contentWindow.postMessage(data, "*")
+        iframe.contentWindow.postMessage({
+            source: 'django-admin',
+            payload: data
+        }, "*")
     }
 
 }
@@ -106,7 +109,10 @@ function sendLivePreview(){
     const iframe = document.getElementById("livePreview")
 
     if(iframe && iframe.contentWindow){
-        iframe.contentWindow.postMessage(data, "*")
+        iframe.contentWindow.postMessage({
+            source: 'django-admin',
+            payload: data
+        }, "*")
     }
 
 }

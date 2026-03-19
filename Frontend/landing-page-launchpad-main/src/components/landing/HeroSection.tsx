@@ -55,16 +55,14 @@ const HeroSection = () => {
 
   useEffect(() => {
 
-  const handler = (event:any) => {
-
-    if(event.data){
-      setContent((prev:any)=>({
-        ...prev,
-        ...event.data
-      }))
-    }
-
-  }
+    const handler = (event: MessageEvent) => {
+      if (event.data && typeof event.data === 'object' && !Array.isArray(event.data) && event.data.source === 'django-admin') {
+        setContent((prev: any) => ({
+          ...prev,
+          ...event.data.payload
+        }));
+      }
+    };
 
   window.addEventListener("message", handler)
 

@@ -374,7 +374,7 @@ def initiate_payment(request):
             "merchantTransactionId": str(payment.transaction_id),
             "merchantUserId": str(signup.id),
             "amount": int(amount) * 100,  # in paise
-            "redirectUrl": f"{base_url}/payment-success/",
+            "redirectUrl": f"{base_url}/payment-success/?merchantTransactionId={payment.transaction_id}",
             "redirectMode": "REDIRECT",  # Changed to REDIRECT (GET) for better compatibility
             "callbackUrl": f"{base_url}/payment-callback/",
             "paymentInstrument": {
@@ -444,11 +444,15 @@ def initiate_payment(request):
 @csrf_exempt
 def payment_callback(request):
     try:
+        log_file = os.path.join(settings.BASE_DIR, 'payment_debug.log')
+        with open(log_file, 'a') as f:
+            f.write(f"\n--- CALLBACK {uuid.uuid4()} ---\n")
+            f.write(f"Method: {request.method}\n")
+            f.write(f"GET: {json.dumps(request.GET.dict())}\n")
+            f.write(f"POST: {json.dumps(request.POST.dict())}\n")
+            f.write(f"Body: {request.body.decode('utf-8', errors='ignore')[:1000]}\n")
+
         print("--- PHONEPE CALLBACK RECEIVED ---")
-        print("Method:", request.method)
-        print("GET Data:", request.GET.dict())
-        print("POST Data:", request.POST.dict())
-        print("Body:", request.body.decode('utf-8', errors='ignore')[:500])
         
         # PhonePe can send data as JSON body OR as Form-Encoded data in POST
         data = {}
@@ -536,11 +540,17 @@ def payment_success(request):
     from django.shortcuts import redirect, render
     import base64
     import json
+    import os
+    from django.conf import settings
+
+    log_file = os.path.join(settings.BASE_DIR, 'payment_debug.log')
+    with open(log_file, 'a') as f:
+        f.write(f"\n--- SUCCESS REDIRECT {uuid.uuid4()} ---\n")
+        f.write(f"Method: {request.method}\n")
+        f.write(f"GET: {json.dumps(request.GET.dict())}\n")
+        f.write(f"POST: {json.dumps(request.POST.dict())}\n")
 
     print("--- PAYMENT REDIRECT FROM PG ---")
-    print("Method:", request.method)
-    print("GET params:", request.GET.dict())
-    print("POST data:", request.POST.dict())
 
     # 1. Check if this is an internal redirect (we've already processed it)
     # We check for tid and status but NO response/code/encoded fields
@@ -556,7 +566,9 @@ def payment_success(request):
     encoded_response = request.POST.get('response') or request.GET.get('response')
     response_code = request.POST.get('code') or request.GET.get('code')
     # Sometimes transactionId is sent directly in query params or we can get it from 'mt' or similar if custom
-    transaction_id_param = request.GET.get('transactionId') or request.GET.get('mt') or request.POST.get('transactionId') or request.GET.get('merchantTransactionId')
+    transaction_id_param = request.GET.get('transactionId') or request.GET.get('mt') or \
+                          request.POST.get('transactionId') or request.GET.get('merchantTransactionId') or \
+                          request.POST.get('merchantTransactionId') or request.GET.get('transaction_id')
     
     if encoded_response:
         try:
@@ -573,41 +585,41 @@ def payment_success(request):
         status_code = response_code
     
     if transaction_id == "UNKNOWN" and transaction_id_param:
-        transaction_id = transaction_id_param
-
-    # Map to simplified frontend statuses
+        transaction_id = transaction_id_param    # Map to simplified frontend statuses
     if status_code == "PAYMENT_SUCCESS":
         frontend_status = "SUCCESS"
-        # Update database status immediately on success redirect (backup for callback)
-        if transaction_id != "UNKNOWN":
-            try:
-                from uuid import UUID
-                payment = Payment.objects.get(transaction_id=UUID(transaction_id))
-                save_flag = False
-                if encoded_response:
-                    try:
-                        decoded_response = base64.b64decode(encoded_response).decode()
-                        payment.response_data = json.loads(decoded_response)
-                        save_flag = True
-                    except:
-                        pass
-                
-                if payment.status == "PENDING":
-                    payment.status = "SUCCESS"
-                    save_flag = True
-                
-                if save_flag:
-                    payment.save()
-                    print(f"Payment {transaction_id} updated/saved via redirect. Status: {payment.status}")
-            except Exception as e:
-                print(f"Could not update status via redirect: {e}")
     elif status_code in ["PAYMENT_ERROR", "PAYMENT_DECLINED", "TIMED_OUT"]:
         frontend_status = "FAILURE"
     elif status_code == "PAYMENT_PENDING":
         frontend_status = "PENDING"
     else:
-        frontend_status = status_code # Likely "UNKNOWN" or raw code
+        # -------------------------------
+        # DB Lookup Fallback
+        # -------------------------------
+        # If redirect parameters are missing/unclear, check the database status
+        # which might have been updated by the callback already
+        if transaction_id != "UNKNOWN":
+            try:
+                from uuid import UUID
+                payment = Payment.objects.get(transaction_id=UUID(transaction_id))
+                if payment.status in ["SUCCESS", "FAILURE", "PENDING"]:
+                    frontend_status = payment.status
+                    print(f"Status resolved from DB for {transaction_id}: {frontend_status}")
+                else:
+                    frontend_status = status_code
+            except Exception as db_err:
+                print(f"Fallback DB lookup failed: {db_err}")
+                frontend_status = status_code
+        else:
+            frontend_status = status_code # Still likely "UNKNOWN"
 
+    # Final check: if we are redirecting to index.html anyway, 
+    # make sure we have the most accurate status
+    if frontend_status == "UNKNOWN" and transaction_id == "UNKNOWN":
+         # Check if there's ANY PENDING payment for this session/IP (risky but better than nothing)
+         pass
+
+    print(f"Redirecting to frontend with status={frontend_status}, tid={transaction_id}")
     # Redirect to same URL but with our simplified parameters
     return redirect(f"/payment-success/?status={frontend_status}&tid={transaction_id}")
     

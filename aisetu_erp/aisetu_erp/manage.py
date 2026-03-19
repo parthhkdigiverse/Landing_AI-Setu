@@ -69,9 +69,11 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
-    # Set default host and port for runserver
-    if len(sys.argv) > 1 and sys.argv[1] == 'runserver' and len(sys.argv) == 2:
-        sys.argv.append('0.0.0.0:5004')
+    # Robustly set default port for runserver if not provided
+    if len(sys.argv) > 1 and sys.argv[1] == 'runserver':
+        if len(sys.argv) == 2 or sys.argv[2].startswith('--'):
+            sys.argv.insert(2, '0.0.0.0:5004')
+            print(f"Note: Automatically using default address 0.0.0.0:5004")
 
     execute_from_command_line(sys.argv)
 

@@ -1,17 +1,23 @@
 from rest_framework import serializers
 from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, Culture, DemoVideo, JobDescription, JobPosition, JobSkill, LoginLink, Page, Perk, Policy, PolicySection, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost, Section, SectionItem
 
-# ... rest of file until the end ...
+class ObjectIdField(serializers.Field):
+    def to_representation(self, value):
+        return str(value)
+
+    def to_internal_value(self, data):
+        from bson import ObjectId
+        return ObjectId(data)
 
 class BlogCategorySerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+    id = ObjectIdField()
     class Meta:
         model = BlogCategory
         fields = '__all__'
 
 class BlogPostSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
-    category = serializers.CharField(source='category.id', read_only=True)
+    id = ObjectIdField()
+    category = ObjectIdField(read_only=True)
     category_name = serializers.CharField(source='category.name', read_only=True)
     featured_image_url = serializers.SerializerMethodField()
 
@@ -115,12 +121,6 @@ class DemoVideoSerializer(serializers.ModelSerializer):
         model = DemoVideo
         fields = "__all__"
 
-class ObjectIdField(serializers.Field):
-    def to_representation(self, value):
-        return str(value)
-
-    def to_internal_value(self, data):
-        return ObjectId(data)
 
 class AllStoreTypeSerializer(serializers.ModelSerializer):
     id = ObjectIdField()    

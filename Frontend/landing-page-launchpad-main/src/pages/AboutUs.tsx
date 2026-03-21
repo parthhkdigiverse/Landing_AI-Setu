@@ -25,6 +25,21 @@ const AboutUs = () => {
   const [demoOpen, setDemoOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [content, setContent] = useState<AboutPageContent | null>(null);
+  const [livePreview, setLivePreview] = useState<any>(null);
+
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      if (event.data?.source === "django-admin") {
+        setLivePreview(event.data.payload);
+        if (event.data.scrollTarget) {
+          const el = document.getElementById(event.data.scrollTarget);
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -99,22 +114,27 @@ const AboutUs = () => {
 
         {/* HERO */}
         <motion.section
+          id="hero"
           variants={fadeIn}
           initial="hidden"
           animate="show"
           className="bg-[#1F2E4D] text-white py-20 text-center"
         >
+          <motion.div variants={fadeUp} className="text-[#F4B400] font-bold tracking-wider uppercase mb-4 text-sm">
+            ABOUT US
+          </motion.div>
           <motion.h1 variants={fadeUp} className="text-5xl font-bold mb-4">
-            {hero?.title || "About AI-Setu ERP"}
+            {livePreview?.hero_title || hero?.title || "About AI-Setu ERP"}
           </motion.h1>
 
           <motion.p variants={fadeUp} className="max-w-3xl mx-auto text-gray-300">
-            {hero?.subtitle || ""}
+            {livePreview?.hero_description || hero?.subtitle || ""}
           </motion.p>
         </motion.section>
 
         {/* ABOUT */}
         <motion.section
+          id="about"
           variants={fadeIn}
           initial="hidden"
           whileInView="show"
@@ -126,14 +146,25 @@ const AboutUs = () => {
             className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 px-6"
           >
             <motion.div variants={fadeUp}>
-              <h2 className="text-3xl font-bold mb-4">{about?.title}</h2>
+              <h3 className="text-[#F4B400] font-bold tracking-wider uppercase mb-2 text-sm">
+                ABOUT US
+              </h3>
+              <h2 className="text-3xl font-bold mb-4">{livePreview?.about_heading || about?.title}</h2>
               <p className="mb-4 text-gray-600">{about?.subtitle}</p>
 
-              {about?.items?.map((item) => (
-                <p key={item.id} className="text-gray-600 mb-2">
-                  {item.description}
-                </p>
-              ))}
+              {livePreview ? (
+                <>
+                  {livePreview.about_description_1 && <p className="text-gray-600 mb-2">{livePreview.about_description_1}</p>}
+                  {livePreview.about_description_2 && <p className="text-gray-600 mb-2">{livePreview.about_description_2}</p>}
+                  {livePreview.about_description_3 && <p className="text-gray-600 mb-2">{livePreview.about_description_3}</p>}
+                </>
+              ) : (
+                about?.items?.map((item) => (
+                  <p key={item.id} className="text-gray-600 mb-2">
+                    {item.description}
+                  </p>
+                ))
+              )}
             </motion.div>
 
             {about?.image && (
@@ -147,6 +178,7 @@ const AboutUs = () => {
 
         {/* MISSION + WHY */}
         <motion.section
+          id="mission"
           variants={fadeIn}
           initial="hidden"
           whileInView="show"
@@ -158,16 +190,26 @@ const AboutUs = () => {
             className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 px-6"
           >
             <motion.div variants={fadeUp}>
-              <h2 className="text-3xl font-bold mb-4">{mission?.title}</h2>
-              <p className="text-gray-600">{mission?.subtitle}</p>
+              <h2 className="text-3xl font-bold mb-4">{livePreview?.mission_title || mission?.title}</h2>
+              <p className="text-gray-600">{livePreview?.mission_description || mission?.subtitle}</p>
             </motion.div>
 
-            <motion.div variants={fadeUp} className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-xl font-semibold mb-3">{why?.title}</h3>
+            <motion.div variants={fadeUp} className="bg-white p-6 rounded-lg shadow" id="why_choose">
+              <h3 className="text-xl font-semibold mb-3">{livePreview?.why_choose_title || why?.title}</h3>
               <ul className="space-y-2 text-gray-600">
-                {why?.items?.map((item) => (
-                  <li key={item.id}>✔ {item.title}</li>
-                ))}
+                {livePreview ? (
+                  <>
+                    {livePreview.why_point_1 && <li>✔ {livePreview.why_point_1}</li>}
+                    {livePreview.why_point_2 && <li>✔ {livePreview.why_point_2}</li>}
+                    {livePreview.why_point_3 && <li>✔ {livePreview.why_point_3}</li>}
+                    {livePreview.why_point_4 && <li>✔ {livePreview.why_point_4}</li>}
+                    {livePreview.why_point_5 && <li>✔ {livePreview.why_point_5}</li>}
+                  </>
+                ) : (
+                  why?.items?.map((item) => (
+                    <li key={item.id}>✔ {item.title}</li>
+                  ))
+                )}
               </ul>
             </motion.div>
           </motion.div>
@@ -175,14 +217,15 @@ const AboutUs = () => {
 
         {/* SERVE */}
         <motion.section
+          id="serve"
           variants={fadeIn}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
           className="py-20"
         >
-          <h2 className="text-center text-3xl font-bold mb-4">{serve?.title}</h2>
-          <p className="text-center mb-8 text-black-300">{serve?.subtitle}</p>
+          <h2 className="text-center text-3xl font-bold mb-4">{livePreview?.serve_title || serve?.title}</h2>
+          <p className="text-center mb-8 text-black-300">{livePreview?.serve_subtitle || serve?.subtitle}</p>
 
           <div className="relative max-w-7xl mx-auto px-6">
 
@@ -236,14 +279,15 @@ const AboutUs = () => {
 
         {/* CTA */}
         <motion.section
+          id="cta"
           variants={fadeUp}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
           className="py-20 bg-[#1F2E4D] text-white text-center"
         >
-          <h2 className="text-3xl font-bold mb-3">{cta?.title}</h2>
-          <p className="mb-4 text-gray-300">{cta?.subtitle}</p>
+          <h2 className="text-3xl font-bold mb-3">{livePreview?.cta_title || cta?.title}</h2>
+          <p className="mb-4 text-gray-300">{livePreview?.cta_description || cta?.subtitle}</p>
 
           <motion.div whileHover={{ scale: 1.1 }}>
             <Button
@@ -251,7 +295,7 @@ const AboutUs = () => {
               className="bg-gold-gradient text-accent-foreground font-bold text-lg px-10 py-6 shadow-xl"
               onClick={() => setDemoOpen(true)}
             >
-              {cta?.items?.[0]?.title || "Book Demo"}
+              {livePreview?.cta_button_text || cta?.items?.[0]?.title || "Book Demo"}
             </Button>
           </motion.div>
         </motion.section>

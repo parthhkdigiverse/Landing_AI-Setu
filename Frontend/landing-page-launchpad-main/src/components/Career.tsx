@@ -15,6 +15,7 @@ const CareerPage = () => {
   const openingsRef = useRef<HTMLDivElement>(null);
 
   const [content, setContent] = useState<CareerPageContent | null>(null);
+  const [livePreview, setLivePreview] = useState<any>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -28,6 +29,14 @@ const CareerPage = () => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data === "reload_full_data") {
         fetchCareerPageContent().then((data) => data && setContent(data));
+      } else if (event.data && typeof event.data === 'object' && event.data.source === 'django-admin') {
+        setLivePreview((prev: any) => ({ ...prev, ...event.data.payload }));
+        if (event.data.scrollTarget) {
+            setTimeout(() => {
+                const el = document.getElementById(event.data.scrollTarget);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
       }
     };
 
@@ -53,26 +62,26 @@ const CareerPage = () => {
       <main className="bg-[#F5F6FA]">
 
         {/* HERO */}
-        <section className="py-24 text-center bg-[#1F2E4D] text-white">
+        <section id="hero" className="py-24 text-center bg-[#1F2E4D] text-white">
           <motion.h1
             initial={{ opacity: 0, y: -40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="text-5xl font-bold mb-6"
           >
-            {content?.hero_title || "Build Your Career With AI-Setu 🚀"}
+            {livePreview?.hero_title || content?.hero_title || "Build Your Career With AI-Setu 🚀"}
           </motion.h1>
 
           <p className="max-w-2xl mx-auto text-lg opacity-90">
-            {content?.hero_subtitle ||
+            {livePreview?.hero_subtitle || content?.hero_subtitle ||
               "Join a team building the future of AI powered ERP systems."}
           </p>
         </section>
 
         {/* CULTURE */}
-        <section className="py-20 container mx-auto px-6">
+        <section id="culture" className="py-20 container mx-auto px-6">
           <h2 className="text-4xl font-bold text-center mb-14 text-[#1F2E4D]">
-            {content?.culture_title || "Our Culture"}
+            {livePreview?.culture_title || content?.culture_title || "Our Culture"}
           </h2>
 
           <div className="grid md:grid-cols-4 gap-8">
@@ -97,10 +106,10 @@ const CareerPage = () => {
         </section>
 
         {/* BENEFITS */}
-        <section className="py-20 bg-white">
+        <section id="perks" className="py-20 bg-white">
           <div className="container mx-auto px-6 text-center">
             <h2 className="text-4xl font-bold mb-12 text-[#1F2E4D]">
-              {content?.perks_title || "Perks & Benefits"}
+              {livePreview?.perks_title || content?.perks_title || "Perks & Benefits"}
             </h2>
 
             <div className="grid md:grid-cols-3 gap-8">
@@ -121,12 +130,12 @@ const CareerPage = () => {
 
         {/* JOB POSITIONS */}
         <section
-          id="openings"
+          id="open_positions"
           ref={openingsRef}
           className="py-20 container mx-auto px-6"
         >
           <h2 className="text-4xl font-bold text-center mb-12 text-[#1F2E4D]">
-            {content?.positions_title || "Open Positions"}
+            {livePreview?.positions_title || content?.positions_title || "Open Positions"}
           </h2>
 
           <div className="space-y-6">
@@ -152,13 +161,13 @@ const CareerPage = () => {
         </section>
 
         {/* CTA */}
-        <section className="py-20 text-center bg-[#1F2E4D] text-white">
+        <section id="cta" className="py-20 text-center bg-[#1F2E4D] text-white">
           <h2 className="text-4xl font-bold mb-4">
-            {content?.cta_title || "Ready to Join AI-Setu?"}
+            {livePreview?.cta_title || content?.cta_title || "Ready to Join AI-Setu?"}
           </h2>
 
           <p className="mb-8">
-            {content?.cta_subtitle ||
+            {livePreview?.cta_subtitle || content?.cta_subtitle ||
               "Explore our current openings and apply today."}
           </p>
 
@@ -168,7 +177,7 @@ const CareerPage = () => {
             }
             className="bg-gradient-to-r from-[#F4B400] to-[#F6C34A] text-black font-bold px-8 py-4 rounded-lg shadow hover:scale-105 transition"
           >
-            {content?.cta_button_text || "View Openings"}
+            {livePreview?.cta_button_text || content?.cta_button_text || "View Openings"}
           </button>
         </section>
       </main>

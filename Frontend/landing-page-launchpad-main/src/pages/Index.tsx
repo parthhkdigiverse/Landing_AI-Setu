@@ -42,6 +42,12 @@ const Index = () => {
           ...prev,
           ...event.data.payload
         }));
+        if (event.data.scrollTarget) {
+          setTimeout(() => {
+            const el = document.getElementById(event.data.scrollTarget);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 100);
+        }
       }
     };
 
@@ -62,22 +68,19 @@ const Index = () => {
       <Header />
 
       <main>
-
-        {/* Pass preview data ONLY to hero */}
-        <HeroSection />
-        <TrustStrip />
-        <ProblemSection />
-        <SolutionSection />
-        <USPSection />
-        <HowItWorks />
-        <WhoIsThisFor />
-        <PricingSection />
-        <ReferralSection />
-        <ComparisonSection />
-        <TestimonialsSection />
-        <FAQSection />
-        <FinalCTA />
-
+        <div id="hero"><HeroSection /></div>
+        <div id="trusted-retailers"><TrustStrip /></div>
+        <div id="problem"><ProblemSection /></div>
+        <div id="solution"><SolutionSection /></div>
+        <div id="usp"><USPSection /></div>
+        <div id="how-it-works"><HowItWorks /></div>
+        <div id="who-is-this-for"><WhoIsThisFor /></div>
+        <div id="pricing"><PricingSection /></div>
+        <div id="referral"><ReferralSection /></div>
+        <div id="comparison"><ComparisonSection /></div>
+        <div id="testimonials"><TestimonialsSection /></div>
+        <div id="faq"><FAQSection /></div>
+        <div id="cta"><FinalCTA /></div>
       </main>
 
       <Footer />

@@ -6,6 +6,7 @@ import { API_BASE_URL } from "@/services/api";
 const Footer = () => {
 
   const [footer, setFooter] = useState<any>(null);
+  const [livePreview, setLivePreview] = useState<any>(null);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/footer/`)
@@ -14,10 +15,54 @@ const Footer = () => {
       .catch((err) => console.log(err));
   }, []);
 
-  if (!footer) return null;
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // INIT INSTANT SNAP
+      if (event.data && event.data.source === 'django-admin-init' && event.data.target === 'footer') {
+         const footerEl = document.getElementById("master-footer");
+         if (footerEl) footerEl.scrollIntoView({ behavior: 'instant', block: 'center' });
+         return;
+      }
+
+      if (event.data && event.data.source === 'django-admin') {
+        const payload = event.data.payload;
+
+        // Determine if this payload has footer fields. 
+        if (payload.email !== undefined || payload.address !== undefined || payload.description !== undefined) {
+          
+          let quick_links = footer?.quick_links || [];
+          let policies = footer?.policies || [];
+
+          try {
+            if (payload.quick_links) quick_links = JSON.parse(payload.quick_links);
+          } catch(e) {}
+          
+          try {
+            if (payload.policies) policies = JSON.parse(payload.policies);
+          } catch(e) {}
+
+          setLivePreview({
+            description: payload.description,
+            email: payload.email,
+            address: payload.address,
+            phone: payload.phone,
+            quick_links: quick_links,
+            policies: policies,
+          });
+        }
+      }
+    };
+    
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [footer]);
+
+  const displayData = livePreview || footer;
+
+  if (!displayData) return null;
 
   return (
-    <footer className="bg-primary text-primary-foreground">
+    <footer id="master-footer" className="bg-primary text-primary-foreground">
       <div className="container py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
 
@@ -31,8 +76,8 @@ const Footer = () => {
               />
             </div>
 
-            <p className="text-sm text-primary-foreground/60">
-              {footer.description}
+            <p className="text-sm text-primary-foreground/60 whitespace-pre-wrap">
+              {displayData.description}
             </p>
           </div>
 
@@ -40,10 +85,10 @@ const Footer = () => {
           <div>
             <h4 className="font-heading font-bold text-sm mb-3">Quick Links</h4>
             <nav className="space-y-2">
-              {footer.quick_links?.map((l: any) => (
+              {displayData.quick_links?.map((l: any, i: number) => (
                 <Link
-                  key={l.href}
-                  to={l.href}
+                  key={l.href || i}
+                  to={l.href || "#"}
                   className="block text-sm text-primary-foreground/60 hover:text-accent transition-colors"
                 >
                   {l.label}
@@ -56,10 +101,10 @@ const Footer = () => {
           <div>
             <h4 className="font-heading font-bold text-sm mb-3">Policies</h4>
             <nav className="space-y-2">
-              {footer.policies?.map((l: any) => (
+              {displayData.policies?.map((l: any, i: number) => (
                 <Link
-                  key={l.href}
-                  to={l.href}
+                  key={l.href || i}
+                  to={l.href || "#"}
                   className="block text-sm text-primary-foreground/60 hover:text-accent transition-colors"
                 >
                   {l.label}
@@ -72,9 +117,9 @@ const Footer = () => {
           <div>
             <h4 className="font-heading font-bold text-sm mb-3">Contact</h4>
             <div className="space-y-2 text-sm text-primary-foreground/60">
-              <p>{footer.email}</p>
-              <p dangerouslySetInnerHTML={{ __html: footer.address }} />
-              <p>{footer.phone}</p>
+              <p>{displayData.email}</p>
+              <p dangerouslySetInnerHTML={{ __html: displayData.address }} />
+              <p>{displayData.phone}</p>
             </div>
           </div>
 

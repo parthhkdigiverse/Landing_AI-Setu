@@ -38,14 +38,20 @@ const Pricing = () => {
           ...prev,
           ...event.data.payload
         }));
+        if (event.data.scrollTarget) {
+          setTimeout(() => {
+            const el = document.getElementById(event.data.scrollTarget);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 100);
+        }
       }
     };
 
-    window.addEventListener("message", handler)
+    window.addEventListener("message", handler);
 
-    return () => window.removeEventListener("message", handler)
+    return () => window.removeEventListener("message", handler);
 
-  },[])
+  }, []);
 
 
   return (

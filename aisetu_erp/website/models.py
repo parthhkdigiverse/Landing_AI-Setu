@@ -538,188 +538,183 @@ class PaymentProxy(Payment):
         verbose_name_plural = "Payments"
         app_label = 'forms_data'
 
+class PricingContent(LandingPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "Pricing Content"
+        verbose_name_plural = "Pricing Content"
+        app_label = 'website'
+
 from django.db import models
 
 
-# class AboutPageContent(models.Model):
+class AboutPageContent(models.Model):
 
-#     # ==========================
-#     # HERO SECTION
-#     # ==========================
+    # ==========================
+    # HERO SECTION
+    # ==========================
 
-#     hero_title = models.CharField(
-#         max_length=255,
-#         default="About AI-Setu ERP",
-#         blank=True
-#     )
+    hero_title = models.CharField(
+        max_length=255,
+        default="About AI-Setu ERP",
+        blank=True
+    )
 
-#     hero_description = models.TextField(
-#         default="AI-Setu ERP empowers retailers with modern technology to simplify store management. We help SMEs automate operations, improve efficiency, and grow faster with intelligent ERP solutions.",
-#         blank=True
-#     )
-
-
-#     # ==========================
-#     # ABOUT CONTENT SECTION
-#     # ==========================
-
-#     about_label = models.CharField(
-#         max_length=100,
-#         default="ABOUT US",
-#         blank=True
-#     )
-
-#     about_heading = models.CharField(
-#         max_length=255,
-#         default="WE ARE ON A DRIVE TO MAKE THE RETAIL INDUSTRY MORE EFFICIENT.",
-#         blank=True
-#     )
-
-#     about_description_1 = models.TextField(
-#         default="AI-Setu ERP is the future of retail. From empowering offline stores to managing their inventory and sales with smart technology.",
-#         blank=True
-#     )
-
-#     about_description_2 = models.TextField(
-#         default="SMEs often struggle to find a comprehensive cloud-based ERP and POS solution that can scale with their growth.",
-#         blank=True
-#     )
-
-#     about_description_3 = models.TextField(
-#         default="AI-Setu ERP empowers SMEs to use modern ERP tools without complexity and grow their business with automation and analytics.",
-#         blank=True
-#     )
-
-#     # ==========================
-#     # MISSION SECTION
-#     # ==========================
-
-#     mission_title = models.CharField(
-#         max_length=200,
-#         default="Our Mission",
-#         blank=True
-#     )
-
-#     mission_description = models.TextField(
-#         default="Retail businesses are the backbone of the Indian economy, yet many rely on outdated tools. AI-Setu ERP brings modern technology to retail businesses, enabling inventory tracking, billing, sales analytics, and smarter decisions with ease.",
-#         blank=True
-#     )
+    hero_description = models.TextField(
+        default="AI-Setu ERP empowers retailers with modern technology to simplify store management. We help SMEs automate operations, improve efficiency, and grow faster with intelligent ERP solutions.",
+        blank=True
+    )
 
 
-#     # ==========================
-#     # WHY CHOOSE US SECTION
-#     # ==========================
+    # ==========================
+    # ABOUT CONTENT SECTION
+    # ==========================
 
-#     why_choose_title = models.CharField(
-#         max_length=200,
-#         default="Why Choose AI-Setu ERP?",
-#         blank=True
-#     )
+    about_label = models.CharField(
+        max_length=100,
+        default="ABOUT US",
+        blank=True
+    )
 
-#     why_point_1 = models.CharField(
-#         max_length=200,
-#         default="Smart AI-powered billing",
-#         blank=True
-#     )
-
-#     why_point_2 = models.CharField(
-#         max_length=200,
-#         default="Fast and reliable billing",
-#         blank=True
-#     )
-
-#     why_point_3 = models.CharField(
-#         max_length=200,
-#         default="Real-time inventory tracking",
-#         blank=True
-#     )
-
-#     why_point_4 = models.CharField(
-#         max_length=200,
-#         default="Powerful sales analytics",
-#         blank=True
-#     )
-
-#     why_point_5 = models.CharField(
-#         max_length=200,
-#         default="Built specifically for Indian retailers",
-#         blank=True
-#     )
-
-
-#     # ==========================
-#     # WHO DO WE SERVE SECTION
-#     # ==========================
-
-#     serve_title = models.CharField(
-#         max_length=200,
-#         default="WHO DO WE SERVE?",
-#         blank=True
-#     )
-
-#     serve_subtitle = models.CharField(
-#         max_length=255,
-#         default="We serve all types of retail businesses with our ERP solutions.",
-#         blank=True
-#     )
-
-
-#     # Retail Category 1
-#     serve1_title = models.CharField(
-#         max_length=200,
-#         default="Kirana Store",
-#         blank=True
-#     )
-
-#     # Retail Category 2
-#     serve2_title = models.CharField(
-#         max_length=200,
-#         default="General Store",
-#         blank=True
-#     )
-
-#     # Retail Category 3
-#     serve3_title = models.CharField(
-#         max_length=200,
-#         default="Medical Store",
-#         blank=True
-#     )
-
-#     # Retail Category 4
-#     serve4_title = models.CharField(
-#         max_length=200,
-#         default="Hardware Store",
-#         blank=True
-#     )
-
-
-#     # ==========================
-#     # BOTTOM CTA SECTION
-#     # ==========================
-
-#     cta_title = models.CharField(
-#         max_length=255,
-#         default="Transform Your Retail Business",
-#         blank=True
-#     )
-
-#     cta_description = models.TextField(
-#         default="Join retailers who are already using AI-Setu ERP to streamline operations.",
-#         blank=True
-#     )
-
-#     cta_button_text = models.CharField(
-#         max_length=100,
-#         default="Book Free Demo",
-#         blank=True
-#     )
-
-#     updated_at = models.DateTimeField(auto_now=True)
-
-
-#     def __str__(self):
-#         return "About Page Content"
+    about_heading = models.CharField(
+        max_length=255,
+        default="WE ARE ON A DRIVE TO MAKE THE RETAIL INDUSTRY MORE EFFICIENT.",
+        blank=True
+    )
     
+    about_image = models.ImageField(upload_to="about/", blank=True, null=True)
+
+    about_description_1 = models.TextField(
+        default="AI-Setu ERP is the future of retail. From empowering offline stores to managing their inventory and sales with smart technology.",
+        blank=True
+    )
+
+    about_description_2 = models.TextField(
+        default="SMEs often struggle to find a comprehensive cloud-based ERP and POS solution that can scale with their growth.",
+        blank=True
+    )
+
+    about_description_3 = models.TextField(
+        default="AI-Setu ERP empowers SMEs to use modern ERP tools without complexity and grow their business with automation and analytics.",
+        blank=True
+    )
+
+    # ==========================
+    # MISSION SECTION
+    # ==========================
+
+    mission_title = models.CharField(
+        max_length=200,
+        default="Our Mission",
+        blank=True
+    )
+
+    mission_description = models.TextField(
+        default="Retail businesses are the backbone of the Indian economy, yet many rely on outdated tools. AI-Setu ERP brings modern technology to retail businesses, enabling inventory tracking, billing, sales analytics, and smarter decisions with ease.",
+        blank=True
+    )
+
+
+    # ==========================
+    # WHY CHOOSE US SECTION
+    # ==========================
+
+    why_choose_title = models.CharField(
+        max_length=200,
+        default="Why Choose AI-Setu ERP?",
+        blank=True
+    )
+
+    why_point_1 = models.CharField(
+        max_length=200,
+        default="Smart AI-powered billing",
+        blank=True
+    )
+
+    why_point_2 = models.CharField(
+        max_length=200,
+        default="Fast and reliable billing",
+        blank=True
+    )
+
+    why_point_3 = models.CharField(
+        max_length=200,
+        default="Real-time inventory tracking",
+        blank=True
+    )
+
+    why_point_4 = models.CharField(
+        max_length=200,
+        default="Powerful sales analytics",
+        blank=True
+    )
+
+    why_point_5 = models.CharField(
+        max_length=200,
+        default="Built specifically for Indian retailers",
+        blank=True
+    )
+
+
+    # ==========================
+    # WHO DO WE SERVE SECTION
+    # ==========================
+
+    serve_title = models.CharField(
+        max_length=200,
+        default="WHO DO WE SERVE?",
+        blank=True
+    )
+
+    serve_subtitle = models.CharField(
+        max_length=255,
+        default="We serve all types of retail businesses with our ERP solutions.",
+        blank=True
+    )
+
+
+    # ==========================
+    # BOTTOM CTA SECTION
+    # ==========================
+
+    cta_title = models.CharField(
+        max_length=255,
+        default="Transform Your Retail Business",
+        blank=True
+    )
+
+    cta_description = models.TextField(
+        default="Join retailers who are already using AI-Setu ERP to streamline operations.",
+        blank=True
+    )
+
+    cta_button_text = models.CharField(
+        max_length=100,
+        default="Book Free Demo",
+        blank=True
+    )
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+    def save(self, *args, **kwargs):
+        if AboutPageContent.objects.exists() and not self.pk:
+            existing = AboutPageContent.objects.first()
+            self.pk = existing.pk
+        super(AboutPageContent, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return "About Page Content"
+
+class AboutUsServeItem(models.Model):
+    about_page = models.ForeignKey(AboutPageContent, on_delete=models.CASCADE, related_name="serve_items", null=True, blank=True)
+    title = models.CharField(max_length=200)
+    image = models.ImageField(upload_to="about_serve/", blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    order = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.title
 
 class ContactPageContent(models.Model):
 
@@ -1224,6 +1219,18 @@ class JobPosition(models.Model):
     seo_description = models.TextField(blank=True, null=True, help_text="Meta description for SEO (max 160 chars recommended)")
     seo_keywords = models.CharField(max_length=255, blank=True, null=True, help_text="Comma-separated SEO keywords")
 
+    def save(self, *args, **kwargs):
+        from django.utils.text import slugify
+        if not self.job_slug:
+            base_slug = slugify(self.title)
+            slug = base_slug
+            counter = 1
+            while JobPosition.objects.filter(job_slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.job_slug = slug
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.title
     
@@ -1235,7 +1242,7 @@ class ChildJobPosition(models.Model):
     )
 
     title = models.CharField(max_length=200)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, blank=True, null=True)
 
     location = models.CharField(max_length=200)
     experience = models.CharField(max_length=100)
@@ -1251,7 +1258,13 @@ class ChildJobPosition(models.Model):
     def save(self, *args, **kwargs):
 
         if not self.slug:
-            self.slug = slugify(self.title)
+            base_slug = slugify(self.title)
+            slug = base_slug
+            counter = 1
+            while ChildJobPosition.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
 
         super().save(*args, **kwargs)
 

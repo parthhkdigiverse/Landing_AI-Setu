@@ -932,13 +932,84 @@ class JobDetailAPIView(APIView):
     
 @api_view(['GET'])
 def about_page_api(request):
-    page = Page.objects.filter(slug="about").first()
+    from website.models import AboutPageContent, AboutUsServeItem
+    content = AboutPageContent.objects.first()
 
-    if not page:
-        return Response({"error": "Page not found"}, status=404)
+    if not content:
+        content = AboutPageContent.objects.create()
 
-    serializer = PageSerializer(page)
-    return Response(serializer.data)
+    # Build response format expected by frontend
+    data = {"sections": []}
+
+    # Helper for image URL
+    def get_img_url(img_field):
+        return request.build_absolute_uri(img_field.url) if img_field else None
+
+    # Hero
+    data["sections"].append({
+        "name": "hero",
+        "title": content.hero_title,
+        "subtitle": content.hero_description,
+        "items": []
+    })
+
+    # About
+    about_items = []
+    for i, desc in enumerate([content.about_description_1, content.about_description_2, content.about_description_3]):
+        if desc: about_items.append({"id": i, "description": desc})
+        
+    data["sections"].append({
+        "name": "about",
+        "title": content.about_heading,
+        "subtitle": "", # not used
+        "image": get_img_url(content.about_image),
+        "items": about_items
+    })
+
+    # Mission
+    data["sections"].append({
+        "name": "mission",
+        "title": content.mission_title,
+        "subtitle": content.mission_description,
+        "items": []
+    })
+
+    # Why Choose
+    why_items = []
+    for i, point in enumerate([content.why_point_1, content.why_point_2, content.why_point_3, content.why_point_4, content.why_point_5]):
+        if point: why_items.append({"id": i, "title": point})
+
+    data["sections"].append({
+        "name": "why_choose",
+        "title": content.why_choose_title,
+        "items": why_items
+    })
+
+    # Serve
+    serve_items = []
+    for s_item in AboutUsServeItem.objects.filter(is_active=True).order_by('order'):
+        serve_items.append({
+            "id": str(s_item.id),
+            "title": s_item.title,
+            "image": get_img_url(s_item.image)
+        })
+
+    data["sections"].append({
+        "name": "serve",
+        "title": content.serve_title,
+        "subtitle": content.serve_subtitle,
+        "items": serve_items
+    })
+
+    # CTA
+    data["sections"].append({
+        "name": "cta",
+        "title": content.cta_title,
+        "subtitle": content.cta_description,
+        "items": [{"id": 1, "title": content.cta_button_text}]
+    })
+
+    return Response(data)
 
 class PolicyListAPIView(APIView):
     def get(self, request):

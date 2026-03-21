@@ -22,12 +22,46 @@ const JobDetails = () => {
   const navigate = useNavigate();
 
   const [job, setJob] = useState<Job | null>(null);
+  const [livePreview, setLivePreview] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const isPreviewMode = jobId === "new-job";
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && typeof event.data === 'object' && event.data.source === 'django-admin') {
+        setLivePreview((prev: any) => ({ ...prev, ...event.data.payload }));
+        if (event.data.scrollTarget) {
+            setTimeout(() => {
+                const el = document.getElementById(event.data.scrollTarget);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
 
   useEffect(() => {
     if (!jobId) {
       setError("Invalid job link");
+      setLoading(false);
+      return;
+    }
+
+    if (isPreviewMode) {
+      // Create a dummy job to populate the UI
+      setJob({
+        title: "New Job Position",
+        slug: "new-job",
+        location: "Location",
+        experience: "Experience Level",
+        descriptions: [],
+        skills: [],
+      });
       setLoading(false);
       return;
     }
@@ -53,7 +87,7 @@ const JobDetails = () => {
     };
 
     fetchJob();
-  }, [jobId]);
+  }, [jobId, isPreviewMode]);
 
   if (loading) {
     return (
@@ -91,7 +125,7 @@ const JobDetails = () => {
       <main className="bg-[#F5F6FA] min-h-screen">
 
         {/* HERO */}
-        <section className="bg-[#1F2E4D] text-white py-16">
+        <section id="job_header" className="bg-[#1F2E4D] text-white py-16">
           <div className="container mx-auto px-6 max-w-4xl">
 
             <motion.h1
@@ -100,11 +134,11 @@ const JobDetails = () => {
               transition={{ duration: 0.5 }}
               className="text-4xl font-bold mb-4"
             >
-              {job.title}
+              {livePreview?.title || job.title}
             </motion.h1>
 
             <p className="opacity-80 text-lg">
-              {job.experience} • {job.location}
+              {livePreview?.experience || job.experience} • {livePreview?.location || job.location}
             </p>
 
           </div>
@@ -121,7 +155,7 @@ const JobDetails = () => {
             >
 
               {/* DESCRIPTION */}
-              <div>
+              <div id="job_description">
                 <h2 className="text-2xl font-semibold mb-6 text-[#1F2E4D]">
                   Job Description
                 </h2>
@@ -143,7 +177,7 @@ const JobDetails = () => {
               </div>
 
               {/* SKILLS */}
-              <div>
+              <div id="job_skills">
                 <h2 className="text-2xl font-semibold mb-6 text-[#1F2E4D]">
                   Required Skills
                 </h2>

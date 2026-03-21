@@ -46,11 +46,18 @@ const ContactUsPage = () => {
   // 3. LIVE PREVIEW LISTENER (For Django Admin)
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data && typeof event.data === "object") {
+      if (event.data && typeof event.data === "object" && event.data.source === "django-admin") {
         setContent((prev) => ({
           ...prev,
-          ...event.data,
+          ...event.data.payload,
         } as ContactPageContent));
+        
+        if (event.data.scrollTarget) {
+            setTimeout(() => {
+                const el = document.getElementById(event.data.scrollTarget);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
       }
       if (event.data === "reload_full_data") {
         fetchContactPageContent().then((data) => data && setContent(data));
@@ -133,7 +140,7 @@ const ContactUsPage = () => {
       <Header />
 
       {/* HERO SECTION */}
-      <section className="relative min-h-[60vh] bg-gradient-to-br from-[#1F2E4D] via-[#2D3748] to-[#1A202C] flex items-center">
+      <section id="hero" className="relative min-h-[60vh] bg-gradient-to-br from-[#1F2E4D] via-[#2D3748] to-[#1A202C] flex items-center">
         <div className="relative z-10 container mx-auto px-6 py-20 text-center">
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-6xl font-bold text-white mb-6">
             {content.hero_title}
@@ -145,7 +152,7 @@ const ContactUsPage = () => {
       </section>
 
       {/* CONTACT INFO CARDS */}
-      <section className="py-16 bg-[#F5F6FA]">
+      <section id="contact_cards" className="py-16 bg-[#F5F6FA]">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 -mt-24 relative z-20">
             {contactInfo.map((info, idx) => (
@@ -168,7 +175,7 @@ const ContactUsPage = () => {
       </section>
 
       {/* MAIN CONTENT SECTION */}
-      <section className="py-20 bg-white">
+      <section id="form" className="py-20 bg-white">
         <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-16 max-w-7xl">
           
           {/* FORM SIDE */}
@@ -206,7 +213,7 @@ const ContactUsPage = () => {
 
           {/* FEATURES SIDE */}
           <div className="space-y-12">
-            <div>
+            <div id="why_choose">
               <h2 className="text-4xl font-bold text-[#1F2E4D] mb-6">{content.why_title}</h2>
               <p className="text-lg text-gray-600 leading-relaxed">{content.why_description}</p>
             </div>
@@ -226,7 +233,7 @@ const ContactUsPage = () => {
             </div>
 
             {/* CTA BLOCK */}
-            <div className="bg-[#F4B400]/10 rounded-2xl p-8 border border-[#F4B400]/20">
+            <div id="cta" className="bg-[#F4B400]/10 rounded-2xl p-8 border border-[#F4B400]/20">
               <h3 className="text-2xl font-bold text-[#1F2E4D] mb-4">{content.cta_title}</h3>
               <p className="text-gray-600 mb-6">{content.cta_description}</p>
               <div className="flex flex-wrap gap-4 text-xs font-bold uppercase tracking-wider text-gray-500">

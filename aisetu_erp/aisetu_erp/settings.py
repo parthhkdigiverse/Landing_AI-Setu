@@ -51,6 +51,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'forms_data',
     'import_export',
+    'custom_admin',
+    'crispy_forms',
+    'crispy_bootstrap5',
 ]
 
 MIDDLEWARE = [
@@ -193,3 +196,6 @@ PHONEPE_BASE_URL = os.getenv("PHONEPE_BASE_URL", "https://api-preprod.phonepe.co
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 IMPORT_EXPORT_USE_TRANSACTIONS = True
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

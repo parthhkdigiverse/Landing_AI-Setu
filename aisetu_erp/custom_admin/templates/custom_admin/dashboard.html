@@ -1,0 +1,40 @@
+{% extends 'custom_admin/base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2 fw-bold text-dark">Dashboard Overview</h1>
+</div>
+<div class="row g-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary bg-gradient shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h6 class="card-title text-uppercase opacity-75">Demo Requests</h6>
+                <h1 class="display-5 fw-bold mb-0">{{ demo_count }}</h1>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success bg-gradient shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h6 class="card-title text-uppercase opacity-75">Pricing Signups</h6>
+                <h1 class="display-5 fw-bold mb-0">{{ signup_count }}</h1>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info bg-gradient shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h6 class="card-title text-uppercase opacity-75">Total Payments</h6>
+                <h1 class="display-5 fw-bold mb-0">{{ payment_count }}</h1>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning bg-gradient shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h6 class="card-title text-uppercase opacity-75">Contact Messages</h6>
+                <h1 class="display-5 fw-bold mb-0 text-dark">{{ contact_count }}</h1>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

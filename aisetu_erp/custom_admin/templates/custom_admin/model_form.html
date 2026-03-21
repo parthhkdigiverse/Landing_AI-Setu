@@ -1,0 +1,245 @@
+{% extends 'custom_admin/base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="pt-3 pb-2 mb-4 border-bottom">
+    <h1 class="h2 fw-bold">{% if object %}Edit{% else %}Create{% endif %} {{ model_name }}</h1>
+</div>
+{% if preview_url %}
+<style>
+.admin-preview-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+.admin-edit-section {
+    min-width: 0;
+}
+.preview-section {
+    border-left: 1px solid #ddd;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+}
+.preview-header {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+.preview-section iframe {
+    width: 100%;
+    flex: 1;
+    min-height: 85vh;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+}
+</style>
+<div class="admin-preview-layout">
+    <div class="admin-edit-section">
+{% endif %}
+
+<div class="card shadow-sm border-0 w-100 mx-auto" style="max-width: 900px;">
+    <div class="card-body p-4 p-md-5">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form|crispy }}
+            
+            {% if is_career_page %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Cultures</h4>
+                    {{ culture_formset.management_form }}
+                    <div id="culture-formset-container" class="formset-container" data-prefix="cultures">
+                        {% for form in culture_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="culture-formset-container">Add Culture</button>
+                </div>
+            {% endif %}
+
+            {% if is_career_page %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Perks</h4>
+                    {{ perk_formset.management_form }}
+                    <div id="perk-formset-container" class="formset-container" data-prefix="perks">
+                        {% for form in perk_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="perk-formset-container">Add Perk</button>
+                </div>
+            {% endif %}
+
+            {% if is_career_page %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Job Positions</h4>
+                    {{ job_formset.management_form }}
+                    <div id="job-formset-container" class="formset-container" data-prefix="jobs">
+                        {% for form in job_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="job-formset-container">Add Job Position</button>
+                </div>
+            {% endif %}
+
+            {% if is_child_job_position %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Job Descriptions</h4>
+                    {{ description_formset.management_form }}
+                    <div id="description-formset-container" class="formset-container" data-prefix="descriptions">
+                        {% for form in description_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="description-formset-container">Add Description</button>
+                </div>
+            {% endif %}
+
+            {% if is_child_job_position %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Job Skills</h4>
+                    {{ skill_formset.management_form }}
+                    <div id="skill-formset-container" class="formset-container" data-prefix="skills">
+                        {% for form in skill_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="skill-formset-container">Add Skill</button>
+                </div>
+            {% endif %}
+
+            {% if is_about_page %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Who We Serve</h4>
+                    {{ serve_formset.management_form }}
+                    <div id="serve-formset-container" class="formset-container" data-prefix="serve_items">
+                        {% for form in serve_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="serve-formset-container">Add Serve Item</button>
+                </div>
+            {% endif %}
+
+            {% if is_policy %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Policy Sections (Points)</h4>
+                    {{ section_formset.management_form }}
+                    <div id="section-formset-container" class="formset-container" data-prefix="sections">
+                        {% for form in section_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="section-formset-container">Add Policy Section</button>
+                </div>
+            {% endif %}
+
+            <div class="mt-5 pt-4 border-top text-end">
+                <a href="{% url 'custom_admin:model_list' app_label model_slug %}" class="btn btn-light border px-4 me-2">Cancel</a>
+                <button type="submit" class="btn btn-primary px-4 shadow-sm">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if preview_url %}
+    </div> <!-- end admin-edit-section -->
+    <div class="preview-section">
+        <div class="preview-header">Live Website Preview</div>
+        <iframe id="livePreview" src="{{ preview_url }}"></iframe>
+    </div>
+</div> <!-- end admin-preview-layout -->
+
+<script>
+function sendLivePreview(scrollTarget = null) {
+    const data = {};
+    document.querySelectorAll("input, textarea").forEach(field => {
+        if(field.id) {
+            const key = field.id.replace("id_", "");
+            data[key] = field.value;
+        }
+    });
+
+    const iframe = document.getElementById("livePreview");
+    if(iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({
+            source: 'django-admin',
+            payload: data,
+            scrollTarget: scrollTarget
+        }, "*");
+    }
+}
+
+document.addEventListener("input", function(e) {
+    clearTimeout(window.livePreviewTimer);
+    window.livePreviewTimer = setTimeout(sendLivePreview, 300);
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    const iframe = document.getElementById("livePreview");
+    if(iframe) {
+        iframe.onload = function() {
+            {% if model_slug == 'footer' %}
+            setTimeout(() => {
+                iframe.contentWindow.postMessage({
+                    source: 'django-admin-init',
+                    target: 'footer'
+                }, "*");
+            }, 500);
+            {% endif %}
+        };
+    }
+});
+</script>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.add-form-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const containerId = this.getAttribute('data-target');
+            const container = document.getElementById(containerId);
+            const prefix = container.getAttribute('data-prefix');
+            const totalFormsInput = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+            const formCount = parseInt(totalFormsInput.value);
+            
+            const forms = container.querySelectorAll('.inline-form');
+            if (forms.length === 0) return;
+            const lastForm = forms[forms.length - 1];
+            const newForm = lastForm.cloneNode(true);
+            
+            const formRegex = new RegExp(`${prefix}-(\\d+)-`, 'g');
+            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `${prefix}-${formCount}-`);
+            
+            const inputs = newForm.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    input.checked = false;
+                } else if (input.type !== 'hidden' || input.name.endsWith('-id')) {
+                    input.value = '';
+                }
+            });
+            
+            container.appendChild(newForm);
+            totalFormsInput.value = formCount + 1;
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -13,6 +13,7 @@ urlpatterns = [
     path("payment-callback/", payment_callback),
     path("payment-success/", views.payment_success, name="payment_success"),
     path("phonepe/initiate/", initiate_payment, name="initiate_payment"),
+    path("api/payment/status/<str:tid>/", views.check_payment_status_api, name="check_payment_status_api"),
     # path("admin/login/", views.admin_login),
     # path("admin/demos/", views.admin_demo_list),
     # path("admin/delete-demo/<int:id>/", views.delete_demo),

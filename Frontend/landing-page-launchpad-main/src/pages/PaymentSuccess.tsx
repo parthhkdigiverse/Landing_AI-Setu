@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle2, Home, ArrowRight, ShieldCheck, Download, XCircle, Clock, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,8 +10,40 @@ const PaymentSuccess = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const rawStatus = searchParams.get("status");
-  const status = rawStatus?.toUpperCase() || "UNKNOWN";
+  const [status, setStatus] = useState(rawStatus?.toUpperCase() || "UNKNOWN");
   const tid = searchParams.get("tid") || "N/A";
+
+  const [isPolling, setIsPolling] = useState(status === "PENDING" || status === "UNKNOWN");
+
+  useEffect(() => {
+    if (!isPolling || tid === "N/A") return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/payment/status/${tid}/`);
+        const data = await response.json();
+        
+        if (data.status === "SUCCESS" || data.status === "FAILURE") {
+          setStatus(data.status);
+          setIsPolling(false);
+          clearInterval(pollInterval);
+        }
+      } catch (error) {
+        console.error("Error polling payment status:", error);
+      }
+    }, 3000); // Poll every 3 seconds
+
+    // Timeout after 1 minute
+    const timeout = setTimeout(() => {
+      setIsPolling(false);
+      clearInterval(pollInterval);
+    }, 60000);
+
+    return () => {
+      clearInterval(pollInterval);
+      clearTimeout(timeout);
+    };
+  }, [isPolling, tid]);
 
   const renderContent = () => {
     // If we have no status at all in the URL, show a warning or loading

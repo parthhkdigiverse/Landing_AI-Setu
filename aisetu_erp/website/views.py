@@ -439,6 +439,47 @@ def initiate_payment(request):
         }, status=500)
 
 # -------------------------------
+# PhonePe Status Check Utility (Synchronous)
+# -------------------------------
+def check_phonepe_status_sync(merchant_transaction_id):
+    """
+    Directly query PhonePe for the status of a transaction.
+    """
+    try:
+        import hashlib
+        import requests
+        from django.conf import settings
+
+        merchant_id = settings.PHONEPE_MERCHANT_ID
+        salt_key = settings.PHONEPE_SALT_KEY
+        salt_index = settings.PHONEPE_SALT_INDEX
+        base_url = settings.PHONEPE_BASE_URL
+
+        endpoint = f"/pg/v1/status/{merchant_id}/{merchant_transaction_id}"
+        string_to_hash = endpoint + salt_key
+        
+        sha256 = hashlib.sha256(string_to_hash.encode()).hexdigest()
+        checksum = sha256 + "###" + str(salt_index)
+
+        headers = {
+            "Content-Type": "application/json",
+            "X-VERIFY": checksum,
+            "X-MERCHANT-ID": merchant_id
+        }
+
+        url = base_url + endpoint
+        print(f"Checking PhonePe status at: {url}")
+        
+        response = requests.get(url, headers=headers, timeout=10)
+        data = response.json()
+        print(f"PhonePe Status Response: {json.dumps(data, indent=2)}")
+        
+        return data
+    except Exception as e:
+        print(f"Error checking PhonePe status sync: {e}")
+        return None
+
+# -------------------------------
 # PhonePe Callback
 # -------------------------------
 @csrf_exempt
@@ -615,13 +656,62 @@ def payment_success(request):
 
     # Final check: if we are redirecting to index.html anyway, 
     # make sure we have the most accurate status
-    if frontend_status == "UNKNOWN" and transaction_id == "UNKNOWN":
-         # Check if there's ANY PENDING payment for this session/IP (risky but better than nothing)
-         pass
+    if (frontend_status == "UNKNOWN" or frontend_status == "PENDING") and transaction_id != "UNKNOWN":
+        print(f"Status still {frontend_status}, attempting synchronous Status API check...")
+        status_data = check_phonepe_status_sync(transaction_id)
+        if status_data and status_data.get("success"):
+            status_code = status_data.get("code")
+            if status_code == "PAYMENT_SUCCESS":
+                frontend_status = "SUCCESS"
+                # Update DB
+                try:
+                    payment = Payment.objects.get(transaction_id=UUID(transaction_id))
+                    if payment.status != "SUCCESS":
+                        payment.status = "SUCCESS"
+                        payment.response_data = status_data
+                        payment.save()
+                        print(f"DB updated to SUCCESS via sync check for {transaction_id}")
+                except:
+                    pass
+            elif status_code in ["PAYMENT_ERROR", "PAYMENT_DECLINED", "TIMED_OUT"]:
+                frontend_status = "FAILURE"
+            elif status_code == "PAYMENT_PENDING":
+                frontend_status = "PENDING"
 
     print(f"Redirecting to frontend with status={frontend_status}, tid={transaction_id}")
     # Redirect to same URL but with our simplified parameters
     return redirect(f"/payment-success/?status={frontend_status}&tid={transaction_id}")
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def check_payment_status_api(request, tid):
+    """
+    API for frontend to poll payment status.
+    """
+    try:
+        from uuid import UUID
+        payment = Payment.objects.get(transaction_id=UUID(tid))
+        
+        # If still pending in DB, try a sync check once
+        if payment.status == "PENDING":
+             status_data = check_phonepe_status_sync(tid)
+             if status_data and status_data.get("success"):
+                 status_code = status_data.get("code")
+                 if status_code == "PAYMENT_SUCCESS":
+                     payment.status = "SUCCESS"
+                     payment.response_data = status_data
+                     payment.save()
+                 elif status_code == "PAYMENT_FAILED": # Simplified
+                     payment.status = "FAILURE"
+                     payment.save()
+        
+        return Response({
+            "status": payment.status,
+            "tid": str(payment.transaction_id),
+            "amount": payment.amount
+        })
+    except (Payment.DoesNotExist, ValueError):
+        return Response({"error": "Payment not found"}, status=404)
     
 # @api_view(["GET"])
 # def about_page_content(request):

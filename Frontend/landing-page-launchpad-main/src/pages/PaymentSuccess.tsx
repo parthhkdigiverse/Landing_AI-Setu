@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
@@ -107,6 +108,7 @@ const PaymentSuccess = () => {
 
   return (
     <>
+      <SEO title="Payment Status" description="Check the status of your payment for AI-Setu ERP subscription." />
       <Header />
 
       <main className="min-h-[80vh] flex items-center justify-center bg-gradient-to-b from-white to-[#F6F8FB] px-6 py-20">

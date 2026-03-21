@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 
 const DemoSuccess = () => {
   const navigate = useNavigate();
 
   return (
     <>
+      <SEO title="Demo Request Submitted" description="Your demo request for AI-Setu ERP has been submitted successfully. We'll be in touch soon!" />
       <Header />
 
       <main className="min-h-[80vh] flex items-center justify-center bg-gradient-to-b from-white to-[#F6F8FB] px-6 py-20">

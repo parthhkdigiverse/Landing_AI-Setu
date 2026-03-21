@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import SEO from "@/components/SEO";
 
 import { API_BASE_URL } from "@/services/api";
 
@@ -69,6 +70,7 @@ const Login = () => {
 
   return (
     <>
+      <SEO title="Admin Login" description="Log in to your AI-Setu ERP admin dashboard to manage your retail business smarter." />
       <Header />
 
       <main className="min-h-[80vh] flex items-center justify-center bg-background">

@@ -50,8 +50,14 @@ const WhoIsThisFor = () => {
   // Live preview listener
   useEffect(() => {
     const handler = (event: any) => {
-      if (event.data) {
-        setLivePreview((prev: any) => ({ ...prev, ...event.data }));
+      if (event.data && event.data.source === 'django-admin') {
+        if (event.data.model === 'LandingPageContent') {
+          setContent((prev: any) => ({ ...prev, ...event.data.payload }));
+        } else if (event.data.model === 'StoreType') {
+          const item = event.data.payload;
+          const pk = event.data.pk;
+          setTypes(prev => prev.map(t => (t.id === parseInt(pk) || t.id === pk) ? { ...t, ...item } : t));
+        }
       }
     };
     window.addEventListener("message", handler);
@@ -64,17 +70,17 @@ const WhoIsThisFor = () => {
         {/* Section Header */}
         <div className="text-center mb-12">
           <span className="text-accent font-semibold text-sm uppercase tracking-wider">
-            {livePreview?.who_main_title || content?.who_main_title || "Perfect For"}
+            {content?.who_main_title || "Perfect For"}
           </span>
 
           <h2 className="text-3xl lg:text-4xl font-bold mt-2 text-foreground">
-            {livePreview?.who_title || content?.who_title || "Who Is This For?"}
+            {content?.who_title || "Who Is This For?"}
           </h2>
         </div>
 
         {/* Store Type Cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-          {types.map((t, i) => {
+          {(content?.store_types || types).map((t, i) => {
             const Icon = iconMap[t.icon];
             return (
               <motion.div

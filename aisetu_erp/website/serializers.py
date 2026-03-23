@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, Culture, DemoVideo, JobDescription, JobPosition, JobSkill, LoginLink, Page, Perk, Policy, PolicySection, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost, Section, SectionItem
+from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, Culture, DemoVideo, JobDescription, JobPosition, JobSkill, LoginLink, Page, Perk, Policy, PolicySection, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost, Section, SectionItem, HowItWorksStep, Problem, Feature, USPFeature, StoreType, ReferralPerk, Testimonial
 
 class ObjectIdField(serializers.Field):
     def to_representation(self, value):
@@ -46,12 +46,47 @@ class PricingSignupSerializer(serializers.ModelSerializer):
         model = PricingSignup
         fields = '__all__'
 
-class LandingPageContentSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
-    
+class HowItWorksStepSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()
     class Meta:
-        model = LandingPageContent
-        fields = '__all__'
+        model = HowItWorksStep
+        fields = ['id', 'title', 'description', 'icon', 'step_number', 'is_active']
+
+class ProblemSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()
+    class Meta:
+        model = Problem
+        fields = ['id', 'title', 'description', 'icon', 'order', 'is_active']
+
+class FeatureSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()
+    class Meta:
+        model = Feature
+        fields = ['id', 'title', 'description', 'icon', 'order', 'is_active']
+
+class USPFeatureSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()
+    class Meta:
+        model = USPFeature
+        fields = ['id', 'title', 'description', 'icon', 'order', 'is_active']
+
+class StoreTypeSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()
+    class Meta:
+        model = StoreType
+        fields = ['id', 'title', 'icon', 'order', 'is_active']
+
+class ReferralPerkSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()
+    class Meta:
+        model = ReferralPerk
+        fields = ['id', 'value', 'text', 'icon', 'order', 'is_active']
+
+class TestimonialSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()
+    class Meta:
+        model = Testimonial
+        fields = ['id', 'name', 'role', 'review', 'image', 'rating', 'order', 'is_active']
 
 class ContactSubmissionSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
@@ -96,18 +131,32 @@ class ContactPageContentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ComparisonFeatureSerializer(serializers.ModelSerializer):
-    id = serializers.SerializerMethodField()  # override id to string
+    id = ObjectIdField()
 
     class Meta:
         model = ComparisonFeature
-        fields = ['id', 'feature_name', 'has_ai_setu', 'has_traditional']
+        fields = ['id', 'feature_name', 'has_ai_setu', 'has_traditional', 'order', 'is_active']
 
-    def get_id(self, obj):
-        return str(obj.id)
-    
 class FAQSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()
     class Meta:
         model = FAQ
+        fields = ['id', 'question', 'answer', 'order', 'is_active']
+
+class LandingPageContentSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    howitworks_steps = HowItWorksStepSerializer(many=True, read_only=True)
+    problems = ProblemSerializer(many=True, read_only=True)
+    features = FeatureSerializer(many=True, read_only=True)
+    usp_features = USPFeatureSerializer(many=True, read_only=True)
+    store_types = StoreTypeSerializer(many=True, read_only=True)
+    referral_perks = ReferralPerkSerializer(many=True, read_only=True)
+    testimonials = TestimonialSerializer(many=True, read_only=True)
+    comparison_features = ComparisonFeatureSerializer(many=True, read_only=True)
+    faqs = FAQSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = LandingPageContent
         fields = '__all__'
 
 class LoginLinkSerializer(serializers.ModelSerializer):

@@ -1059,7 +1059,6 @@ class ReferralPerk(models.Model):
 
     order = models.PositiveIntegerField(default=0)
 
-    landing_page = models.ForeignKey(LandingPageContent, related_name='referral_perks', on_delete=models.CASCADE, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):

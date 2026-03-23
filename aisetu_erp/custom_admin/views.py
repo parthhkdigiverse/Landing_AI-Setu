@@ -457,6 +457,18 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
 
         elif 'landingpagecontent' in model_name:
             context['is_landing_page'] = True
+            
+            # Ensure any orphan items are linked to this singleton landing page
+            HowItWorksStep.objects.filter(landing_page__isnull=True).update(landing_page=self.object)
+            Problem.objects.filter(landing_page__isnull=True).update(landing_page=self.object)
+            Feature.objects.filter(landing_page__isnull=True).update(landing_page=self.object)
+            USPFeature.objects.filter(landing_page__isnull=True).update(landing_page=self.object)
+            StoreType.objects.filter(landing_page__isnull=True).update(landing_page=self.object)
+            ReferralPerk.objects.filter(landing_page__isnull=True).update(landing_page=self.object)
+            Testimonial.objects.filter(landing_page__isnull=True).update(landing_page=self.object)
+            ComparisonFeature.objects.filter(landing_page__isnull=True).update(landing_page=self.object)
+            FAQ.objects.filter(landing_page__isnull=True).update(landing_page=self.object)
+            
             if self.request.method == 'POST':
                 context['problem_formset'] = ProblemFormSet(self.request.POST, self.request.FILES, instance=self.object)
                 context['feature_formset'] = FeatureFormSet(self.request.POST, self.request.FILES, instance=self.object)

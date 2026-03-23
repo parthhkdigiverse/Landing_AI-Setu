@@ -754,140 +754,120 @@ def contactus_page_content(request):
 
 @api_view(["GET"])
 def get_problems(request):
-
-    problems = Problem.objects.filter(is_active=True)
-
+    problems = Problem.objects.filter(is_active=True).order_by('order')
     data = []
-
     for p in problems:
         data.append({
+            "id": str(p.id),
             "title": p.title,
             "description": p.description,
             "icon": p.icon
         })
-
     return Response(data)
 
 
 @api_view(["GET"])
 def get_features(request):
-
-    features = Feature.objects.filter(is_active=True)
-
+    features = Feature.objects.filter(is_active=True).order_by('order')
     data = []
-
     for f in features:
         data.append({
+            "id": str(f.id),
             "title": f.title,
             "description": f.description,
             "icon": f.icon
         })
-
     return Response(data)
 
 @api_view(["GET"])
 def get_usp_features(request):
-
-    features = USPFeature.objects.filter(is_active=True)
-
+    features = USPFeature.objects.filter(is_active=True).order_by('order')
     data = []
-
     for f in features:
         data.append({
+            "id": str(f.id),
             "title": f.title,
             "description": f.description,
             "icon": f.icon
         })
-
     return Response(data)
 
 @api_view(["GET"])
 def get_how_it_works_steps(request):
-
-    steps = HowItWorksStep.objects.filter(is_active=True)
-
-    data = []
-
-    for s in steps:
-
-        data.append({
-            "title": s.title,
-            "description": s.description,
-            "icon": s.icon,
-            "step_number": s.step_number
-        })
-
-    return Response(data)
+    try:
+        content = LandingPageContent.objects.first()
+        if not content:
+            return Response([])
+        
+        steps = HowItWorksStep.objects.filter(is_active=True).order_by('step_number')
+        data = []
+        for s in steps:
+            data.append({
+                "id": str(s.id),
+                "title": s.title,
+                "description": s.description,
+                "icon": s.icon,
+                "step_number": s.step_number
+            })
+        return Response(data)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
 
 @api_view(["GET"])
 def get_store_types(request):
-
-    stores = StoreType.objects.filter(is_active=True)
-
+    stores = StoreType.objects.filter(is_active=True).order_by('order')
     data = []
-
     for s in stores:
         data.append({
+            "id": str(s.id),
             "title": s.title,
             "icon": s.icon
         })
-
     return Response(data)
 
 @api_view(["GET"])
 def get_referral_perks(request):
-
-    perks = ReferralPerk.objects.filter(is_active=True)
-
+    perks = ReferralPerk.objects.filter(is_active=True).order_by('order')
     data = []
-
     for p in perks:
         data.append({
+            "id": str(p.id),
             "value": p.value,
             "text": p.text,
             "icon": p.icon
         })
-
     return Response(data)
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_home_testimonials(request):
-
-    testimonials = Testimonial.objects.filter(is_active=True)[:3]
-
+    testimonials = Testimonial.objects.filter(is_active=True).order_by('order')[:3]
     data = []
-
     for t in testimonials:
-
         data.append({
+            "id": str(t.id),
             "name": t.name,
             "role": t.role,
             "text": t.review,
             "rating": t.rating,
             "image": request.build_absolute_uri(t.image.url) if t.image else None
         })
-
     return Response(data)
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def get_all_testimonials(request):
-
-    testimonials = Testimonial.objects.filter(is_active=True)
-
+    testimonials = Testimonial.objects.filter(is_active=True).order_by('order')
     data = []
-
     for t in testimonials:
-
         data.append({
+            "id": str(t.id),
             "name": t.name,
             "role": t.role,
             "text": t.review,
             "rating": t.rating,
             "image": request.build_absolute_uri(t.image.url) if t.image else None
         })
-
     return Response(data)
 
 @api_view(["GET"])

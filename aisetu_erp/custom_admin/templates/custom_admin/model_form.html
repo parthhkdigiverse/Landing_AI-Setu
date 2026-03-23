@@ -304,27 +304,62 @@ const fileUrlCache = {};
 
 function sendLivePreview(scrollTarget = null) {
     const data = {};
-    document.querySelectorAll("input, textarea").forEach(field => {
-        if(field.id) {
-            const key = field.id.replace("id_", "");
-            
-            if (field.type === 'file' && field.files && field.files.length > 0) {
-                const file = field.files[0];
-                const cacheKey = file.name + file.size;
-                if (!fileUrlCache[cacheKey]) {
-                    fileUrlCache[cacheKey] = URL.createObjectURL(file);
+    const formsets = {};
+
+    // First pass: collect all fields and identify formsets
+    document.querySelectorAll("input, textarea, select").forEach(field => {
+        if(!field.id) return;
+        const id = field.id.replace("id_", "");
+        
+        // Handle formset fields (e.g., problems-0-title)
+        if (id.includes("-")) {
+            const parts = id.split("-");
+            if (parts.length >= 3) {
+                const prefix = parts[0];
+                const index = parts[1];
+                const fieldName = parts.slice(2).join("-");
+
+                if (!formsets[prefix]) formsets[prefix] = {};
+                if (!formsets[prefix][index]) formsets[prefix][index] = {};
+                
+                let value = field.value;
+                if (field.type === 'file' && field.files && field.files.length > 0) {
+                    const file = field.files[0];
+                    const cacheKey = file.name + file.size;
+                    if (!fileUrlCache[cacheKey]) fileUrlCache[cacheKey] = URL.createObjectURL(file);
+                    value = fileUrlCache[cacheKey];
+                } else if (field.type === 'checkbox') {
+                    value = field.checked;
                 }
-                data[key] = fileUrlCache[cacheKey];
-            } else if (field.type !== 'file') {
-                data[key] = field.value;
+                
+                formsets[prefix][index][fieldName] = value;
+                return;
             }
         }
+
+        // Handle regular fields
+        if (field.type === 'file' && field.files && field.files.length > 0) {
+            const file = field.files[0];
+            const cacheKey = file.name + file.size;
+            if (!fileUrlCache[cacheKey]) fileUrlCache[cacheKey] = URL.createObjectURL(file);
+            data[id] = fileUrlCache[cacheKey];
+        } else if (field.type === 'checkbox') {
+            data[id] = field.checked;
+        } else {
+            data[id] = field.value;
+        }
     });
+
+    // Second pass: convert formset objects to arrays
+    for (const prefix in formsets) {
+        data[prefix] = Object.values(formsets[prefix]);
+    }
 
     const iframe = document.getElementById("livePreview");
     if(iframe && iframe.contentWindow) {
         iframe.contentWindow.postMessage({
             source: 'django-admin',
+            model: '{{ model_name|title|cut:" " }}',
             payload: data,
             scrollTarget: scrollTarget
         }, "*");

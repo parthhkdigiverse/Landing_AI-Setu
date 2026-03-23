@@ -103,7 +103,7 @@ const FAQSection = () => {
         {/* FAQ Accordion */}
         <Accordion type="single" collapsible className="space-y-3">
 
-          {faqs.map((faq, i) => (
+          {(content?.faqs || faqs).map((faq, i) => (
 
             <AccordionItem
               key={faq.id || i}

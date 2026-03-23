@@ -107,7 +107,7 @@ const ProblemSection = () => {
         {/* Problem Cards */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
 
-          {problems.map((p, i) => {
+          {(content?.problems || problems).map((p, i) => {
 
             const Icon = iconMap[p.icon];
 

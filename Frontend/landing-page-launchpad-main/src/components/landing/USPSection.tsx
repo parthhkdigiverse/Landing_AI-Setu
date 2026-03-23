@@ -95,7 +95,7 @@ const USPSection = () => {
 
             {/* Features */}
             <div className="space-y-4">
-              {features.map((f, i) => {
+              {(content?.usp_features || features).map((f, i) => {
                 const Icon = iconMap[f.icon];
                 return (
                   <motion.div

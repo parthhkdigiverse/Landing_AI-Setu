@@ -160,7 +160,7 @@ const ReferralSection = () => {
 
         {/* Perks */}
         <div className="grid md:grid-cols-4 gap-8 max-w-4xl mx-auto mb-10">
-          {(livePreview?.referral_perks || perks).map((p: any, i: number) => {
+          {(content?.referral_perks || perks).map((p: any, i: number) => {
             const Icon = iconMap[p.icon];
             return (
               <motion.div

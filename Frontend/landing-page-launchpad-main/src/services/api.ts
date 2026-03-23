@@ -74,6 +74,15 @@ export interface LandingPageContent {
     cta_small_text: string;
     feature_title: string;
     feature_title2: string;
+    howitworks_steps?: any[];
+    problems?: any[];
+    features?: any[];
+    usp_features?: any[];
+    store_types?: any[];
+    referral_perks?: any[];
+    testimonials?: any[];
+    comparison_features?: any[];
+    faqs?: any[];
     seo_title?: string;
     seo_description?: string;
     seo_keywords?: string;

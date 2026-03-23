@@ -42,8 +42,8 @@ const TestimonialsSection = () => {
   }, []);
 
   // 3. Duplicate items to create the "Infinite" loop effect
-  // We double the array so that as the first set exits, the second set enters seamlessly
-  const infiniteTestimonials = [...testimonials, ...testimonials, ...testimonials];
+  const currentTestimonials = content?.testimonials || testimonials;
+  const infiniteTestimonials = [...currentTestimonials, ...currentTestimonials, ...currentTestimonials];
 
   return (
     <section className="py-16 lg:py-24 bg-background overflow-hidden">
@@ -51,10 +51,10 @@ const TestimonialsSection = () => {
         {/* Header Section */}
         <div className="text-center mb-16">
           <span className="text-[#F4B400] font-bold text-sm uppercase tracking-widest">
-            {livePreview?.testimonial_label || content?.testimonial_label || "TESTIMONIALS"}
+            {content?.testimonial_label || "TESTIMONIALS"}
           </span>
           <h2 className="text-3xl lg:text-5xl font-bold mt-3 text-[#1F2E4D]">
-            {livePreview?.testimonial_title || content?.testimonial_title || "What Our Customers Say"}
+            {content?.testimonial_title || "What Our Customers Say"}
           </h2>
         </div>
 

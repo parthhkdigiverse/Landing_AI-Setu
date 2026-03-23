@@ -70,7 +70,7 @@ const HowItWorks = () => {
 
         {/* Steps */}
         <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          {steps.map((s, i) => {
+          {(content?.howitworks_steps || steps).map((s, i) => {
             const Icon = iconMap[s.icon];
             return (
               <motion.div

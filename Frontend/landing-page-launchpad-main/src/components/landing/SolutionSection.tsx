@@ -130,7 +130,7 @@ const SolutionSection = () => {
             viewport={{ once: true, amount: 0.1 }}
             className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
           >
-            {solutions.map((s, i) => {
+            {(content?.features || solutions).map((s, i) => {
               const Icon = iconMap[s.icon];
               return (
                 <motion.div

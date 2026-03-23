@@ -90,9 +90,9 @@ const ComparisonSection = () => {
           </div>
 
           {/* Rows */}
-          {rows.map((row, i) => (
+          {(content?.comparison_features || rows).map((row, i) => (
             <motion.div
-              key={row.id}
+              key={row.id || i}
               custom={i}
               variants={rowVariants}
               initial="hidden"

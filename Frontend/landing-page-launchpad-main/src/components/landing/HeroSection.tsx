@@ -78,8 +78,7 @@ const HeroSection = () => {
 
   return (
     <>
-      <section className="bg-hero text-primary-foreground relative overflow-hidden min-h-[90vh] flex items-center">
-
+      <section className="bg-hero text-primary-foreground relative overflow-hidden pt-20 lg:pt-28 pb-14">
         {/* Background blobs */}
         <div
           className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full opacity-10 blur-3xl pointer-events-none"
@@ -99,8 +98,7 @@ const HeroSection = () => {
           }}
         />
 
-        <div className="container relative z-10 py-16 lg:py-24 grid lg:grid-cols-2 gap-16 items-center">
-
+        <div className="container relative z-10 grid lg:grid-cols-2 gap-16 items-center">          
           {/* LEFT COLUMN */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -215,7 +213,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            className="relative hidden lg:flex items-center justify-center pb-12 pr-4"
+            className="relative hidden lg:flex items-center justify-center pr-4"
           >
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div
@@ -265,7 +263,7 @@ const HeroSection = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 1 }}
-                className="absolute -bottom-4 -right-4 glass-card rounded-xl px-3 py-2 shadow-xl
+                className="absolute bottom-4 right-4 glass-card rounded-xl px-3 py-2 shadow-xl
                   border border-white/15 flex items-center gap-2"
               >
                 <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
@@ -278,7 +276,7 @@ const HeroSection = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.9 }}
-                className="absolute -bottom-8 -left-8 w-40 rounded-xl overflow-hidden shadow-2xl
+                className="absolute bottom-4 left-4 w-40 rounded-xl overflow-hidden shadow-2xl
                   border-2 border-white/15 ring-2 ring-yellow-400/20"
               >
                 <img
@@ -291,7 +289,6 @@ const HeroSection = () => {
           </motion.div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background/20 to-transparent pointer-events-none" />
       </section>
 
       {/* DEMO FORM MODAL */}

@@ -76,9 +76,11 @@ const HeroSection = () => {
     ? content.hero_highlights.split(",").map((h) => h.trim())
     : defaultHighlights;
 
+  const isPreview = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('is_preview') === '1' : false;
+
   return (
     <>
-      <section className="bg-hero text-primary-foreground relative overflow-hidden min-h-[90vh] flex items-center">
+      <section className={`bg-hero text-primary-foreground relative overflow-hidden flex items-center ${isPreview ? 'min-h-[500px]' : 'min-h-[90vh]'}`}>
 
         {/* Background blobs */}
         <div
@@ -99,11 +101,11 @@ const HeroSection = () => {
           }}
         />
 
-        <div className="container relative z-10 py-16 lg:py-24 grid lg:grid-cols-2 gap-16 items-center">
+        <div className={`container relative z-10 grid lg:grid-cols-2 gap-16 items-center ${isPreview ? 'py-8' : 'py-16 lg:py-24'}`}>
 
           {/* LEFT COLUMN */}
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            initial={isPreview ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
           >

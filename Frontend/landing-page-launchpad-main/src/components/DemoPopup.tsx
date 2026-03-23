@@ -5,6 +5,12 @@ const DemoPopup = () => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    // Check if we are in admin preview mode
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('is_preview') === '1') {
+      return;
+    }
+
     console.log("DemoPopup mounted");
 
     const timer = setTimeout(() => {

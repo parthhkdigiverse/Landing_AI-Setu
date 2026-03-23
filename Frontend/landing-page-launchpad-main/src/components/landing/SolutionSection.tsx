@@ -87,6 +87,8 @@ const SolutionSection = () => {
     return () => window.removeEventListener("message", handler);
   }, []);
 
+  const isPreview = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('is_preview') === '1' : false;
+
   return (
     <section 
       id="features" // CRITICAL: This allows the header link to find this section
@@ -96,9 +98,9 @@ const SolutionSection = () => {
         
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={isPreview ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, amount: 0.1 }}
           className="text-center mb-16"
         >
           <span className="inline-block px-4 py-2 bg-accent text-accent-foreground font-semibold text-sm uppercase tracking-wider rounded-full shadow-lg mb-4">
@@ -123,9 +125,9 @@ const SolutionSection = () => {
         ) : (
           <motion.div
             variants={containerVariants}
-            initial="hidden"
+            initial={isPreview ? "visible" : "hidden"}
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.1 }}
             className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8"
           >
             {solutions.map((s, i) => {

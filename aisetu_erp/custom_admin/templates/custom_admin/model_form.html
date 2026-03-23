@@ -295,7 +295,7 @@
     </div> <!-- end admin-edit-section -->
     <div class="preview-section">
         <div class="preview-header">Live Website Preview</div>
-        <iframe id="livePreview" src="{{ preview_url }}"></iframe>
+        <iframe id="livePreview" src="{{ preview_url }}{% if '?' in preview_url %}&{% else %}?{% endif %}is_preview=1"></iframe>
     </div>
 </div> <!-- end admin-preview-layout -->
 

@@ -56,6 +56,8 @@ const USPSection = () => {
     return () => window.removeEventListener("message", handler);
   }, []);
 
+  const isPreview = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('is_preview') === '1' : false;
+
   return (
     <section className="relative py-16 lg:py-32 bg-gradient-to-br from-[#1F2E4D] via-[#2D3748] to-[#1A202C] text-primary-foreground overflow-hidden">
       <div className="container relative z-10">
@@ -63,7 +65,7 @@ const USPSection = () => {
 
           {/* LEFT CONTENT */}
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
+            initial={isPreview ? { opacity: 1, x: 0 } : { opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7 }}
           >
@@ -117,7 +119,7 @@ const USPSection = () => {
 
           {/* RIGHT IMAGE */}
           <motion.div
-            initial={{ opacity: 0, x: 40 }}
+            initial={isPreview ? { opacity: 1, x: 0 } : { opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             className="relative flex justify-center"

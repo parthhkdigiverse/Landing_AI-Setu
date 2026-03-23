@@ -52,6 +52,8 @@ const HowItWorks = () => {
     return () => window.removeEventListener("message", handler);
   }, []);
 
+  const isPreview = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('is_preview') === '1' : false;
+
   return (
     <section className="py-16 lg:py-24 bg-background">
       <div className="container">

@@ -71,6 +71,8 @@ const ProblemSection = () => {
 
   }, []);
 
+  const isPreview = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('is_preview') === '1' : false;
+
   return (
     <section className="py-16 lg:py-24 bg-background">
 
@@ -78,9 +80,9 @@ const ProblemSection = () => {
 
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={isPreview ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, amount: 0.1 }}
           className="text-center mb-12"
         >
 
@@ -113,10 +115,10 @@ const ProblemSection = () => {
 
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
+                initial={isPreview ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{ delay: isPreview ? 0 : i * 0.1 }}
                 className="bg-card rounded-xl p-6 shadow-card border border-border hover:shadow-card-hover transition-shadow"
               >
 

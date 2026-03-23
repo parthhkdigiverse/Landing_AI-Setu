@@ -124,12 +124,50 @@ class DynamicModelMixin:
         # Determine columns for list view
         if hasattr(self, 'object_list'):
             fields = [f for f in model._meta.fields if f.name not in ['id', '_id', 'password']]
-            context['fields'] = fields[:5] # Show first 5 fields in table
+            # Show more fields for read-only tabular views to ensure data like resumes are visible
+            context['fields'] = fields[:15] 
         return context
 
 class CustomAdminListView(AdminRequiredMixin, DynamicModelMixin, ListView):
     template_name = 'custom_admin/model_list.html'
     paginate_by = 20
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        model_name = self.kwargs.get('model_name', '').lower().strip()
+        scheme = self.request.scheme
+        host = self.request.get_host()
+        base_url = f"{scheme}://{host}"
+        
+        if 'referralperk' in model_name:
+            context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = "referral"
+            
+        readonly_models = ['demorequest', 'jobapplication', 'pricingsignup', 'contactsubmission', 'payment']
+        is_readonly = model_name in readonly_models
+        context['is_readonly'] = is_readonly
+        
+        if is_readonly:
+            headers = [f.verbose_name.title() for f in context.get('fields', [])]
+            context['headers'] = headers
+            rows = []
+            for obj in context.get('object_list', []):
+                row_data = []
+                for f in context.get('fields', []):
+                    val = getattr(obj, f.name, '')
+                    if val is None:
+                        val = ''
+                    # Handle FileField / ImageField gracefully if associated file exists
+                    elif val and hasattr(val, 'url'):
+                        val = f"<a href='javascript:void(0)' data-file-url='{val.url}' class='view-file-btn text-decoration-none'><i class='bi bi-file-earmark-text'></i> View</a>"
+                    else:
+                        val = str(val) if val is not None else ''
+                    row_data.append(val)
+                rows.append({'pk': obj.pk, 'data': row_data})
+            context['tabular_rows'] = rows
+            
+        return context
 
 class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
     template_name = 'custom_admin/model_form.html'
@@ -224,6 +262,7 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
             context['preview_url'] = f"{base_url}/"
         elif 'referralprogramcontent' in model_name:
             context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = 'referral'
         elif 'pricingcontent' in model_name:
             context['preview_url'] = f"{base_url}/pricing"
         elif 'careerpage' in model_name:
@@ -234,6 +273,8 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
             context['preview_url'] = f"{base_url}/career/new-job"
         elif 'policy' == model_name:
             context['preview_url'] = f"{base_url}/policy/new-policy"
+        elif 'blogpost' in model_name:
+            context['preview_url'] = f"{base_url}/blog"
         elif 'footer' == model_name:
             context['preview_url'] = f"{base_url}/"
         
@@ -250,9 +291,6 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
         elif 'howitworksstep' in model_name:
             context['preview_url'] = f"{base_url}/"
             context['scroll_target'] = "how-it-works"
-        elif 'referralperk' in model_name:
-            context['preview_url'] = f"{base_url}/"
-            context['scroll_target'] = "referral"
         elif 'testimonial' in model_name:
             context['preview_url'] = f"{base_url}/"
             context['scroll_target'] = "testimonials"
@@ -451,6 +489,7 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
             context['preview_url'] = f"{base_url}/"
         elif 'referralprogramcontent' in model_name:
             context['preview_url'] = f"{base_url}/"
+            context['scroll_target'] = 'referral'
         elif 'pricingcontent' in model_name:
             context['preview_url'] = f"{base_url}/pricing"
         elif 'careerpage' in model_name:
@@ -467,6 +506,11 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
                 context['preview_url'] = f"{base_url}/policy/{self.object.slug}"
             else:
                 context['preview_url'] = f"{base_url}/policy/new-policy"
+        elif 'blogpost' in model_name:
+            if hasattr(self, 'object') and self.object and getattr(self.object, 'slug', None):
+                context['preview_url'] = f"{base_url}/blog/{self.object.slug}"
+            else:
+                context['preview_url'] = f"{base_url}/blog"
         elif 'footer' == model_name:
             context['preview_url'] = f"{base_url}/"
 
@@ -483,9 +527,6 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         elif 'howitworksstep' in model_name:
             context['preview_url'] = f"{base_url}/"
             context['scroll_target'] = "how-it-works"
-        elif 'referralperk' in model_name:
-            context['preview_url'] = f"{base_url}/"
-            context['scroll_target'] = "referral"
         elif 'testimonial' in model_name:
             context['preview_url'] = f"{base_url}/"
             context['scroll_target'] = "testimonials"

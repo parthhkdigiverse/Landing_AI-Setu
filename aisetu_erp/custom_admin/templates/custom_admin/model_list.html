@@ -1,32 +1,99 @@
 {% extends 'custom_admin/base.html' %}
 {% block content %}
+{% if preview_url %}
+<style>
+.admin-preview-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+.admin-list-section {
+    min-width: 0;
+}
+.preview-section {
+    border-left: 1px solid #ddd;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+}
+.preview-header {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+.preview-section iframe {
+    width: 100%;
+    flex: 1;
+    min-height: 85vh;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+}
+</style>
+<div class="admin-preview-layout">
+    <div class="admin-list-section">
+{% endif %}
+
 <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4">
     <h1 class="h2 fw-bold">{{ model_name_plural }}</h1>
+    {% if not is_readonly %}
     <a href="{% url 'custom_admin:model_create' app_label model_slug %}" class="btn btn-primary px-4 shadow-sm"><i class="bi bi-plus-lg"></i> Add New</a>
+    {% endif %}
 </div>
-<div class="card shadow-sm border-0">
+<div class="card shadow-sm border-0 rounded-3 overflow-hidden">
     <div class="card-body p-0 table-responsive">
         <table class="table table-hover mb-0 align-middle">
-            <thead class="table-light">
+            <thead class="bg-light text-secondary small fw-bold text-uppercase">
                 <tr>
-                    <th class="px-4 py-3">Record Information</th>
-                    <th class="text-end px-4 py-3">Actions</th>
+                    {% if is_readonly %}
+                        {% for header in headers %}
+                        <th class="px-4 py-3 border-bottom-0 text-nowrap">{{ header }}</th>
+                        {% endfor %}
+                    {% else %}
+                        <th class="px-4 py-3 border-bottom-0">Record Information</th>
+                    {% endif %}
+                    <th class="text-end px-4 py-3 border-bottom-0">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for object in object_list %}
-                <tr>
-                    <td class="px-4"><strong>{{ object }}</strong></td>
-                    <td class="text-end text-nowrap px-4 py-3">
-                        <a href="{% url 'custom_admin:model_update' app_label model_slug object.pk %}" class="btn btn-sm btn-light border"><i class="bi bi-pencil"></i> Edit</a>
-                        <a href="{% url 'custom_admin:model_delete' app_label model_slug object.pk %}" class="btn btn-sm btn-outline-danger ms-1"><i class="bi bi-trash"></i> Delete</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="2" class="text-center py-5 text-muted">No records found. Click "Add New" to get started.</td>
-                </tr>
-                {% endfor %}
+                {% if is_readonly %}
+                    {% for row in tabular_rows %}
+                    <tr>
+                        {% for val in row.data %}
+                        <td class="px-4 py-3 border-light text-dark fw-medium">
+                            {{ val|safe|truncatechars_html:100 }}
+                        </td>
+                        {% endfor %}
+                        <td class="text-end text-nowrap px-4 py-3 border-light">
+                            <a href="{% url 'custom_admin:model_delete' app_label model_slug row.pk %}" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-medium"><i class="bi bi-trash me-1"></i> Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="{{ headers|length|add:1 }}" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox display-4 d-block mb-3 text-secondary opacity-50"></i>
+                            No records found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    {% for object in object_list %}
+                    <tr>
+                        <td class="px-4 py-3 border-light text-dark fw-medium">{{ object|truncatechars_html:100 }}</td>
+                        <td class="text-end text-nowrap px-4 py-3 border-light">
+                            <a href="{% url 'custom_admin:model_update' app_label model_slug object.pk %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium"><i class="bi bi-pencil me-1"></i> Edit</a>
+                            <a href="{% url 'custom_admin:model_delete' app_label model_slug object.pk %}" class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-2 fw-medium"><i class="bi bi-trash me-1"></i> Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox display-4 d-block mb-3 text-secondary opacity-50"></i>
+                            No records found. Click "Add New" to get started.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
             </tbody>
         </table>
     </div>
@@ -56,4 +123,75 @@
     </ul>
 </nav>
 {% endif %}
+
+{% if preview_url %}
+    </div> <!-- end admin-list-section -->
+    <div class="preview-section py-2">
+        <div class="preview-header"><i class="bi bi-display me-2 text-primary"></i> Live Website Preview</div>
+        <iframe id="livePreview" src="{{ preview_url }}"></iframe>
+    </div>
+</div> <!-- end admin-preview-layout -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Live Website Preview Logic
+    const iframe = document.getElementById("livePreview");
+    if(iframe) {
+        iframe.onload = function() {
+            {% if scroll_target %}
+            setTimeout(() => {
+                iframe.contentWindow.postMessage({
+                    source: 'django-admin',
+                    scrollTarget: '{{ scroll_target }}'
+                }, "*");
+            }, 500);
+            {% endif %}
+        };
+    }
+});
+</script>
+{% endif %}
+
+<!-- File Preview Modal -->
+<div class="modal fade" id="filePreviewModal" tabindex="-1" aria-labelledby="filePreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="filePreviewModalLabel"><i class="bi bi-eye me-2"></i> File Preview</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <iframe id="filePreviewIframe" src="" style="width: 100%; height: 80vh; border: none;"></iframe>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary px-4 rounded-pill" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // 2. File Preview Modal Logic
+    const fileModal = new bootstrap.Modal(document.getElementById('filePreviewModal'));
+    const fileIframe = document.getElementById('filePreviewIframe');
+    
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.view-file-btn');
+        if (btn) {
+            e.preventDefault();
+            const fileUrl = btn.getAttribute('data-file-url');
+            if (fileUrl) {
+                fileIframe.src = fileUrl;
+                fileModal.show();
+            }
+        }
+    });
+
+    // Clear iframe src when modal is closed to stop audio/video or free memory
+    document.getElementById('filePreviewModal').addEventListener('hidden.bs.modal', function() {
+        fileIframe.src = '';
+    });
+});
+</script>
 {% endblock %}

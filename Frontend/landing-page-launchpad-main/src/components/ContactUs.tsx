@@ -140,8 +140,8 @@ const ContactUsPage = () => {
       <Header />
 
       {/* HERO SECTION */}
-      <section id="hero" className="relative bg-gradient-to-br from-[#1F2E4D] via-[#2D3748] to-[#1A202C] pt-20 pb-32">
-        <div className="relative z-10 container mx-auto px-6 text-center">
+      <section id="hero" className="relative min-h-[60vh] bg-gradient-to-br from-[#1F2E4D] via-[#2D3748] to-[#1A202C] flex items-center">
+        <div className="relative z-10 container mx-auto px-6 py-20 text-center">
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-6xl font-bold text-white mb-6">
             {content.hero_title}
           </motion.h1>

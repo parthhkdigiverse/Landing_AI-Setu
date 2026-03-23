@@ -453,13 +453,13 @@ class JobApplication(models.Model):
     email = models.EmailField()
     phone = models.CharField(max_length=20)
 
-    experience = models.IntegerField(null=True, )
-    available_to_join = models.IntegerField(null=True, )
+    experience = models.IntegerField(null=True, blank=True)
+    available_to_join = models.IntegerField(null=True, blank=True)
 
-    current_salary = models.CharField(max_length=100, )
-    expected_salary = models.CharField(max_length=100, )
+    current_salary = models.CharField(max_length=100, null=True, blank=True)
+    expected_salary = models.CharField(max_length=100, null=True, blank=True)
 
-    location = models.CharField(max_length=200)
+    location = models.CharField(max_length=200, null=True, blank=True)
 
     resume = models.FileField(upload_to="resumes/")
 

@@ -293,9 +293,9 @@ def apply_job(request):
 
     if serializer.is_valid():
         serializer.save()
-        return Response({"message": "Application submitted successfully"})
+        return Response({"message": "Application submitted successfully"}, status=status.HTTP_201_CREATED)
 
-    return Response(serializer.errors)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def check_referral(request):

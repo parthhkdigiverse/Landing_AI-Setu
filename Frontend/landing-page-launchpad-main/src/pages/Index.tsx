@@ -35,15 +35,37 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
+    const previewChannel = new BroadcastChannel('aisetu_preview');
 
     const handler = (event: MessageEvent) => {
       if (event.data && typeof event.data === 'object' && !Array.isArray(event.data) && event.data.source === 'django-admin') {
         
-        if (event.data.model === 'LandingPageContent' || event.data.model === 'PricingContent') {
+        if (event.data.model === 'LandingPageContent' || 
+            event.data.model === 'PricingContent' || 
+            event.data.model === 'ChallengeContent' || 
+            event.data.model === 'SolutionContent' ||
+            event.data.model === 'USPContent' || 
+            event.data.model === 'HowItWorksContent' || 
+            event.data.model === 'WhoIsThisForContent' || 
+            event.data.model === 'TestimonialContent' || 
+            event.data.model === 'ComparisonContent' || 
+            event.data.model === 'FAQContent' || 
+            event.data.model === 'TrustContent' || 
+            event.data.model === 'HeroContent' || 
+            event.data.model === 'CTAContent' || 
+            event.data.model === 'ReferralProgramContent') {
+          
+          const payload = event.data.payload;
           setContent((prev: any) => ({
             ...prev,
-            ...event.data.payload
+            ...payload
           }));
+
+          // Broadcast to other tabs
+          previewChannel.postMessage({
+            type: 'LIVE_PREVIEW_UPDATE',
+            content: payload
+          });
         }
 
         if (event.data.scrollTarget) {
@@ -55,11 +77,38 @@ const Index = () => {
       }
     };
 
-    window.addEventListener("message", handler);
+    const channelHandler = (event: MessageEvent) => {
+      if (event.data?.type === 'LIVE_PREVIEW_UPDATE') {
+        setContent((prev: any) => ({
+          ...prev,
+          ...event.data.content
+        }));
+      }
+    };
 
-    return () => window.removeEventListener("message", handler);
+    window.addEventListener("message", handler);
+    previewChannel.addEventListener("message", channelHandler);
+
+    return () => {
+      window.removeEventListener("message", handler);
+      previewChannel.removeEventListener("message", channelHandler);
+      previewChannel.close();
+    };
 
   }, []);
+
+  const isPreview = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('is_preview') === '1' : false;
+  const sectionParam = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('section') : null;
+
+  // Mount scroll to section param
+  useEffect(() => {
+    if (sectionParam) {
+      setTimeout(() => {
+        const el = document.getElementById(sectionParam);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 800); // Wait for components to load
+    }
+  }, [sectionParam]);
 
   return (
     <>

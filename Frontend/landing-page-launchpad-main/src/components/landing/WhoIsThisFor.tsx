@@ -51,7 +51,7 @@ const WhoIsThisFor = () => {
   useEffect(() => {
     const handler = (event: any) => {
       if (event.data && event.data.source === 'django-admin') {
-        if (event.data.model === 'LandingPageContent') {
+        if (event.data.model === 'LandingPageContent' || event.data.model === 'WhoIsThisForContent') {
           setContent((prev: any) => ({ ...prev, ...event.data.payload }));
         } else if (event.data.model === 'StoreType') {
           const item = event.data.payload;

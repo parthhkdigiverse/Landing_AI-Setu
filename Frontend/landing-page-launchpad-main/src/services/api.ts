@@ -3,6 +3,14 @@ import axios from "axios";
 // Use relative URL so it works on any IP/Port where Django is running
 export const API_BASE_URL = '';
 
+export interface TrustItem {
+    id: number;
+    title: string;
+    icon: string;
+    order: number;
+    is_active: boolean;
+}
+
 export interface LandingPageContent {
     id: number;
     hero_eyebrow: string;
@@ -15,10 +23,7 @@ export interface LandingPageContent {
     trusted_retailers_count: string;
     hero_stats_label: string;
     hero_stats_value: string;
-    trust_item1: string;
-    trust_item2: string;
-    trust_item3: string;
-    trust_item4: string;
+    trust_items?: TrustItem[];
     problem_section_label: string;
     problem_section_title: string;
     solution_section_label: string;
@@ -50,6 +55,7 @@ export interface LandingPageContent {
     pricing_feature6: string;
     pricing_feature7: string;
     pricing_feature8: string;
+    pricing_features?: any[];
     referral_main_title: string;
     referral_main_desc: string;
     referral_label: string;

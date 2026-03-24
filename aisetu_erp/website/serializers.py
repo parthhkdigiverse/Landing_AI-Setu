@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, Culture, DemoVideo, JobDescription, JobPosition, JobSkill, LoginLink, Page, Perk, Policy, PolicySection, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost, Section, SectionItem, HowItWorksStep, Problem, Feature, USPFeature, StoreType, ReferralPerk, Testimonial
+from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, Culture, DemoVideo, JobDescription, JobPosition, JobSkill, LoginLink, Page, Perk, Policy, PolicySection, PricingSignup,DemoRequest, LandingPageContent, ContactSubmission, JobApplication, ReferralUser, BlogCategory, BlogPost, Section, SectionItem, HowItWorksStep, Problem, Feature, USPFeature, StoreType, ReferralPerk, Testimonial, TrustItem, PricingFeature
 
 class ObjectIdField(serializers.Field):
     def to_representation(self, value):
@@ -143,6 +143,18 @@ class FAQSerializer(serializers.ModelSerializer):
         model = FAQ
         fields = ['id', 'question', 'answer', 'order', 'is_active']
 
+class TrustItemSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()
+    class Meta:
+        model = TrustItem
+        fields = ['id', 'title', 'icon', 'order', 'is_active']
+
+class PricingFeatureSerializer(serializers.ModelSerializer):
+    id = ObjectIdField()
+    class Meta:
+        model = PricingFeature
+        fields = ['id', 'title', 'order', 'is_active']
+
 class LandingPageContentSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     howitworks_steps = HowItWorksStepSerializer(many=True, read_only=True)
@@ -154,6 +166,8 @@ class LandingPageContentSerializer(serializers.ModelSerializer):
     testimonials = TestimonialSerializer(many=True, read_only=True)
     comparison_features = ComparisonFeatureSerializer(many=True, read_only=True)
     faqs = FAQSerializer(many=True, read_only=True)
+    trust_items = TrustItemSerializer(many=True, read_only=True)
+    pricing_features = PricingFeatureSerializer(many=True, read_only=True)
     
     class Meta:
         model = LandingPageContent

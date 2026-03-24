@@ -54,6 +54,8 @@ const Pricing = () => {
   }, []);
 
 
+  const isPreview = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('is_preview') === '1' : false;
+
   return (
 
     <>

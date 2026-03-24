@@ -499,6 +499,34 @@ class Payment(models.Model):
     def __str__(self):
         return str(self.transaction_id)
 
+class TrustItem(models.Model):
+    title = models.CharField(max_length=200)
+    icon = models.CharField(
+        max_length=50,
+        help_text="lucide-react icon name (shield-check, indian-rupee, cloud, headphones)"
+    )
+    order = models.PositiveIntegerField(default=0)
+    landing_page = models.ForeignKey(LandingPageContent, related_name='trust_items', on_delete=models.CASCADE, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ["order"]
+
+class PricingFeature(models.Model):
+    title = models.CharField(max_length=255)
+    order = models.PositiveIntegerField(default=0)
+    landing_page = models.ForeignKey(LandingPageContent, related_name='pricing_features', on_delete=models.CASCADE, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ["order"]
+
 # ==========================
 # PROXY MODELS FOR ADMIN CATEGORIZATION
 # ==========================
@@ -551,6 +579,85 @@ class ReferralProgramContent(LandingPageContent):
         verbose_name = "Referral Program Content"
         verbose_name_plural = "Referral Program Content"
         app_label = 'website'
+
+class TrustContent(LandingPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "Trust Strip Content"
+        verbose_name_plural = "Trust Strip Content"
+        app_label = 'website'
+
+class ChallengeContent(LandingPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "Challenge Content"
+        verbose_name_plural = "Challenge Content"
+        app_label = 'website'
+
+class SolutionContent(LandingPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "Solution Content"
+        verbose_name_plural = "Solution Content"
+        app_label = 'website'
+
+class USPContent(LandingPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "USP Content"
+        verbose_name_plural = "USP Content"
+        app_label = 'website'
+
+class HowItWorksContent(LandingPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "How It Works Content"
+        verbose_name_plural = "How It Works Content"
+        app_label = 'website'
+
+class WhoIsThisForContent(LandingPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "Who Is This For Content"
+        verbose_name_plural = "Who Is This For Content"
+        app_label = 'website'
+
+class TestimonialContent(LandingPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "Testimonial Content"
+        verbose_name_plural = "Testimonial Content"
+        app_label = 'website'
+
+class ComparisonContent(LandingPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "Comparison Content"
+        verbose_name_plural = "Comparison Content"
+        app_label = 'website'
+
+class FAQContent(LandingPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "FAQ Content"
+        verbose_name_plural = "FAQ Content"
+        app_label = 'website'
+
+class HeroContent(LandingPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "Hero Section Content"
+        verbose_name_plural = "Hero Section Content"
+        app_label = 'website'
+
+class CTAContent(LandingPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "Final CTA Content"
+        verbose_name_plural = "Final CTA Content"
+        app_label = 'website'
+
+
 
 from django.db import models
 
@@ -1114,6 +1221,8 @@ class FAQ(models.Model):
 
     def __str__(self):
         return self.question
+
+
     
 class LoginLink(models.Model):
     label = models.CharField(max_length=100, default="Login")

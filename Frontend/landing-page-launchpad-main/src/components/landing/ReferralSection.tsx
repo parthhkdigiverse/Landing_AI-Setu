@@ -49,7 +49,7 @@ const ReferralSection = () => {
   useEffect(() => {
     const handler = (event: any) => {
       if (event.data && event.data.source === 'django-admin') {
-        if (event.data.model === 'LandingPageContent') {
+        if (event.data.model === 'LandingPageContent' || event.data.model === 'ReferralProgramContent') {
           setContent((prev: any) => ({ ...prev, ...event.data.payload }));
         } else if (event.data.model === 'ReferralPerk') {
           const item = event.data.payload;

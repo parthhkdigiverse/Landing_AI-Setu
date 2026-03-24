@@ -33,24 +33,19 @@ const Referral = () => {
 
   // LIVE ADMIN PREVIEW
   useEffect(() => {
-
-    const handler = (event:any) => {
-
-      if(event.data){
-        setContent((prev:any)=>({
+    const handler = (event: any) => {
+      if (event.data && event.data.source === 'django-admin') {
+        setContent((prev: any) => ({
           ...prev,
-          ...event.data
-        }))
+          ...event.data.payload
+        }));
       }
+    };
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, []);
 
-    }
-
-    window.addEventListener("message", handler)
-
-    return () => window.removeEventListener("message", handler)
-
-  },[])
-
+  const isPreview = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('is_preview') === '1' : false;
 
   return (
 

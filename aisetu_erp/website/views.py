@@ -1,8 +1,9 @@
 from django.shortcuts import get_object_or_404, render
 
 from website.models import DemoRequest,UserLogin, ReferralUser
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 import json
+import re
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import APIView, api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -103,6 +104,69 @@ def user_login(request):
             return JsonResponse({"error": str(e)}, status=400)
 
     return JsonResponse({"error": "Only POST allowed"}, status=405)
+
+def serve_frontend_with_seo(request, slug=None):
+    from django.conf import settings
+    index_path = settings.REACT_BUILD_DIR / 'index.html'
+    
+    if not index_path.exists():
+        return HttpResponse("Frontend build not found.", status=404)
+        
+    with open(index_path, 'r', encoding='utf-8') as f:
+        html = f.read()
+        
+    if slug:
+        try:
+            post = BlogPost.objects.get(slug=slug, is_published=True)
+            
+            from django.utils.html import escape
+            import re
+            
+            def clean_seo(text):
+                if not text: return ""
+                # Replace newlines with spaces and condense multiple spaces
+                text = re.sub(r'\s+', ' ', text).strip()
+                return escape(text)
+
+            # Prepare SEO values
+            title = clean_seo(post.seo_title or post.title)
+            description = clean_seo(post.seo_description or (post.excerpt if post.excerpt else ""))
+            keywords = clean_seo(post.seo_keywords)
+            
+            # Extract Image URL safely
+            image_url = "https://lovable.dev/opengraph-image-p98pqg.png"
+            if post.featured_image:
+                try:
+                    image_url = request.build_absolute_uri(post.featured_image.url)
+                except:
+                    pass
+            
+            # Replace Title
+            html = re.sub(r'<title>[^<]+</title>', f'<title>{title} | AI-Setu ERP</title>', html)
+            
+            # Replace Meta Description
+            html = re.sub(r'<meta name="description" content="[^"]*" />', f'<meta name="description" content="{description}" />', html)
+            
+            # Inject/Replace Keywords
+            if keywords:
+                if '<meta name="keywords"' in html:
+                    html = re.sub(r'<meta name="keywords" content="[^"]*" />', f'<meta name="keywords" content="{keywords}" />', html)
+                else:
+                    # Insert after description
+                    html = re.sub(r'(<meta name="description" content="[^"]*" />)', rf'\1\n    <meta name="keywords" content="{keywords}" />', html)
+
+            # Replace OG Tags
+            html = re.sub(r'<meta property="og:title" content="[^"]*" />', f'<meta property="og:title" content="{title} | AI-Setu ERP" />', html)
+            html = re.sub(r'<meta property="og:description" content="[^"]*" />', f'<meta property="og:description" content="{description}" />', html)
+            html = re.sub(r'<meta property="og:image" content="[^"]*" />', f'<meta property="og:image" content="{image_url}" />', html)
+            
+            # Replace Twitter Tags
+            html = re.sub(r'<meta name="twitter:image" content="[^"]*" />', f'<meta name="twitter:image" content="{image_url}" />', html)
+            
+        except BlogPost.DoesNotExist:
+            pass # Fallback to default
+            
+    return HttpResponse(html)
 
 FIXED_PASSWORD = "1234"
 @csrf_exempt

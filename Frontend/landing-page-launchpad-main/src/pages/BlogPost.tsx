@@ -175,9 +175,10 @@ const BlogPost = () => {
               }}
               className="prose prose-xl max-w-none bg-white/90 backdrop-blur-sm p-8 md:p-12 rounded-b-3xl shadow-2xl border border-white/30 border-t-0 relative z-10"
             >
-              <div className="text-gray-800 leading-relaxed mb-6 text-lg font-medium whitespace-pre-wrap">
-                {post.content}
-              </div>
+              <div 
+                className="text-gray-800 leading-relaxed mb-6 text-lg font-medium blog-content"
+                dangerouslySetInnerHTML={{ __html: post.content }}
+              />
             </motion.div>
           </motion.div>
 

@@ -14,9 +14,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
 from django.urls import re_path,path, include
-from django.views.generic import TemplateView
+from website.views import serve_frontend_with_seo
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -29,4 +28,6 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Catch-all route for frontend routing (React) - MUST BE LAST
-urlpatterns.append(re_path(r'^.*$', TemplateView.as_view(template_name="index.html")))
+# We use serve_frontend_with_seo to inject dynamic meta tags for blog posts and other pages
+urlpatterns.append(re_path(r'^blog/(?P<slug>[\w-]+)/?$', serve_frontend_with_seo))
+urlpatterns.append(re_path(r'^.*$', serve_frontend_with_seo))

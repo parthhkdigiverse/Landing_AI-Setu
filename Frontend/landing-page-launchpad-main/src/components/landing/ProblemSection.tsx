@@ -54,7 +54,7 @@ const ProblemSection = () => {
     const handler = (event: any) => {
 
       if (event.data && event.data.source === 'django-admin') {
-        if (event.data.model === 'LandingPageContent') {
+        if (event.data.model === 'LandingPageContent' || event.data.model === 'ChallengeContent') {
             setContent((prev: any) => ({ ...prev, ...event.data.payload }));
         } else if (event.data.model === 'Problem') {
             const item = event.data.payload;

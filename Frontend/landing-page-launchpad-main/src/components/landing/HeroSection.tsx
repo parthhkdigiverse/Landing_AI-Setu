@@ -29,7 +29,7 @@ const HeroSection = () => {
   
 
   // ✅ LIVE PREVIEW DATA FROM DJANGO ADMIN
-  const [livePreview, setLivePreview] = useState<any>(null);
+  
 
   useEffect(() => {
   const loadVideo = async () => {
@@ -70,9 +70,7 @@ const HeroSection = () => {
 
 },[])
 
-  const highlights = livePreview?.hero_highlights
-    ? livePreview.hero_highlights.split(",").map((h: string) => h.trim())
-    : content?.hero_highlights
+  const highlights = content?.hero_highlights
     ? content.hero_highlights.split(",").map((h) => h.trim())
     : defaultHighlights;
 
@@ -119,22 +117,22 @@ const HeroSection = () => {
             >
               <Sparkles className="w-4 h-4 animate-pulse" />
 
-              {livePreview?.hero_eyebrow ||
+              {
                 content?.hero_eyebrow ||
                 "India's Smartest Retail ERP"} 
             </motion.div>
 
             <h1 className="text-4xl lg:text-5xl xl:text-[3.8rem] font-extrabold leading-[1.1] mb-6 tracking-tight">
-              {livePreview?.hero_title || content?.hero_title || "Smart ERP for"}{" "}
+              { content?.hero_title || "Smart ERP for"}{" "}
               <span className="text-gradient-animate">
-                {livePreview?.hero_highlighted_title ||
+                {
                   content?.hero_highlighted_title ||
                   "Indian Retailers"}
               </span>
             </h1>
 
             <p className="text-lg lg:text-xl text-primary-foreground/75 mb-8 max-w-lg leading-relaxed whitespace-pre-line">
-              {livePreview?.hero_subtitle ||
+              {
                 content?.hero_subtitle ||
                 "AI-powered billing, inventory & store management — built specifically for Indian retail businesses."}
             </p>
@@ -164,7 +162,7 @@ const HeroSection = () => {
                   hover:scale-105 hover:shadow-[0_0_28px_rgba(255,200,50,0.55)]
                   active:scale-95 animate-pulse-glow group"
               >
-                {livePreview?.primary_cta_text ||
+                {
                   content?.primary_cta_text ||
                   "Book Free Demo"}
 
@@ -181,7 +179,7 @@ const HeroSection = () => {
                 >
                   <Play className="mr-2 h-4 w-4 fill-current" />
 
-                  {livePreview?.secondary_cta_text ||
+                  {
                     content?.secondary_cta_text ||
                     "Watch Demo"}
                 </Button>
@@ -204,7 +202,7 @@ const HeroSection = () => {
             >
               ⭐⭐⭐⭐⭐ Trusted by{" "}
               <span className="text-yellow-400 font-semibold">
-                {livePreview?.trusted_retailers_count ||
+                {
                   content?.trusted_retailers_count ||
                   "500+"}
               </span>{" "}
@@ -251,13 +249,13 @@ const HeroSection = () => {
                 className="absolute -top-5 -right-5 glass-card rounded-xl px-4 py-2.5 shadow-xl border border-yellow-400/20"
               >
                 <p className="text-xs text-primary-foreground/60 font-medium">
-                  {livePreview?.hero_stats_label ||
+                  {
                     content?.hero_stats_label ||
                     "Today's Sales"}
                 </p>
 
                 <p className="text-xl font-bold text-yellow-400">
-                  {livePreview?.hero_stats_value ||
+                  {
                     content?.hero_stats_value ||
                     "₹1,24,500"}
                 </p>

@@ -10,8 +10,6 @@ const PricingSection = () => {
   const navigate = useNavigate();
 
   const [content, setContent] = useState<any>(null);
-  const [livePreview, setLivePreview] = useState<any>(null);
-  const [dbFeatures, setDbFeatures] = useState<string[]>([]);
 
   // Fetch database content
   useEffect(() => {
@@ -19,19 +17,6 @@ const PricingSection = () => {
       const data = await fetchLandingPageContent();
       if (data) {
         setContent(data);
-      }
-
-      // Fetch dynamic features
-      try {
-        const res = await fetch("/api/features/");
-        if (res.ok) {
-          const featuresData = await res.json();
-          if (featuresData && featuresData.length > 0) {
-            setDbFeatures(featuresData.map((f: any) => f.title));
-          }
-        }
-      } catch (err) {
-        console.error("Failed to load dynamic features:", err);
       }
     };
     loadContent();
@@ -41,11 +26,13 @@ const PricingSection = () => {
   useEffect(() => {
     const handler = (event: any) => {
       if (event.data && event.data.source === 'django-admin') {
-        const payload = event.data.payload;
-        setLivePreview((prev: any) => ({
-          ...prev,
-          ...payload
-        }));
+        if (event.data.model === 'LandingPageContent' || event.data.model === 'PricingContent') {
+          const payload = event.data.payload;
+          setContent((prev: any) => ({
+            ...prev,
+            ...payload
+          }));
+        }
       }
     };
 
@@ -53,16 +40,18 @@ const PricingSection = () => {
     return () => window.removeEventListener("message", handler);
   }, []);
 
-  const featuresList = dbFeatures.length > 0 ? dbFeatures : [
-    livePreview?.pricing_feature1 || content?.pricing_feature1 || "Full Access to All Modules",
-    livePreview?.pricing_feature2 || content?.pricing_feature2 || "POS Billing + Inventory",
-    livePreview?.pricing_feature3 || content?.pricing_feature3 || "CRM & Loyalty Programs",
-    livePreview?.pricing_feature4 || content?.pricing_feature4 || "Accounting & Reports",
-    livePreview?.pricing_feature5 || content?.pricing_feature5 || "Employee Management",
-    livePreview?.pricing_feature6 || content?.pricing_feature6 || "Setup & Training Support",
-    livePreview?.pricing_feature7 || content?.pricing_feature7 || "24/7 Customer Support",
-    livePreview?.pricing_feature8 || content?.pricing_feature8 || "AI Photo Billing",
-  ];
+  const featuresList = content?.pricing_features?.length > 0 
+    ? content.pricing_features.map((f: any) => f.title)
+    : [
+        content?.pricing_feature1 || "Full Access to All Modules",
+        content?.pricing_feature2 || "POS Billing + Inventory",
+        content?.pricing_feature3 || "CRM & Loyalty Programs",
+        content?.pricing_feature4 || "Accounting & Reports",
+        content?.pricing_feature5 || "Employee Management",
+        content?.pricing_feature6 || "Setup & Training Support",
+        content?.pricing_feature7 || "24/7 Customer Support",
+        content?.pricing_feature8 || "AI Photo Billing",
+      ];
 
   return (
     <section id="pricing" className="py-16 lg:py-24 bg-background">
@@ -77,13 +66,13 @@ const PricingSection = () => {
         >
 
           <span className="text-accent font-semibold text-sm uppercase tracking-wider">
-            {livePreview?.pricing_label ||
+            {content?.pricing_label ||
              content?.pricing_label ||
              "Pricing"}
           </span>
 
           <h2 className="text-3xl lg:text-4xl font-bold mt-2 text-foreground">
-            {livePreview?.pricing_title ||
+            {content?.pricing_title ||
              content?.pricing_title ||
              "Simple & Transparent Pricing"}
           </h2>
@@ -100,7 +89,7 @@ const PricingSection = () => {
           <div className="text-center mb-6">
 
             <p className="text-muted-foreground text-sm mb-2">
-              {livePreview?.pricing_plan_name ||
+              {content?.pricing_plan_name ||
                content?.pricing_plan_name ||
                "All-Inclusive Package"}
             </p>
@@ -108,7 +97,7 @@ const PricingSection = () => {
             <div className="flex flex-col items-center justify-center gap-1">
 
               <span className="text-muted-foreground line-through text-lg font-medium tracking-wide">
-                {livePreview?.pricing_old_price ||
+                {content?.pricing_old_price ||
                  content?.pricing_old_price ||
                  "₹29,999"}
               </span>
@@ -116,13 +105,13 @@ const PricingSection = () => {
               <div className="flex items-baseline gap-1 mt-1">
 
                 <span className="text-5xl font-extrabold text-foreground">
-                  {livePreview?.pricing_price ||
+                  {content?.pricing_price ||
                    content?.pricing_price ||
                    "₹12,000"}
                 </span>
 
                 <span className="text-muted-foreground text-sm">
-                  {livePreview?.pricing_price_suffix ||
+                  {content?.pricing_price_suffix ||
                    content?.pricing_price_suffix ||
                    "+ GST"}
                 </span>

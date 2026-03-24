@@ -95,7 +95,6 @@ const PricingSignup = () => {
   const [basePrice, setBasePrice] = useState(12000);
   const [price, setPrice] = useState(14160);
   const [content, setContent] = useState<any>(null);
-  const [features, setFeatures] = useState<string[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -112,20 +111,52 @@ const PricingSignup = () => {
             }
           }
         }
-
-        // 2. Fetch Features (to sync with admin features CRUD)
-        const featuresRes = await fetch(`${API_BASE_URL}/api/features/`);
-        if (featuresRes.ok) {
-          const featuresData = await featuresRes.json();
-          if (featuresData && featuresData.length > 0) {
-            setFeatures(featuresData.map((f: any) => f.title));
-          }
-        }
       } catch (err) {
-        console.error("Failed to load pricing/features:", err);
+        console.error("Failed to load pricing content:", err);
       }
     };
     loadData();
+
+    const previewChannel = new BroadcastChannel('aisetu_preview');
+
+    // Live Preview Listener (postMessage fallback)
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'LIVE_PREVIEW_UPDATE') {
+        updateFromPreview(event.data.content);
+      }
+    };
+
+    // BroadcastChannel Listener (Cross-tab sync)
+    const handleBroadcast = (event: MessageEvent) => {
+      if (event.data?.type === 'LIVE_PREVIEW_UPDATE') {
+        updateFromPreview(event.data.content);
+      }
+    };
+
+    const updateFromPreview = (updatedContent: any) => {
+        setContent((prev: any) => ({
+            ...prev,
+            ...updatedContent
+        }));
+        
+        // Update price if it changed in preview
+        if (updatedContent.pricing_price) {
+          const parsedPrice = parseInt(updatedContent.pricing_price.replace(/[^0-9]/g, ''), 10);
+          if (!isNaN(parsedPrice) && parsedPrice > 0) {
+            setBasePrice(parsedPrice);
+            setPrice(parsedPrice * 1.18);
+          }
+        }
+    };
+
+    window.addEventListener('message', handleMessage);
+    previewChannel.addEventListener('message', handleBroadcast);
+
+    return () => {
+        window.removeEventListener('message', handleMessage);
+        previewChannel.removeEventListener('message', handleBroadcast);
+        previewChannel.close();
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -255,10 +286,7 @@ const PricingSignup = () => {
               <div className="space-y-4">
                 <h3 className="font-semibold text-foreground border-b border-border pb-2">What's Included:</h3>
                 <ul className="space-y-3">
-                  {(features.length > 0 ? features : (content ? [
-                    content.pricing_feature1, content.pricing_feature2, content.pricing_feature3, content.pricing_feature4,
-                    content.pricing_feature5, content.pricing_feature6, content.pricing_feature7, content.pricing_feature8
-                  ].filter(Boolean) : [
+                  {(content?.pricing_features && content.pricing_features.length > 0 ? content.pricing_features.map((f: any) => f.title) : [
                     "Full Access to All Modules",
                     "POS Billing + Inventory",
                     "CRM & Loyalty Programs",
@@ -267,7 +295,7 @@ const PricingSignup = () => {
                     "Setup & Training Support",
                     "24/7 Customer Support",
                     "AI Photo Billing",
-                  ])).map((feature, i) => (
+                  ]).map((feature, i) => (
                     <li key={i} className="flex items-start gap-3 text-sm text-foreground/80">
                       <svg
                         className="w-5 h-5 text-accent shrink-0 mt-0.5"

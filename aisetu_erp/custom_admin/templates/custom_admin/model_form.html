@@ -6,42 +6,47 @@
 </div>
 {% if preview_url %}
 <style>
-.admin-preview-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-.admin-edit-section {
-    min-width: 0;
-}
-.preview-section {
-    border-left: 1px solid #ddd;
-    padding-left: 20px;
-    display: flex;
-    flex-direction: column;
-}
-.preview-header {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 10px;
-}
-.preview-section iframe {
-    width: 100%;
-    flex: 1;
-    min-height: 85vh;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background: #fff;
-}
+    .admin-preview-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .admin-edit-section {
+        min-width: 0;
+    }
+
+    .preview-section {
+        border-left: 1px solid #ddd;
+        padding-left: 20px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .preview-header {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .preview-section iframe {
+        width: 100%;
+        flex: 1;
+        min-height: 85vh;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #fff;
+    }
 </style>
 <div class="admin-preview-layout">
     <div class="admin-edit-section">
-{% endif %}
+        {% endif %}
 
-<div class="card shadow-sm border-0 w-100 mx-auto" style="max-width: 900px;">
-    <div class="card-body p-4 p-md-5">
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
+        <div class="card shadow-sm border-0 w-100 mx-auto" style="max-width: 900px;">
+            <div class="card-body p-4 p-md-5">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
             {{ form|crispy }}
             
             {% if is_career_page %}
@@ -149,122 +154,35 @@
                 </div>
             {% endif %}
 
-            {% if is_landing_page %}
+            {% if is_trust_section %}
                 <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Challenges / Problems</h4>
-                    {{ problem_formset.management_form }}
-                    <div id="problem-formset-container" class="formset-container" data-prefix="problems">
-                        {% for form in problem_formset %}
+                    <h4 class="mb-3 text-primary">Trusted Retailers (Trust Strip)</h4>
+                    {{ trust_formset.management_form }}
+                    <div id="trust-formset-container" class="formset-container" data-prefix="trust_items">
+                        {% for form in trust_formset %}
                             <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="problem-formset-container">Add Problem</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="trust-formset-container">Add Item</button>
                 </div>
+            {% endif %}
 
+            {% if is_pricing_section %}
                 <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Features / Solutions</h4>
-                    {{ feature_formset.management_form }}
-                    <div id="feature-formset-container" class="formset-container" data-prefix="features">
-                        {% for form in feature_formset %}
+                    <h4 class="mb-3 text-primary">Pricing Plan Features</h4>
+                    {{ pricing_formset.management_form }}
+                    <div id="pricing-formset-container" class="formset-container" data-prefix="pricing_features">
+                        {% for form in pricing_formset %}
                             <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="feature-formset-container">Add Feature</button>
-                </div>
-
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">USP Features</h4>
-                    {{ usp_formset.management_form }}
-                    <div id="usp-formset-container" class="formset-container" data-prefix="usp_features">
-                        {% for form in usp_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                {{ form|crispy }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="usp-formset-container">Add USP Feature</button>
-                </div>
-
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">How It Works Steps</h4>
-                    {{ howitworks_formset.management_form }}
-                    <div id="howitworks-formset-container" class="formset-container" data-prefix="howitworks_steps">
-                        {% for form in howitworks_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                {{ form|crispy }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="howitworks-formset-container">Add Step</button>
-                </div>
-
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Store Types (Who is this for)</h4>
-                    {{ store_type_formset.management_form }}
-                    <div id="store-type-formset-container" class="formset-container" data-prefix="store_types">
-                        {% for form in store_type_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                {{ form|crispy }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="store-type-formset-container">Add Store Type</button>
-                </div>
-
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Referral Perks</h4>
-                    {{ referral_perk_formset.management_form }}
-                    <div id="referral-perk-formset-container" class="formset-container" data-prefix="referral_perks">
-                        {% for form in referral_perk_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                {{ form|crispy }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="referral-perk-formset-container">Add Perk</button>
-                </div>
-
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Testimonials</h4>
-                    {{ testimonial_formset.management_form }}
-                    <div id="testimonial-formset-container" class="formset-container" data-prefix="testimonials">
-                        {% for form in testimonial_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                {{ form|crispy }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="testimonial-formset-container">Add Testimonial</button>
-                </div>
-
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Comparison Features</h4>
-                    {{ comparison_feature_formset.management_form }}
-                    <div id="comparison-feature-formset-container" class="formset-container" data-prefix="comparison_features">
-                        {% for form in comparison_feature_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                {{ form|crispy }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="comparison-feature-formset-container">Add Comparison Feature</button>
-                </div>
-
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">FAQs</h4>
-                    {{ faq_formset.management_form }}
-                    <div id="faq-formset-container" class="formset-container" data-prefix="faqs">
-                        {% for form in faq_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                {{ form|crispy }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="faq-formset-container">Add FAQ</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="pricing-formset-container">Add Pricing Feature</button>
                 </div>
             {% endif %}
 
@@ -283,198 +201,366 @@
                 </div>
             {% endif %}
 
+            {% if is_challenge_section %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Problems (The Challenge)</h4>
+                    {{ challenge_formset.management_form }}
+                    <div id="challenge-formset-container" class="formset-container" data-prefix="problems">
+                        {% for form in challenge_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="challenge-formset-container">Add Problem</button>
+                </div>
+            {% endif %}
+
+            {% if is_solution_section %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Features / Solutions</h4>
+                    {{ solution_formset.management_form }}
+                    <div id="solution-formset-container" class="formset-container" data-prefix="features">
+                        {% for form in solution_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="solution-formset-container">Add Feature</button>
+                </div>
+            {% endif %}
+
+            {% if is_usp_section %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">USP Features</h4>
+                    {{ usp_formset.management_form }}
+                    <div id="usp-formset-container" class="formset-container" data-prefix="usp_features">
+                        {% for form in usp_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="usp-formset-container">Add USP Feature</button>
+                </div>
+            {% endif %}
+
+            {% if is_hiw_section %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">How It Works Steps</h4>
+                    {{ hiw_formset.management_form }}
+                    <div id="hiw-formset-container" class="formset-container" data-prefix="howitworks_steps">
+                        {% for form in hiw_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="hiw-formset-container">Add Step</button>
+                </div>
+            {% endif %}
+
+            {% if is_who_section %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Store Types (Who is this for)</h4>
+                    {{ who_formset.management_form }}
+                    <div id="who-formset-container" class="formset-container" data-prefix="store_types">
+                        {% for form in who_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="who-formset-container">Add Store Type</button>
+                </div>
+            {% endif %}
+
+            {% if is_testimonial_section %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Testimonials</h4>
+                    {{ testimonial_formset.management_form }}
+                    <div id="testimonial-formset-container" class="formset-container" data-prefix="testimonials">
+                        {% for form in testimonial_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="testimonial-formset-container">Add Testimonial</button>
+                </div>
+            {% endif %}
+
+            {% if is_comparison_section %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">Comparison Features</h4>
+                    {{ comparison_formset.management_form }}
+                    <div id="comparison-formset-container" class="formset-container" data-prefix="comparison_features">
+                        {% for form in comparison_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="comparison-formset-container">Add Comparison Feature</button>
+                </div>
+            {% endif %}
+
+            {% if is_faq_section %}
+                <div class="mt-5 pt-4 border-top">
+                    <h4 class="mb-3 text-primary">FAQs</h4>
+                    {{ faq_formset.management_form }}
+                    <div id="faq-formset-container" class="formset-container" data-prefix="faqs">
+                        {% for form in faq_formset %}
+                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="faq-formset-container">Add FAQ</button>
+                </div>
+            {% endif %}
+
             <div class="mt-5 pt-4 border-top text-end">
                 <a href="{% url 'custom_admin:model_list' app_label model_slug %}" class="btn btn-light border px-4 me-2">Cancel</a>
                 <button type="submit" class="btn btn-primary px-4 shadow-sm">Save Changes</button>
             </div>
-        </form>
-    </div>
-</div>
+                </form>
+            </div>
+        </div>
 
-{% if preview_url %}
+        {% if preview_url %}
     </div> <!-- end admin-edit-section -->
     <div class="preview-section">
         <div class="preview-header">Live Website Preview</div>
-        <iframe id="livePreview" src="{{ preview_url }}{% if '?' in preview_url %}&{% else %}?{% endif %}is_preview=1"></iframe>
+        <iframe id="livePreview"
+            src="{{ preview_url }}{% if '?' in preview_url %}&{% else %}?{% endif %}is_preview=1"></iframe>
     </div>
 </div> <!-- end admin-preview-layout -->
 
 <script>
-const fileUrlCache = {};
+    const fileUrlCache = {};
 
-function sendLivePreview(scrollTarget = null) {
-    const data = {};
-    const formsets = {};
+    function sendLivePreview(scrollTarget = null) {
+        const data = {};
+        const formsets = {};
 
-    // First pass: collect all fields and identify formsets
-    document.querySelectorAll("input, textarea, select").forEach(field => {
-        if(!field.id) return;
-        const id = field.id.replace("id_", "");
-        
-        // Handle formset fields (e.g., problems-0-title)
-        if (id.includes("-")) {
-            const parts = id.split("-");
-            if (parts.length >= 3) {
-                const prefix = parts[0];
-                const index = parts[1];
-                const fieldName = parts.slice(2).join("-");
+        // First pass: collect all fields and identify formsets
+        document.querySelectorAll("input, textarea, select").forEach(field => {
+            if (!field.id) return;
+            const id = field.id.replace("id_", "");
 
-                if (!formsets[prefix]) formsets[prefix] = {};
-                if (!formsets[prefix][index]) formsets[prefix][index] = {};
-                
-                let value = field.value;
-                if (field.type === 'file' && field.files && field.files.length > 0) {
-                    const file = field.files[0];
-                    const cacheKey = file.name + file.size;
-                    if (!fileUrlCache[cacheKey]) fileUrlCache[cacheKey] = URL.createObjectURL(file);
-                    value = fileUrlCache[cacheKey];
-                } else if (field.type === 'checkbox') {
-                    value = field.checked;
+            // Handle formset fields (e.g., problems-0-title)
+            if (id.includes("-")) {
+                const parts = id.split("-");
+                if (parts.length >= 3) {
+                    const prefix = parts[0];
+                    const index = parts[1];
+                    const fieldName = parts.slice(2).join("-");
+
+                    if (!formsets[prefix]) formsets[prefix] = {};
+                    if (!formsets[prefix][index]) formsets[prefix][index] = {};
+
+                    let value = field.value;
+                    if (field.type === 'file' && field.files && field.files.length > 0) {
+                        const file = field.files[0];
+                        const cacheKey = file.name + file.size;
+                        if (!fileUrlCache[cacheKey]) fileUrlCache[cacheKey] = URL.createObjectURL(file);
+                        value = fileUrlCache[cacheKey];
+                    } else if (field.type === 'checkbox') {
+                        value = field.checked;
+                    }
+
+                    formsets[prefix][index][fieldName] = value;
+                    return;
                 }
-                
-                formsets[prefix][index][fieldName] = value;
-                return;
             }
+
+            // Handle regular fields
+            if (field.type === 'file' && field.files && field.files.length > 0) {
+                const file = field.files[0];
+                const cacheKey = file.name + file.size;
+                if (!fileUrlCache[cacheKey]) fileUrlCache[cacheKey] = URL.createObjectURL(file);
+                data[id] = fileUrlCache[cacheKey];
+            } else if (field.type === 'checkbox') {
+                data[id] = field.checked;
+            } else {
+                data[id] = field.value;
+            }
+        });
+
+        // Second pass: convert formset objects to arrays
+        for (const prefix in formsets) {
+            data[prefix] = Object.values(formsets[prefix]);
         }
 
-        // Handle regular fields
-        if (field.type === 'file' && field.files && field.files.length > 0) {
-            const file = field.files[0];
-            const cacheKey = file.name + file.size;
-            if (!fileUrlCache[cacheKey]) fileUrlCache[cacheKey] = URL.createObjectURL(file);
-            data[id] = fileUrlCache[cacheKey];
-        } else if (field.type === 'checkbox') {
-            data[id] = field.checked;
-        } else {
-            data[id] = field.value;
+        const iframe = document.getElementById("livePreview");
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({
+                source: 'django-admin',
+                model: '{{ model_class_name }}',
+                payload: data,
+                scrollTarget: scrollTarget
+            }, "*");
         }
+    }
+
+    document.addEventListener("input", function (e) {
+        clearTimeout(window.livePreviewTimer);
+        window.livePreviewTimer = setTimeout(sendLivePreview, 300);
     });
 
-    // Second pass: convert formset objects to arrays
-    for (const prefix in formsets) {
-        data[prefix] = Object.values(formsets[prefix]);
-    }
-
-    const iframe = document.getElementById("livePreview");
-    if(iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage({
-            source: 'django-admin',
-            model: '{{ model_name|title|cut:" " }}',
-            payload: data,
-            scrollTarget: scrollTarget
-        }, "*");
-    }
-}
-
-document.addEventListener("input", function(e) {
-    clearTimeout(window.livePreviewTimer);
-    window.livePreviewTimer = setTimeout(sendLivePreview, 300);
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-    const iframe = document.getElementById("livePreview");
-    if(iframe) {
-        iframe.onload = function() {
-            {% if model_slug == 'footer' %}
-            setTimeout(() => {
-                iframe.contentWindow.postMessage({
-                    source: 'django-admin-init',
-                    target: 'footer'
-                }, "*");
-            }, 500);
-            {% elif scroll_target %}
-            setTimeout(() => {
-                iframe.contentWindow.postMessage({
-                    source: 'django-admin',
-                    scrollTarget: '{{ scroll_target }}'
-                }, "*");
-            }, 500);
-            {% endif %}
-        };
-    }
-});
+    document.addEventListener("DOMContentLoaded", function () {
+        const iframe = document.getElementById("livePreview");
+        if (iframe) {
+            iframe.onload = function () {
+                {% if model_slug == 'footer' %}
+                setTimeout(() => {
+                    iframe.contentWindow.postMessage({
+                        source: 'django-admin-init',
+                        target: 'footer'
+                    }, "*");
+                }, 500);
+                {% elif scroll_target %}
+                setTimeout(() => {
+                    sendLivePreview('{{ scroll_target }}');
+                }, 500);
+                {% endif %}
+            };
+        }
+    });
 </script>
 {% endif %}
 {% endblock %}
 {% block scripts %}
 <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 1. Initialize TinyMCE for the content field if it exists
-    const contentField = document.getElementById('id_content');
-    if (contentField) {
-        tinymce.init({
-            selector: '#id_content',
-            height: 400,
-            menubar: false,
-            plugins: [
-                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                'anchor', 'searchreplace', 'visualblocks', 'fullscreen',
-                'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
-            ],
-            toolbar: 'undo redo | blocks | ' +
-            'bold italic forecolor | alignleft aligncenter ' +
-            'alignright alignjustify | bullist numlist outdent indent | ' +
-            'removeformat | help',
-            setup: function(editor) {
-                editor.on('change', function() {
-                    editor.save();
-                    contentField.dispatchEvent(new Event('input', { bubbles: true }));
-                });
-            }
-        });
-    }
-
-    // 2. Auto slug generation
-    const titleField = document.getElementById('id_title');
-    const slugField = document.getElementById('id_slug');
-    if (titleField && slugField) {
-        titleField.addEventListener('keyup', function() {
-            if (!slugField.hasAttribute('data-edited')) {
-                const title = titleField.value;
-                const slug = title.toLowerCase()
-                                .replace(/[^a-z0-9\s-]/g, '')
-                                .trim()
-                                .replace(/\s+/g, '-');
-                slugField.value = slug;
-                slugField.dispatchEvent(new Event('input', { bubbles: true }));
-            }
-        });
-        slugField.addEventListener('input', function() {
-            slugField.setAttribute('data-edited', 'true');
-        });
-    }
-
-    // Custom formset btn logic
-    document.querySelectorAll('.add-form-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const containerId = this.getAttribute('data-target');
-            const container = document.getElementById(containerId);
-            const prefix = container.getAttribute('data-prefix');
-            const totalFormsInput = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
-            const formCount = parseInt(totalFormsInput.value);
-            
-            const forms = container.querySelectorAll('.inline-form');
-            if (forms.length === 0) return;
-            const lastForm = forms[forms.length - 1];
-            const newForm = lastForm.cloneNode(true);
-            
-            const formRegex = new RegExp(`${prefix}-(\\d+)-`, 'g');
-            newForm.innerHTML = newForm.innerHTML.replace(formRegex, `${prefix}-${formCount}-`);
-            
-            const inputs = newForm.querySelectorAll('input, select, textarea');
-            inputs.forEach(input => {
-                if (input.type === 'checkbox' || input.type === 'radio') {
-                    input.checked = false;
-                } else if (input.type !== 'hidden' || input.name.endsWith('-id')) {
-                    input.value = '';
+    document.addEventListener('DOMContentLoaded', function () {
+        // 1. Initialize TinyMCE for the content field if it exists
+        const contentField = document.getElementById('id_content');
+        if (contentField) {
+            tinymce.init({
+                selector: '#id_content',
+                height: 400,
+                menubar: false,
+                plugins: [
+                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                    'anchor', 'searchreplace', 'visualblocks', 'fullscreen',
+                    'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                ],
+                toolbar: 'undo redo | blocks | ' +
+                    'bold italic forecolor | alignleft aligncenter ' +
+                    'alignright alignjustify | bullist numlist outdent indent | ' +
+                    'removeformat | help',
+                setup: function (editor) {
+                    editor.on('change', function () {
+                        editor.save();
+                        contentField.dispatchEvent(new Event('input', { bubbles: true }));
+                    });
                 }
             });
-            
-            container.appendChild(newForm);
-            totalFormsInput.value = formCount + 1;
+        }
+
+        // 2. Auto slug generation
+        const titleField = document.getElementById('id_title');
+        const slugField = document.getElementById('id_slug');
+        if (titleField && slugField) {
+            titleField.addEventListener('keyup', function () {
+                if (!slugField.hasAttribute('data-edited')) {
+                    const title = titleField.value;
+                    const slug = title.toLowerCase()
+                        .replace(/[^a-z0-9\s-]/g, '')
+                        .trim()
+                        .replace(/\s+/g, '-');
+                    slugField.value = slug;
+                    slugField.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            });
+            slugField.addEventListener('input', function () {
+                slugField.setAttribute('data-edited', 'true');
+            });
+        }
+
+        // Custom formset btn logic (delegated for removal)
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-form-btn')) {
+                const form = e.target.closest('.inline-form');
+                const container = form.closest('.formset-container');
+                if (!container) return;
+                const prefix = container.getAttribute('data-prefix');
+                const totalFormsInput = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+
+                const idInput = form.querySelector(`input[name^="${prefix}-"][name$="-id"]`);
+                if (idInput && idInput.value) {
+                    // Database record - find the DELETE checkbox
+                    const deleteCheckbox = form.querySelector(`input[name$="-DELETE"]`);
+                    if (deleteCheckbox) {
+                        deleteCheckbox.checked = true;
+                        form.classList.add('d-none');
+                    } else {
+                        form.remove();
+                        totalFormsInput.value = parseInt(totalFormsInput.value) - 1;
+                    }
+                } else {
+                    // New form
+                    form.remove();
+                    totalFormsInput.value = parseInt(totalFormsInput.value) - 1;
+                }
+            }
+        });
+
+        document.querySelectorAll('.add-form-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const containerId = this.getAttribute('data-target');
+                const container = document.getElementById(containerId);
+                const prefix = container.getAttribute('data-prefix');
+                const totalFormsInput = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+                const formCount = parseInt(totalFormsInput.value);
+
+                // Try to find a template or the first form to clone
+                const forms = container.querySelectorAll('.inline-form:not(.d-none)');
+                const formToClone = forms.length > 0 ? forms[0] : container.querySelector('.inline-form');
+
+                if (!formToClone) return;
+
+                const newForm = formToClone.cloneNode(true);
+                newForm.classList.remove('d-none');
+
+                const formRegex = new RegExp(`${prefix}-(\\d+)-`, 'g');
+                newForm.innerHTML = newForm.innerHTML.replace(formRegex, `${prefix}-${formCount}-`);
+
+                const inputs = newForm.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    if (input.type === 'checkbox' || input.type === 'radio') {
+                        input.checked = false;
+                    } else if (input.type !== 'hidden' || !input.name.endsWith('-id')) {
+                        input.value = '';
+                    }
+                    // Ensure ID is cleared for new forms
+                    if (input.name.endsWith('-id')) {
+                        input.value = '';
+                    }
+                    // Uncheck DELETE for the new form
+                    if (input.name.endsWith('-DELETE')) {
+                        input.checked = false;
+                    }
+                });
+
+                container.appendChild(newForm);
+                totalFormsInput.value = formCount + 1;
+
+                // Re-trigger live preview
+                if (typeof sendLivePreview === 'function') sendLivePreview();
+            });
         });
     });
-});
 </script>
 {% endblock %}

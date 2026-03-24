@@ -74,7 +74,7 @@ const SolutionSection = () => {
   useEffect(() => {
     const handler = (event: any) => {
       if (event.data && event.data.source === 'django-admin') {
-        if (event.data.model === 'LandingPageContent') {
+        if (event.data.model === 'LandingPageContent' || event.data.model === 'SolutionContent') {
           setContent((prev: any) => ({ ...prev, ...event.data.payload }));
         } else if (event.data.model === 'Feature') {
           const item = event.data.payload;

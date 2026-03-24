@@ -1,84 +1,144 @@
 {% extends 'custom_admin/base.html' %}
 {% block content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
-    <h1 class="h2 fw-bold text-dark"><i class="bi bi-speedometer2 text-primary me-2"></i>Dashboard Overview</h1>
+<div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-1 text-slate-800">Dashboard Overview</h1>
+        <p class="text-muted small mb-0">Welcome back! Here's what's happening with AI-Setu today.</p>
+    </div>
+    <div class="text-muted small">
+        <i class="bi bi-calendar3 me-1"></i> {% now "f j, Y" %}
+    </div>
 </div>
 
 <style>
-    .dashboard-card {
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        border-radius: 12px;
+    .stat-card {
+        border-radius: 1.25rem;
+        border: 1px solid rgba(0,0,0,0.05);
+        background: white;
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
     }
-    .dashboard-card:hover {
+
+    .stat-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
     }
-    .card-icon {
-        font-size: 2.5rem;
-        opacity: 0.5;
-        position: absolute;
-        right: 20px;
-        bottom: 10px;
+
+    .stat-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
     }
-    .card-title {
-        letter-spacing: 0.5px;
-        font-size: 0.9rem;
+
+    .stat-value {
+        font-size: 2.25rem;
+        font-weight: 800;
+        color: #1e293b;
+        line-height: 1;
+        margin-bottom: 0.5rem;
     }
+
+    .stat-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    .stat-trend {
+        margin-top: auto;
+        padding-top: 1rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Color variants */
+    .icon-primary { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+    .icon-info { background: rgba(14, 165, 233, 0.1); color: #0ea5e9; }
+    .icon-success { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+    .icon-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    .icon-warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
 </style>
 
 <div class="row g-4">
     <!-- Demo Requests -->
     <div class="col-12 col-md-6 col-lg-4">
-        <div class="card dashboard-card bg-primary text-white bg-gradient shadow-sm border-0 h-100 position-relative">
-            <div class="card-body p-4">
-                <h6 class="card-title text-uppercase fw-semibold mb-3">Demo Requests</h6>
-                <h1 class="display-4 fw-bold mb-0">{{ demo_count }}</h1>
-                <i class="bi bi-display card-icon"></i>
+        <div class="stat-card p-4">
+            <div class="stat-icon-wrapper icon-primary">
+                <i class="bi bi-display"></i>
+            </div>
+            <div class="stat-value">{{ demo_count }}</div>
+            <div class="stat-label">Demo Requests</div>
+            <div class="stat-trend text-primary">
+                <i class="bi bi-activity me-1"></i> Live tracking enabled
             </div>
         </div>
     </div>
 
     <!-- Job Applications -->
     <div class="col-12 col-md-6 col-lg-4">
-        <div class="card dashboard-card bg-info text-white bg-gradient shadow-sm border-0 h-100 position-relative">
-            <div class="card-body p-4">
-                <h6 class="card-title text-uppercase fw-semibold mb-3">Job Applications</h6>
-                <h1 class="display-4 fw-bold mb-0">{{ job_application_count }}</h1>
-                <i class="bi bi-briefcase card-icon"></i>
+        <div class="stat-card p-4">
+            <div class="stat-icon-wrapper icon-info">
+                <i class="bi bi-briefcase"></i>
+            </div>
+            <div class="stat-value">{{ job_application_count }}</div>
+            <div class="stat-label">Job Applications</div>
+            <div class="stat-trend text-info">
+                <i class="bi bi-people me-1"></i> Pending review
             </div>
         </div>
     </div>
 
     <!-- Pricing Signups -->
     <div class="col-12 col-md-6 col-lg-4">
-        <div class="card dashboard-card bg-success text-white bg-gradient shadow-sm border-0 h-100 position-relative">
-            <div class="card-body p-4">
-                <h6 class="card-title text-uppercase fw-semibold mb-3">Pricing Signups</h6>
-                <h1 class="display-4 fw-bold mb-0">{{ signup_count }}</h1>
-                <i class="bi bi-bag-check card-icon"></i>
+        <div class="stat-card p-4">
+            <div class="stat-icon-wrapper icon-success">
+                <i class="bi bi-bag-check"></i>
+            </div>
+            <div class="stat-value">{{ signup_count }}</div>
+            <div class="stat-label">Pricing Signups</div>
+            <div class="stat-trend text-success">
+                <i class="bi bi-graph-up me-1"></i> Conversion stable
             </div>
         </div>
     </div>
 
     <!-- Total Payments -->
     <div class="col-12 col-md-6 col-lg-4">
-        <div class="card dashboard-card bg-danger text-white bg-gradient shadow-sm border-0 h-100 position-relative">
-            <div class="card-body p-4">
-                <h6 class="card-title text-uppercase fw-semibold mb-3">Total Payments</h6>
-                <h1 class="display-4 fw-bold mb-0">{{ payment_count }}</h1>
-                <i class="bi bi-credit-card card-icon"></i>
+        <div class="stat-card p-4">
+            <div class="stat-icon-wrapper icon-danger">
+                <i class="bi bi-credit-card"></i>
+            </div>
+            <div class="stat-value">{{ payment_count }}</div>
+            <div class="stat-label">Total Payments</div>
+            <div class="stat-trend text-danger">
+                <i class="bi bi-shield-check me-1"></i> Secured transactions
             </div>
         </div>
     </div>
 
     <!-- Contact Messages -->
     <div class="col-12 col-md-6 col-lg-4">
-        <div class="card dashboard-card bg-warning text-dark bg-gradient shadow-sm border-0 h-100 position-relative">
-            <div class="card-body p-4">
-                <h6 class="card-title text-uppercase fw-semibold mb-3">Contact Messages</h6>
-                <h1 class="display-4 fw-bold mb-0">{{ contact_count }}</h1>
-                <i class="bi bi-envelope card-icon text-dark opacity-25"></i>
+        <div class="stat-card p-4">
+            <div class="stat-icon-wrapper icon-warning">
+                <i class="bi bi-envelope"></i>
+            </div>
+            <div class="stat-value">{{ contact_count }}</div>
+            <div class="stat-label">Contact Messages</div>
+            <div class="stat-trend text-warning">
+                <i class="bi bi-reply me-1"></i> Action required
             </div>
         </div>
     </div>

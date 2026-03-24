@@ -1,18 +1,41 @@
 {% extends 'custom_admin/base.html' %}
 {% block content %}
-<div class="pt-3 pb-2 mb-4 border-bottom">
-    <h1 class="h2 text-danger fw-bold">Confirm Deletion</h1>
+<div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4">
+    <div>
+        <h1 class="h3 fw-bold mb-1 text-slate-800">Confirm Deletion</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{% url 'custom_admin:dashboard' %}" class="text-decoration-none text-muted small">Admin</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'custom_admin:model_list' app_label model_slug %}" class="text-decoration-none text-muted small">{{ model_name_plural }}</a></li>
+                <li class="breadcrumb-item active small" aria-current="page">Delete</li>
+            </ol>
+        </nav>
+    </div>
 </div>
-<div class="card shadow-sm border-0 mx-auto" style="max-width: 600px;">
+
+<div class="card card-modern border-0 mx-auto" style="max-width: 600px;">
     <div class="card-body text-center p-5">
-        <div class="display-1 text-danger mb-4"><i class="bi bi-exclamation-circle"></i></div>
-        <h4 class="mb-3 fw-bold">Are you sure you want to delete this {{ model_name }}?</h4>
-        <p class="text-muted mb-5">"<strong>{{ object }}</strong>" will be permanently deleted. This action cannot be undone.</p>
+        <div class="stat-icon-wrapper icon-danger mx-auto mb-4" style="width: 80px; height: 80px; font-size: 2.5rem;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <h4 class="mb-3 fw-bold text-slate-800">Are you sure?</h4>
+        <p class="text-muted mb-5">You are about to delete "<strong>{{ object }}</strong>". This action is permanent and cannot be undone.</p>
+        
         <form method="post">
             {% csrf_token %}
-            <a href="{% url 'custom_admin:model_list' app_label model_slug %}" class="btn btn-light border px-4 me-2">Cancel</a>
-            <button type="submit" class="btn btn-danger px-4 shadow-sm">Yes, Delete</button>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{% url 'custom_admin:model_list' app_label model_slug %}" class="btn btn-light border rounded-pill px-4 fw-bold">
+                    <i class="bi bi-x-lg me-1"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-danger rounded-pill px-4 shadow-sm fw-bold">
+                    <i class="bi bi-trash me-1"></i> Yes, Delete
+                </button>
+            </div>
         </form>
     </div>
 </div>
+
+<style>
+    .icon-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+</style>
 {% endblock %}

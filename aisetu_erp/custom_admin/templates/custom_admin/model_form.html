@@ -1,19 +1,36 @@
 {% extends 'custom_admin/base.html' %}
 {% load crispy_forms_tags %}
 {% block content %}
-<div class="pt-3 pb-2 mb-4 border-bottom">
-    <h1 class="h2 fw-bold">{% if object %}Edit{% else %}Create{% endif %} {{ model_name }}</h1>
+<div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4">
+    <h1 class="h3 fw-bold mb-0 text-slate-800">
+        <span class="text-primary opacity-75">{% if object %}Edit{% else %}Create{% endif %}</span> 
+        {{ model_name }}
+    </h1>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="{% url 'custom_admin:dashboard' %}" class="text-decoration-none text-muted">Admin</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'custom_admin:model_list' app_label model_slug %}" class="text-decoration-none text-muted">{{ model_name_plural }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{% if object %}Edit{% else %}New{% endif %}</li>
+        </ol>
+    </nav>
 </div>
+
 {% if preview_url %}
 <style>
     .admin-preview-layout {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
+        grid-template-columns: 1fr 400px;
+        gap: 30px;
         align-items: start;
     }
 
-    @media (max-width: 991.98px) {
+    @media (min-width: 1400px) {
+        .admin-preview-layout {
+            grid-template-columns: 1fr 500px;
+        }
+    }
+
+    @media (max-width: 1200px) {
         .admin-preview-layout {
             grid-template-columns: 1fr;
         }
@@ -24,342 +41,456 @@
     }
 
     .preview-section {
-        border-left: 1px solid #ddd;
-        padding-left: 20px;
+        position: sticky;
+        top: 2rem;
+        height: calc(100vh - 4rem);
         display: flex;
         flex-direction: column;
-        position: sticky;
-        top: 20px;
-        height: calc(100vh - 40px);
-        align-self: start;
+        background: #f1f5f9;
+        border-radius: 2rem;
+        padding: 1.5rem;
+        border: 8px solid #334155;
+        box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
     }
 
-    @media (max-width: 991.98px) {
+    @media (max-width: 1200px) {
         .preview-section {
-            border-left: none;
-            border-top: 1px solid #ddd;
-            padding-left: 0;
-            padding-top: 20px;
             position: static;
-            height: auto;
+            height: 800px;
+            margin-top: 2rem;
         }
     }
 
     .preview-header {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 10px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .preview-header i {
+        margin-right: 0.5rem;
     }
 
     .preview-section iframe {
         width: 100%;
         flex: 1;
         min-height: 0;
-        border: 1px solid #ddd;
-        border-radius: 6px;
+        border: none;
+        border-radius: 1rem;
         background: #fff;
+        box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.06);
     }
 
-    @media (max-width: 991.98px) {
-        .preview-section iframe {
-            min-height: 600px;
-        }
+    /* Form Card Enhancements */
+    .card-modern {
+        border-radius: 1.25rem !important;
+        border: 1px solid rgba(0,0,0,0.05) !important;
+        box-shadow: var(--card-shadow) !important;
+        overflow: hidden;
+    }
+
+    .card-header-modern {
+        background: white;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 1.5rem 2rem;
+    }
+
+    .inline-form-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+        position: relative;
+        transition: all 0.2s;
+    }
+
+    .inline-form-card:hover {
+        border-color: var(--primary-color);
+        background: white;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .section-title::before {
+        content: '';
+        display: inline-block;
+        width: 4px;
+        height: 1.25rem;
+        background: var(--primary-color);
+        margin-right: 0.75rem;
+        border-radius: 2px;
+    }
+
+    /* Crispy Form Tweaks */
+    .form-label {
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border-color: #e2e8f0;
+        padding: 0.625rem 0.875rem;
+        border-radius: 0.5rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     }
 </style>
 <div class="admin-preview-layout">
     <div class="admin-edit-section">
         {% endif %}
 
-        <div class="card shadow-sm border-0 w-100 mx-auto" style="max-width: 900px;">
+        <div class="card card-modern border-0">
             <div class="card-body p-4 p-md-5">
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-
-            {{ form|crispy }}
+                    
+                    <div class="mb-4">
+                        <h4 class="section-title">General Information</h4>
+                        {{ form|crispy }}
+                    </div>
             
             {% if is_career_page %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Cultures</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">Cultures</h4>
                     {{ culture_formset.management_form }}
                     <div id="culture-formset-container" class="formset-container" data-prefix="cultures">
                         {% for form in culture_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                            <div class="inline-form inline-form-card position-relative">
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="culture-formset-container">Add Culture</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="culture-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Culture
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_career_page %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Perks</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">Perks</h4>
                     {{ perk_formset.management_form }}
                     <div id="perk-formset-container" class="formset-container" data-prefix="perks">
                         {% for form in perk_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                            <div class="inline-form inline-form-card position-relative">
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="perk-formset-container">Add Perk</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="perk-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Perk
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_career_page %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Job Positions</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">Job Positions</h4>
                     {{ job_formset.management_form }}
                     <div id="job-formset-container" class="formset-container" data-prefix="jobs">
                         {% for form in job_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                            <div class="inline-form inline-form-card position-relative">
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="job-formset-container">Add Job Position</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="job-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Job Position
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_child_job_position %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Job Descriptions</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">Job Descriptions</h4>
                     {{ description_formset.management_form }}
                     <div id="description-formset-container" class="formset-container" data-prefix="descriptions">
                         {% for form in description_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                            <div class="inline-form inline-form-card position-relative">
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="description-formset-container">Add Description</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="description-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Description
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_child_job_position %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Job Skills</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">Job Skills</h4>
                     {{ skill_formset.management_form }}
                     <div id="skill-formset-container" class="formset-container" data-prefix="skills">
                         {% for form in skill_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                            <div class="inline-form inline-form-card position-relative">
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="skill-formset-container">Add Skill</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="skill-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Skill
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_about_page %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Who We Serve</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">Who We Serve</h4>
                     {{ serve_formset.management_form }}
                     <div id="serve-formset-container" class="formset-container" data-prefix="serve_items">
                         {% for form in serve_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                            <div class="inline-form inline-form-card position-relative">
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="serve-formset-container">Add Serve Item</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="serve-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Serve Item
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_policy %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Policy Sections (Points)</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">Policy Sections (Points)</h4>
                     {{ section_formset.management_form }}
                     <div id="section-formset-container" class="formset-container" data-prefix="sections">
                         {% for form in section_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                            <div class="inline-form inline-form-card position-relative">
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="section-formset-container">Add Policy Section</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="section-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Policy Section
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_trust_section %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Trusted Retailers (Trust Strip)</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">Trusted Retailers (Trust Strip)</h4>
                     {{ trust_formset.management_form }}
                     <div id="trust-formset-container" class="formset-container" data-prefix="trust_items">
                         {% for form in trust_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                            <div class="inline-form inline-form-card position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 remove-form-btn" aria-label="Close"></button>
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="trust-formset-container">Add Item</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="trust-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Item
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_pricing_section %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Pricing Plan Features</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">Pricing Plan Features</h4>
                     {{ pricing_formset.management_form }}
                     <div id="pricing-formset-container" class="formset-container" data-prefix="pricing_features">
                         {% for form in pricing_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                            <div class="inline-form inline-form-card position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 remove-form-btn" aria-label="Close"></button>
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="pricing-formset-container">Add Pricing Feature</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="pricing-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Pricing Feature
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_referral_program %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Referral Perks</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">Referral Perks</h4>
                     {{ referral_formset.management_form }}
                     <div id="referral-formset-container" class="formset-container" data-prefix="referral_perks">
                         {% for form in referral_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
+                            <div class="inline-form inline-form-card position-relative">
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="referral-formset-container">Add Referral Perk</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="referral-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Referral Perk
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_challenge_section %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Problems (The Challenge)</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">Problems (The Challenge)</h4>
                     {{ challenge_formset.management_form }}
                     <div id="challenge-formset-container" class="formset-container" data-prefix="problems">
                         {% for form in challenge_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                            <div class="inline-form inline-form-card position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 remove-form-btn" aria-label="Close"></button>
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="challenge-formset-container">Add Problem</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="challenge-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Problem
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_solution_section %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Features / Solutions</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">Features / Solutions</h4>
                     {{ solution_formset.management_form }}
                     <div id="solution-formset-container" class="formset-container" data-prefix="features">
                         {% for form in solution_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                            <div class="inline-form inline-form-card position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 remove-form-btn" aria-label="Close"></button>
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="solution-formset-container">Add Feature</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="solution-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Feature
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_usp_section %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">USP Features</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">USP Features</h4>
                     {{ usp_formset.management_form }}
                     <div id="usp-formset-container" class="formset-container" data-prefix="usp_features">
                         {% for form in usp_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                            <div class="inline-form inline-form-card position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 remove-form-btn" aria-label="Close"></button>
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="usp-formset-container">Add USP Feature</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="usp-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add USP Feature
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_hiw_section %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">How It Works Steps</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">How It Works Steps</h4>
                     {{ hiw_formset.management_form }}
                     <div id="hiw-formset-container" class="formset-container" data-prefix="howitworks_steps">
                         {% for form in hiw_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                            <div class="inline-form inline-form-card position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 remove-form-btn" aria-label="Close"></button>
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="hiw-formset-container">Add Step</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="hiw-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Step
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_who_section %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Store Types (Who is this for)</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">Store Types (Who is this for)</h4>
                     {{ who_formset.management_form }}
                     <div id="who-formset-container" class="formset-container" data-prefix="store_types">
                         {% for form in who_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                            <div class="inline-form inline-form-card position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 remove-form-btn" aria-label="Close"></button>
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="who-formset-container">Add Store Type</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="who-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Store Type
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_testimonial_section %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Testimonials</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">Testimonials</h4>
                     {{ testimonial_formset.management_form }}
                     <div id="testimonial-formset-container" class="formset-container" data-prefix="testimonials">
                         {% for form in testimonial_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                            <div class="inline-form inline-form-card position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 remove-form-btn" aria-label="Close"></button>
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="testimonial-formset-container">Add Testimonial</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="testimonial-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Testimonial
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_comparison_section %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">Comparison Features</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">Comparison Features</h4>
                     {{ comparison_formset.management_form }}
                     <div id="comparison-formset-container" class="formset-container" data-prefix="comparison_features">
                         {% for form in comparison_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                            <div class="inline-form inline-form-card position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 remove-form-btn" aria-label="Close"></button>
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="comparison-formset-container">Add Comparison Feature</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="comparison-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Comparison Feature
+                    </button>
                 </div>
             {% endif %}
 
             {% if is_faq_section %}
-                <div class="mt-5 pt-4 border-top">
-                    <h4 class="mb-3 text-primary">FAQs</h4>
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">FAQs</h4>
                     {{ faq_formset.management_form }}
                     <div id="faq-formset-container" class="formset-container" data-prefix="faqs">
                         {% for form in faq_formset %}
-                            <div class="inline-form border p-3 mb-3 rounded bg-light position-relative">
-                                <button type="button" class="btn-close position-absolute top-0 end-0 m-2 remove-form-btn" aria-label="Close"></button>
+                            <div class="inline-form inline-form-card position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 remove-form-btn" aria-label="Close"></button>
                                 {{ form|crispy }}
                             </div>
                         {% endfor %}
                     </div>
-                    <button type="button" class="btn btn-sm btn-outline-secondary add-form-btn" data-target="faq-formset-container">Add FAQ</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="faq-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add FAQ
+                    </button>
                 </div>
             {% endif %}
 
-            <div class="mt-5 pt-4 border-top text-end">
-                <a href="{% url 'custom_admin:model_list' app_label model_slug %}" class="btn btn-light border px-4 me-2">Cancel</a>
-                <button type="submit" class="btn btn-primary px-4 shadow-sm">Save Changes</button>
+            <div class="mt-5 pt-4 border-top d-flex gap-2 justify-content-end">
+                <a href="{% url 'custom_admin:model_list' app_label model_slug %}" class="btn btn-light border px-4 rounded-pill fw-bold text-muted">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary px-5 rounded-pill fw-bold shadow-sm">
+                    <i class="bi bi-check2-circle me-1"></i> Save Changes
+                </button>
             </div>
                 </form>
             </div>

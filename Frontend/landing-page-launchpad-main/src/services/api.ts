@@ -93,6 +93,20 @@ export interface LandingPageContent {
     seo_description?: string;
     seo_keywords?: string;
 
+    // Visibility Toggles
+    show_hero?: boolean;
+    show_trust_strip?: boolean;
+    show_problem?: boolean;
+    show_solution?: boolean;
+    show_usp?: boolean;
+    show_how_it_works?: boolean;
+    show_who_is_this_for?: boolean;
+    show_pricing?: boolean;
+    show_referral?: boolean;
+    show_comparison?: boolean;
+    show_testimonials?: boolean;
+    show_faq?: boolean;
+    show_cta?: boolean;
 }
 
 export const fetchLandingPageContent = async (): Promise<LandingPageContent | null> => {
@@ -283,6 +297,13 @@ export interface ContactPageContent {
   seo_title?: string;
   seo_description?: string;
   seo_keywords?: string;
+
+  // Visibility Toggles
+  show_hero?: boolean;
+  show_cards?: boolean;
+  show_form?: boolean;
+  show_why_choose?: boolean;
+  show_cta?: boolean;
 }
 
 export const fetchContactPageContent = async (): Promise<ContactPageContent | null> => {

@@ -164,7 +164,11 @@
                     {% csrf_token %}
                     
                     <div class="mb-4">
-                        <h4 class="section-title">General Information</h4>
+                        {% if section_title %}
+                            <h4 class="section-title" id="section_{{ section_param }}">{{ section_title }}</h4>
+                        {% else %}
+                            <h4 class="section-title">{% if object %}Edit Content{% else %}General Information{% endif %}</h4>
+                        {% endif %}
                         {{ form|crispy }}
                     </div>
             
@@ -341,7 +345,7 @@
             {% endif %}
 
             {% if is_challenge_section %}
-                <div class="mt-5 pt-2">
+                <div class="mt-5 pt-2" id="section_challenge">
                     <h4 class="section-title">Problems (The Challenge)</h4>
                     {{ challenge_formset.management_form }}
                     <div id="challenge-formset-container" class="formset-container" data-prefix="problems">
@@ -359,7 +363,7 @@
             {% endif %}
 
             {% if is_solution_section %}
-                <div class="mt-5 pt-2">
+                <div class="mt-5 pt-2" id="section_solution">
                     <h4 class="section-title">Features / Solutions</h4>
                     {{ solution_formset.management_form }}
                     <div id="solution-formset-container" class="formset-container" data-prefix="features">
@@ -377,7 +381,7 @@
             {% endif %}
 
             {% if is_usp_section %}
-                <div class="mt-5 pt-2">
+                <div class="mt-5 pt-2" id="section_usp">
                     <h4 class="section-title">USP Features</h4>
                     {{ usp_formset.management_form }}
                     <div id="usp-formset-container" class="formset-container" data-prefix="usp_features">
@@ -395,7 +399,7 @@
             {% endif %}
 
             {% if is_hiw_section %}
-                <div class="mt-5 pt-2">
+                <div class="mt-5 pt-2" id="section_how_it_works">
                     <h4 class="section-title">How It Works Steps</h4>
                     {{ hiw_formset.management_form }}
                     <div id="hiw-formset-container" class="formset-container" data-prefix="howitworks_steps">
@@ -413,7 +417,7 @@
             {% endif %}
 
             {% if is_who_section %}
-                <div class="mt-5 pt-2">
+                <div class="mt-5 pt-2" id="section_who_is_this_for">
                     <h4 class="section-title">Store Types (Who is this for)</h4>
                     {{ who_formset.management_form }}
                     <div id="who-formset-container" class="formset-container" data-prefix="store_types">
@@ -431,7 +435,7 @@
             {% endif %}
 
             {% if is_testimonial_section %}
-                <div class="mt-5 pt-2">
+                <div class="mt-5 pt-2" id="section_testimonials">
                     <h4 class="section-title">Testimonials</h4>
                     {{ testimonial_formset.management_form }}
                     <div id="testimonial-formset-container" class="formset-container" data-prefix="testimonials">
@@ -449,7 +453,7 @@
             {% endif %}
 
             {% if is_comparison_section %}
-                <div class="mt-5 pt-2">
+                <div class="mt-5 pt-2" id="section_comparison">
                     <h4 class="section-title">Comparison Features</h4>
                     {{ comparison_formset.management_form }}
                     <div id="comparison-formset-container" class="formset-container" data-prefix="comparison_features">
@@ -467,7 +471,7 @@
             {% endif %}
 
             {% if is_faq_section %}
-                <div class="mt-5 pt-2">
+                <div class="mt-5 pt-2" id="section_faq">
                     <h4 class="section-title">FAQs</h4>
                     {{ faq_formset.management_form }}
                     <div id="faq-formset-container" class="formset-container" data-prefix="faqs">
@@ -594,6 +598,21 @@
                 }, 500);
                 {% endif %}
             };
+        }
+
+        // Section Auto-Scroll Logic
+        const sectionParam = "{{ section_param|default:'' }}";
+        if (sectionParam) {
+            const targetId = "section_" + sectionParam;
+            const element = document.getElementById(targetId);
+            if (element) {
+                setTimeout(() => {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Visual highlight
+                    element.classList.add('bg-light');
+                    setTimeout(() => element.classList.remove('bg-light'), 3000);
+                }, 500);
+            }
         }
     });
 </script>

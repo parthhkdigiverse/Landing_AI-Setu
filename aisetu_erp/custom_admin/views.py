@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 import random, string, json
 from django.core.mail import send_mail
 from django.utils import timezone
@@ -21,8 +22,8 @@ from website.models import (
     PricingContent, ReferralProgramContent, TrustContent,
     ChallengeContent, SolutionContent, USPContent,
     HowItWorksContent, WhoIsThisForContent, TestimonialContent,
-    ComparisonContent, FAQContent, HeroContent, CTAContent,
-    AboutPageContent, AboutUsServeItem, Policy, PolicySection
+    ComparisonContent, FAQContent, CTAContent, ContactPageContent, 
+    HeroContent, AboutPageContent, AboutUsServeItem, Policy, PolicySection
 )
 ReferralPerkFormSet = inlineformset_factory(ReferralProgramContent, ReferralPerk, fk_name='landing_page', fields='__all__', extra=1, can_delete=True)
 
@@ -179,7 +180,12 @@ def edit_singleton(request, model_name):
     obj = model.objects.first()
     if not obj:
         obj = model.objects.create()
-    return redirect(reverse('custom_admin:model_update', kwargs={'app_label': 'website', 'model_name': model_name, 'pk': obj.pk}))
+    
+    url = reverse('custom_admin:model_update', kwargs={'app_label': 'website', 'model_name': model_name, 'pk': obj.pk})
+    query_string = request.GET.urlencode()
+    if query_string:
+        url += '?' + query_string
+    return redirect(url)
 
 class AdminRequiredMixin:
     @method_decorator(custom_admin_required)
@@ -366,33 +372,86 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
 
 class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
     template_name = 'custom_admin/model_form.html'
+    
     def get_form_class(self):
         from django.forms import modelform_factory
-        model, model_name = self.get_model(), self.kwargs.get('model_name', '').lower()
+        model, model_name = self.get_model(), self.kwargs.get('model_name', '').lower().strip()
+        section = self.request.GET.get('section')
+        
+        # --- Field Definitions ---
         hero_fields = ['hero_eyebrow', 'hero_title', 'hero_highlighted_title', 'hero_subtitle', 'hero_highlights', 'primary_cta_text', 'secondary_cta_text', 'trusted_retailers_count', 'hero_stats_label', 'hero_stats_value']
-        cta_fields = ['cta_badge', 'cta_title', 'cta_description', 'cta_button_text', 'cta_small_text']
         seo_fields = ['seo_title', 'seo_description', 'seo_keywords']
         
-        if model_name == 'pricingcontent':
-            fields = ['pricing_main_title', 'pricing_main_desc', 'pricing_label', 'pricing_title', 'pricing_plan_name', 'pricing_old_price', 'pricing_price', 'pricing_price_suffix']
-        elif model_name == 'landingpagecontent': fields = hero_fields + seo_fields
+        # Landing Page Sub-sections (Model fields from LandingPageContent)
+        trust_fields = ['trust_item1', 'trust_item2', 'trust_item3', 'trust_item4']
+        challenge_fields = ['problem_section_label', 'problem_section_title']
+        solution_fields = ['feature_title', 'feature_title2', 'solution_section_label', 'solution_section_title']
+        usp_fields = ['usp_badge_text', 'usp_title', 'usp_description']
+        hiw_fields = ['howitworks_label', 'howitworks_title']
+        who_fields = ['who_main_title', 'who_title']
+        pricing_fields = ['pricing_main_title', 'pricing_main_desc', 'pricing_label', 'pricing_title', 'pricing_plan_name', 'pricing_old_price', 'pricing_price', 'pricing_price_suffix'] + [f'pricing_feature{i}' for i in range(1, 9)]
+        referral_fields = ['referral_main_title', 'referral_main_desc', 'referral_label', 'referral_title', 'join_referral']
+        testimonial_fields = ['testimonial_label', 'testimonial_title', 'review_button', 'all_reviews_title', 'all_reviews_desc']
+        comparison_fields = ['comparison_title', 'comparison_subtitle', 'comparison_title1', 'comparison_title2', 'comparison_title3']
+        faq_fields = ['faq_label', 'faq_title']
+        cta_fields = ['cta_badge', 'cta_title', 'cta_description', 'cta_button_text', 'cta_small_text']
+
+        # Contact Page Sub-sections
+        contact_hero = ['hero_title', 'hero_description']
+        contact_cards = ['call_title', 'call_phone', 'call_phone_number', 'call_subtext', 'email_title', 'email_address', 'email_address_link', 'email_subtext', 'visit_title', 'visit_address', 'visit_subtext', 'visit_map_url', 'support_title', 'support_time', 'support_subtext']
+        contact_form = ['form_title', 'name_label', 'name_placeholder', 'phone_label', 'phone_placeholder', 'email_label', 'email_placeholder', 'company_label', 'company_placeholder', 'message_label', 'message_placeholder', 'form_button_text']
+        contact_why = ['why_title', 'why_description', 'feature_1_title', 'feature_2_title', 'feature_3_title', 'feature_4_title']
+        contact_cta = ['cta_title', 'cta_description', 'cta_button_text1', 'cta_button_text2', 'cta_button_text3']
+
+        # --- Model Routing ---
+        if model_name == 'landingpagecontent':
+            if section == 'hero': fields = hero_fields
+            elif section == 'seo': fields = seo_fields
+            else: fields = hero_fields + seo_fields
+        elif model_name == 'herocontent': fields = hero_fields
+        elif model_name == 'trustcontent': fields = trust_fields
+        elif model_name == 'challengecontent': fields = challenge_fields
+        elif model_name == 'solutioncontent': fields = solution_fields
+        elif model_name == 'uspcontent': fields = usp_fields
+        elif model_name == 'howitworkscontent': fields = hiw_fields
+        elif model_name == 'whoisthisforcontent': fields = who_fields
+        elif model_name == 'pricingcontent': fields = pricing_fields
+        elif model_name == 'referralprogramcontent': fields = referral_fields
+        elif model_name == 'testimonialcontent': fields = testimonial_fields
+        elif model_name == 'comparisoncontent': fields = comparison_fields
+        elif model_name == 'faqcontent': fields = faq_fields
         elif model_name == 'ctacontent': fields = cta_fields
-        elif model_name == 'referralprogramcontent': fields = ['referral_main_title', 'referral_main_desc', 'referral_label', 'referral_title', 'join_referral']
-        elif model_name == 'challengecontent': fields = ['problem_section_label', 'problem_section_title']
-        elif model_name == 'solutioncontent': fields = ['feature_title', 'feature_title2', 'solution_section_label', 'solution_section_title']
-        elif model_name == 'uspcontent': fields = ['usp_badge_text', 'usp_title', 'usp_description']
-        elif model_name == 'howitworkscontent': fields = ['howitworks_label', 'howitworks_title']
-        elif model_name == 'whoisthisforcontent': fields = ['who_main_title', 'who_title']
-        elif model_name == 'testimonialcontent': fields = ['testimonial_label', 'testimonial_title', 'review_button', 'all_reviews_title', 'all_reviews_desc']
-        elif model_name == 'comparisoncontent': fields = ['comparison_title', 'comparison_subtitle', 'comparison_title1', 'comparison_title2', 'comparison_title3']
-        elif model_name == 'faqcontent': fields = ['faq_label', 'faq_title']
-        elif model_name == 'trustcontent': fields = []
+        
+        elif model_name == 'contactpagecontent':
+            if section == 'hero': fields = contact_hero
+            elif section == 'contact_cards': fields = contact_cards
+            elif section == 'form': fields = contact_form
+            elif section == 'why_choose': fields = contact_why
+            elif section == 'cta': fields = contact_cta
+            elif section == 'seo': fields = seo_fields
+            else: fields = contact_hero + contact_cards + contact_form + contact_why + contact_cta + seo_fields
+        
         else: fields = '__all__'
+        
         return modelform_factory(model, fields=fields)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        section = self.request.GET.get('section')
+        context['section_param'] = section
         model_name = self.kwargs.get('model_name', '').lower().strip()
+        
+        # --- Resolve Dynamic Section Title ---
+        if section:
+            titles = {
+                'hero': 'Hero Section', 'trust_strip': 'Trust Strip', 'problem': 'The Challenge',
+                'solution': 'Solutions', 'usp': 'USP Features', 'how_it_works': 'How It Works',
+                'who_is_this_for': 'Who Is This For', 'pricing': 'Pricing Plan', 'referral': 'Referral Perks',
+                'comparison': 'Comparisons', 'testimonials': 'Testimonials', 'faq': 'FAQs', 'cta': 'Final CTA',
+                'contact_cards': 'Contact Cards', 'form': 'Contact Form', 'why_choose': 'Why Choose Us', 'seo': 'SEO Metadata'
+            }
+            context['section_title'] = titles.get(section, section.replace('_', ' ').title())
+        
         if 'careerpage' in model_name: context.update({'is_career_page': True, 'culture_formset': CultureFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object), 'perk_formset': PerkFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object), 'job_formset': OpenPositionFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
         elif 'childjobposition' in model_name: context.update({'is_child_job_position': True, 'description_formset': JobDescriptionFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object), 'skill_formset': JobSkillFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
         elif 'aboutpagecontent' in model_name: context.update({'is_about_page': True, 'serve_formset': ServeItemFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
@@ -429,17 +488,27 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         
         scheme, host = self.request.scheme, self.request.get_host()
         base_url = f"{scheme}://{host}"
-        if 'aboutpagecontent' in model_name: context['preview_url'] = f"{base_url}/about"
+        
+        if 'aboutpagecontent' in model_name: 
+            context['preview_url'] = f"{base_url}/about"
         elif 'landingpagecontent' in model_name: 
             context['preview_url'] = f"{base_url}/?is_preview=1"
-            if not context.get('is_master_editor'):
+            if context['section_param']:
+                context['preview_url'] += f"&section={context['section_param']}"
+                context['scroll_target'] = context['section_param']
+            elif not context.get('is_master_editor'):
                 context['preview_url'] += "&section=hero"
                 context['scroll_target'] = 'hero'
-
+        elif 'contactpagecontent' in model_name:
+            context['preview_url'] = f"{base_url}/contact?is_preview=1"
+            if context['section_param']:
+                context['preview_url'] += f"&section={context['section_param']}"
+                context['scroll_target'] = context['section_param']
+            else:
+                context['scroll_target'] = 'hero'
         elif 'ctacontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=cta", 'scroll_target': 'cta'})
         elif 'trustcontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=trusted-retailers", 'scroll_target': 'trusted-retailers'})
         elif 'referralprogramcontent' in model_name: context.update({'preview_url': f"{base_url}/referral?is_preview=1", 'scroll_target': 'referral'})
-
         elif 'challengecontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=problem", 'scroll_target': 'problem'})
         elif 'solutioncontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=solution", 'scroll_target': 'solution'})
         elif 'uspcontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=usp", 'scroll_target': 'usp'})
@@ -450,7 +519,6 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         elif 'faqcontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=faq", 'scroll_target': 'faq'})
         elif 'pricingcontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=pricing", 'scroll_target': 'pricing'})
         elif 'careerpage' in model_name: context['preview_url'] = f"{base_url}/career"
-        elif 'contactpagecontent' in model_name: context['preview_url'] = f"{base_url}/contact"
         elif 'childjobposition' in model_name: context['preview_url'] = f"{base_url}/career/{self.object.slug}"
         elif 'policy' == model_name: context['preview_url'] = f"{base_url}/policy/new-policy"
         elif 'blogpost' in model_name: context['preview_url'] = f"{base_url}/blog"
@@ -494,3 +562,63 @@ class CustomAdminDeleteView(AdminRequiredMixin, DynamicModelMixin, DeleteView):
     template_name = 'custom_admin/model_confirm_delete.html'
     def get_success_url(self):
         return reverse('custom_admin:model_list', kwargs={'app_label': self.kwargs.get('app_label', 'website'), 'model_name': self.kwargs.get('model_slug')})
+
+@custom_admin_required
+def page_sections(request, page_type='landing'):
+    if page_type == 'landing':
+        content = LandingPageContent.objects.first()
+        if not content: content = LandingPageContent.objects.create()
+        title = "Landing Page Sections"
+        sections = [
+            {'id': 'hero', 'name': 'Hero Section', 'toggle_field': 'show_hero', 'is_visible': content.show_hero, 'icon': 'bi-app-indicator', 'edit_url': reverse('custom_admin:edit_singleton', args=['landingpagecontent']) + '?section=hero'},
+            {'id': 'trust_strip', 'name': 'Trust Strip', 'toggle_field': 'show_trust_strip', 'is_visible': content.show_trust_strip, 'icon': 'bi-shield-check', 'edit_url': reverse('custom_admin:edit_singleton', args=['trustcontent'])},
+            {'id': 'problem', 'name': 'The Challenge', 'toggle_field': 'show_problem', 'is_visible': content.show_problem, 'icon': 'bi-exclamation-square', 'edit_url': reverse('custom_admin:edit_singleton', args=['challengecontent'])},
+            {'id': 'solution', 'name': 'Solutions', 'toggle_field': 'show_solution', 'is_visible': content.show_solution, 'icon': 'bi-lightbulb', 'edit_url': reverse('custom_admin:edit_singleton', args=['solutioncontent'])},
+            {'id': 'usp', 'name': 'USP Features', 'toggle_field': 'show_usp', 'is_visible': content.show_usp, 'icon': 'bi-stars', 'edit_url': reverse('custom_admin:edit_singleton', args=['uspcontent'])},
+            {'id': 'how_it_works', 'name': 'How It Works', 'toggle_field': 'show_how_it_works', 'is_visible': content.show_how_it_works, 'icon': 'bi-diagram-3', 'edit_url': reverse('custom_admin:edit_singleton', args=['howitworkscontent'])},
+            {'id': 'who_is_this_for', 'name': 'Who Is This For', 'toggle_field': 'show_who_is_this_for', 'is_visible': content.show_who_is_this_for, 'icon': 'bi-people-fill', 'edit_url': reverse('custom_admin:edit_singleton', args=['whoisthisforcontent'])},
+            {'id': 'pricing', 'name': 'Pricing Plan', 'toggle_field': 'show_pricing', 'is_visible': content.show_pricing, 'icon': 'bi-tags', 'edit_url': reverse('custom_admin:edit_singleton', args=['pricingcontent'])},
+            {'id': 'referral', 'name': 'Referral Perks', 'toggle_field': 'show_referral', 'is_visible': content.show_referral, 'icon': 'bi-gift-fill', 'edit_url': reverse('custom_admin:edit_singleton', args=['referralprogramcontent'])},
+            {'id': 'comparison', 'name': 'Comparisons', 'toggle_field': 'show_comparison', 'is_visible': content.show_comparison, 'icon': 'bi-layers-half', 'edit_url': reverse('custom_admin:edit_singleton', args=['comparisoncontent'])},
+            {'id': 'testimonials', 'name': 'Testimonials', 'toggle_field': 'show_testimonials', 'is_visible': content.show_testimonials, 'icon': 'bi-chat-square-quote', 'edit_url': reverse('custom_admin:edit_singleton', args=['testimonialcontent'])},
+            {'id': 'faq', 'name': 'FAQs', 'toggle_field': 'show_faq', 'is_visible': content.show_faq, 'icon': 'bi-question-diamond', 'edit_url': reverse('custom_admin:edit_singleton', args=['faqcontent'])},
+            {'id': 'cta', 'name': 'Final CTA', 'toggle_field': 'show_cta', 'is_visible': content.show_cta, 'icon': 'bi-bullseye', 'edit_url': reverse('custom_admin:edit_singleton', args=['ctacontent'])},
+        ]
+    else: # contact
+        content = ContactPageContent.objects.first()
+        if not content: content = ContactPageContent.objects.create()
+        title = "Contact Page Sections"
+        sections = [
+            {'id': 'hero', 'name': 'Hero Section', 'toggle_field': 'show_hero', 'is_visible': content.show_hero, 'icon': 'bi-app-indicator', 'edit_url': reverse('custom_admin:edit_singleton', args=['contactpagecontent']) + '?section=hero'},
+            {'id': 'contact_cards', 'name': 'Contact Cards', 'toggle_field': 'show_cards', 'is_visible': content.show_cards, 'icon': 'bi-card-list', 'edit_url': reverse('custom_admin:edit_singleton', args=['contactpagecontent']) + '?section=contact_cards'},
+            {'id': 'form', 'name': 'Contact Form', 'toggle_field': 'show_form', 'is_visible': content.show_form, 'icon': 'bi-envelope-paper', 'edit_url': reverse('custom_admin:edit_singleton', args=['contactpagecontent']) + '?section=form'},
+            {'id': 'why_choose', 'name': 'Why Choose Us', 'toggle_field': 'show_why_choose', 'is_visible': content.show_why_choose, 'icon': 'bi-patch-check', 'edit_url': reverse('custom_admin:edit_singleton', args=['contactpagecontent']) + '?section=why_choose'},
+            {'id': 'cta', 'name': 'Final CTA', 'toggle_field': 'show_cta', 'is_visible': content.show_cta, 'icon': 'bi-bullseye', 'edit_url': reverse('custom_admin:edit_singleton', args=['contactpagecontent']) + '?section=cta'},
+        ]
+    
+    return render(request, 'custom_admin/page_sections.html', {
+        'sections': sections,
+
+        'page_title': title,
+        'page_type': page_type
+    })
+
+@csrf_exempt
+@custom_admin_required
+def toggle_section_visibility(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        page_type = data.get('page_type', 'landing')
+        field_name = data.get('field_name')
+        is_visible = data.get('is_visible')
+        
+        Model = LandingPageContent if page_type == 'landing' else ContactPageContent
+        content = Model.objects.first()
+        if content and hasattr(content, field_name):
+            setattr(content, field_name, is_visible)
+            content.save()
+            return json_response({'status': 'success'})
+    return json_response({'status': 'error'}, status=400)
+
+def json_response(data, status=200):
+   return HttpResponse(json.dumps(data), content_type="application/json", status=status)

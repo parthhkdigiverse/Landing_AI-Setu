@@ -187,7 +187,10 @@
                             </a>
                             <div class="collapse show" id="landingPageCollapse">
                                 <div class="sub-nav">
-                                    <a href="{% url 'custom_admin:edit_singleton' 'landingpagecontent' %}" id="landing_hero">
+                                    <a href="{% url 'custom_admin:page_sections' 'landing' %}" class="fw-bold text-primary border-bottom pb-2 mb-2">
+                                        <i class="bi bi-grid-1x2-fill"></i> Manage Sections
+                                    </a>
+                                    <a href="{% url 'custom_admin:edit_singleton' 'landingpagecontent' %}?section=hero" id="landing_hero">
                                         <i class="bi bi-app-indicator"></i> Hero Section
                                     </a>
                                     <a href="{% url 'custom_admin:edit_singleton' 'pricingcontent' %}">
@@ -230,17 +233,59 @@
                             </div>
                         </li>
 
+                        <!-- Contact Page Content -->
                         <li class="nav-item">
-                            <a href="{% url 'custom_admin:edit_singleton' 'contactpagecontent' %}"><i class="bi bi-telephone-fill"></i> Contact Page</a>
+                            <a class="nav-link d-flex justify-content-between align-items-center" 
+                               data-bs-toggle="collapse" href="#contactPageCollapse" role="button" 
+                               aria-expanded="false" aria-controls="contactPageCollapse">
+                                <span><i class="bi bi-envelope-at-fill"></i> Contact Page</span>
+                                <i class="bi bi-chevron-down"></i>
+                            </a>
+                            <div class="collapse" id="contactPageCollapse">
+                                <div class="sub-nav">
+                                    <a href="{% url 'custom_admin:page_sections' 'contact' %}" class="fw-bold text-primary border-bottom pb-2 mb-2">
+                                        <i class="bi bi-grid-1x2-fill"></i> Manage Sections
+                                    </a>
+                                    <a href="{% url 'custom_admin:edit_singleton' 'contactpagecontent' %}?section=hero">
+                                        <i class="bi bi-app-indicator"></i> Hero Section
+                                    </a>
+                                    <a href="{% url 'custom_admin:edit_singleton' 'contactpagecontent' %}?section=contact_cards">
+                                        <i class="bi bi-card-list"></i> Contact Cards
+                                    </a>
+                                    <a href="{% url 'custom_admin:edit_singleton' 'contactpagecontent' %}?section=form">
+                                        <i class="bi bi-envelope-paper"></i> Contact Form
+                                    </a>
+                                    <a href="{% url 'custom_admin:edit_singleton' 'contactpagecontent' %}?section=why_choose">
+                                        <i class="bi bi-patch-check"></i> Why Choose Us
+                                    </a>
+                                    <a href="{% url 'custom_admin:edit_singleton' 'contactpagecontent' %}?section=cta">
+                                        <i class="bi bi-bullseye"></i> Final CTA
+                                    </a>
+                                </div>
+                            </div>
                         </li>
+
+                        <!-- Other Pages -->
                         <li class="nav-item">
-                            <a href="{% url 'custom_admin:edit_singleton' 'aboutpagecontent' %}"><i class="bi bi-info-circle-fill"></i> About Us</a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'custom_admin:model_list' 'website' 'policy' %}"><i class="bi bi-file-earmark-lock2-fill"></i> Policies</a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'custom_admin:edit_singleton' 'footer' %}"><i class="bi bi-window-sidebar"></i> Footer</a>
+                            <a class="nav-link d-flex justify-content-between align-items-center" 
+                               data-bs-toggle="collapse" href="#otherPagesCollapse" role="button" 
+                               aria-expanded="false" aria-controls="otherPagesCollapse">
+                                <span><i class="bi bi-file-earmark-text-fill"></i> Other Pages</span>
+                                <i class="bi bi-chevron-down"></i>
+                            </a>
+                            <div class="collapse" id="otherPagesCollapse">
+                                <div class="sub-nav">
+                                    <a href="{% url 'custom_admin:edit_singleton' 'aboutpagecontent' %}">
+                                        <i class="bi bi-info-circle-fill"></i> About Us
+                                    </a>
+                                    <a href="{% url 'custom_admin:model_list' 'website' 'policy' %}">
+                                        <i class="bi bi-file-earmark-lock2-fill"></i> Policies
+                                    </a>
+                                    <a href="{% url 'custom_admin:edit_singleton' 'footer' %}">
+                                        <i class="bi bi-window-sidebar"></i> Footer
+                                    </a>
+                                </div>
+                            </div>
                         </li>
                     </ul>
 

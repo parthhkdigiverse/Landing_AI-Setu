@@ -265,9 +265,84 @@
                             </div>
                         </li>
 
+                        <!-- About Page Content -->
+                        <li class="nav-item">
+                            <a class="nav-link d-flex justify-content-between align-items-center collapsed" 
+                               data-bs-toggle="collapse" href="#aboutPageCollapse" role="button" 
+                               aria-expanded="false" aria-controls="aboutPageCollapse">
+                                <span><i class="bi bi-info-circle-fill"></i> About Page</span>
+                                <i class="bi bi-chevron-down"></i>
+                            </a>
+                            <div class="collapse" id="aboutPageCollapse">
+                                <div class="sub-nav">
+                                    <a href="{% url 'custom_admin:edit_singleton' 'aboutpagecontent' %}?section=hero">
+                                        <i class="bi bi-app-indicator"></i> Hero Section
+                                    </a>
+                                    <a href="{% url 'custom_admin:edit_singleton' 'aboutpagecontent' %}?section=content">
+                                        <i class="bi bi-card-text"></i> About Details
+                                    </a>
+                                    <a href="{% url 'custom_admin:edit_singleton' 'aboutpagecontent' %}?section=mission">
+                                        <i class="bi bi-flag-fill"></i> Our Mission
+                                    </a>
+                                    <a href="{% url 'custom_admin:edit_singleton' 'aboutpagecontent' %}?section=why_choose">
+                                        <i class="bi bi-patch-check"></i> Why Choose Us
+                                    </a>
+                                    <a href="{% url 'custom_admin:edit_singleton' 'aboutpagecontent' %}?section=serve">
+                                        <i class="bi bi-people-fill"></i> Who We Serve
+                                    </a>
+                                    <a href="{% url 'custom_admin:edit_singleton' 'aboutpagecontent' %}?section=cta">
+                                        <i class="bi bi-bullseye"></i> Final CTA
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+
+                        <!-- Policies -->
+                        <li class="nav-item">
+                            <a class="nav-link d-flex justify-content-between align-items-center collapsed" 
+                               data-bs-toggle="collapse" href="#policiesCollapse" role="button" 
+                               aria-expanded="false" aria-controls="policiesCollapse">
+                                <span><i class="bi bi-file-earmark-lock2-fill"></i> Policies</span>
+                                <i class="bi bi-chevron-down"></i>
+                            </a>
+                            <div class="collapse" id="policiesCollapse">
+                                <div class="sub-nav">
+                                    <a href="{% url 'custom_admin:model_list' 'website' 'policy' %}">
+                                        <i class="bi bi-card-list"></i> All Policies
+                                    </a>
+                                    <a href="{% url 'custom_admin:model_create' 'website' 'policy' %}">
+                                        <i class="bi bi-plus-circle"></i> Add Policy
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+
+                        <!-- Blogs -->
+                        <li class="nav-item">
+                            <a class="nav-link d-flex justify-content-between align-items-center collapsed" 
+                               data-bs-toggle="collapse" href="#blogCollapse" role="button" 
+                               aria-expanded="false" aria-controls="blogCollapse">
+                                <span><i class="bi bi-journal-richtext"></i> Blog Page</span>
+                                <i class="bi bi-chevron-down"></i>
+                            </a>
+                            <div class="collapse" id="blogCollapse">
+                                <div class="sub-nav">
+                                    <a href="{% url 'custom_admin:model_list' 'website' 'blogpost' %}">
+                                        <i class="bi bi-card-list"></i> All Posts
+                                    </a>
+                                    <a href="{% url 'custom_admin:model_create' 'website' 'blogpost' %}">
+                                        <i class="bi bi-plus-circle"></i> Add Post
+                                    </a>
+                                    <a href="{% url 'custom_admin:model_list' 'website' 'blogcategory' %}">
+                                        <i class="bi bi-tags"></i> Categories
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+
                         <!-- Other Pages -->
                         <li class="nav-item">
-                            <a class="nav-link d-flex justify-content-between align-items-center" 
+                            <a class="nav-link d-flex justify-content-between align-items-center collapsed" 
                                data-bs-toggle="collapse" href="#otherPagesCollapse" role="button" 
                                aria-expanded="false" aria-controls="otherPagesCollapse">
                                 <span><i class="bi bi-file-earmark-text-fill"></i> Other Pages</span>
@@ -275,12 +350,6 @@
                             </a>
                             <div class="collapse" id="otherPagesCollapse">
                                 <div class="sub-nav">
-                                    <a href="{% url 'custom_admin:edit_singleton' 'aboutpagecontent' %}">
-                                        <i class="bi bi-info-circle-fill"></i> About Us
-                                    </a>
-                                    <a href="{% url 'custom_admin:model_list' 'website' 'policy' %}">
-                                        <i class="bi bi-file-earmark-lock2-fill"></i> Policies
-                                    </a>
                                     <a href="{% url 'custom_admin:edit_singleton' 'footer' %}">
                                         <i class="bi bi-window-sidebar"></i> Footer
                                     </a>
@@ -309,9 +378,6 @@
 
                     <h6 class="sidebar-heading">Modules</h6>
                     <ul class="nav flex-column mb-1">
-                        <li class="nav-item">
-                            <a href="{% url 'custom_admin:model_list' 'website' 'blogpost' %}"><i class="bi bi-journal-richtext"></i> Blog Posts</a>
-                        </li>
                         <li class="nav-item">
                             <a href="{% url 'custom_admin:edit_singleton' 'demovideo' %}"><i class="bi bi-play-circle-fill"></i> Demo Videos</a>
                         </li>

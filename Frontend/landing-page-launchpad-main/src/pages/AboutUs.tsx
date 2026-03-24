@@ -4,6 +4,7 @@ import SEO from "@/components/SEO";
 import { useRef, useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, Variants } from "framer-motion";
+import { useSearchParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +27,9 @@ const AboutUs = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [content, setContent] = useState<AboutPageContent | null>(null);
   const [livePreview, setLivePreview] = useState<any>(null);
+  const [searchParams] = useSearchParams();
+  const isPreview = searchParams.get("is_preview") === "1";
+  const sectionParam = searchParams.get("section");
 
   useEffect(() => {
     const handler = (event: MessageEvent) => {
@@ -112,11 +116,12 @@ const AboutUs = () => {
         description={content?.seo_description || "Learn more about AI Setu's mission to empower retailers with innovative AI solutions. Meet our team and discover our journey."}
         keywords={content?.seo_keywords || "about AI Setu, company mission, retail innovation team"}
       />
-      <Header />
+      {!isPreview && <Header />}
 
       <main className="bg-[#F5F6FA]">
 
         {/* HERO */}
+        {(!isPreview || sectionParam === "hero") && (
         <motion.section
           id="hero"
           variants={fadeIn}
@@ -135,8 +140,10 @@ const AboutUs = () => {
             {livePreview?.hero_description || hero?.subtitle || ""}
           </motion.p>
         </motion.section>
+        )}
 
         {/* ABOUT */}
+        {(!isPreview || sectionParam === "content") && (
         <motion.section
           id="about"
           variants={fadeIn}
@@ -179,8 +186,10 @@ const AboutUs = () => {
             )}
           </motion.div>
         </motion.section>
+        )}
 
         {/* MISSION + WHY */}
+        {(!isPreview || sectionParam === "mission" || sectionParam === "why_choose") && (
         <motion.section
           id="mission"
           variants={fadeIn}
@@ -218,8 +227,10 @@ const AboutUs = () => {
             </motion.div>
           </motion.div>
         </motion.section>
+        )}
 
         {/* SERVE */}
+        {(!isPreview || sectionParam === "serve") && (
         <motion.section
           id="serve"
           variants={fadeIn}
@@ -285,8 +296,10 @@ const AboutUs = () => {
 
           </div>
         </motion.section>
+        )}
 
         {/* CTA */}
+        {(!isPreview || sectionParam === "cta") && (
         <motion.section
           id="cta"
           variants={fadeUp}
@@ -308,10 +321,11 @@ const AboutUs = () => {
             </Button>
           </motion.div>
         </motion.section>
+        )}
 
       </main>
 
-      <Footer />
+      {!isPreview && <Footer />}
 
       <Dialog open={demoOpen} onOpenChange={setDemoOpen}>
         <DialogContent className="sm:max-w-sm bg-card border border-border">

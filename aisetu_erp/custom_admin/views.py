@@ -403,6 +403,14 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         contact_why = ['why_title', 'why_description', 'feature_1_title', 'feature_2_title', 'feature_3_title', 'feature_4_title']
         contact_cta = ['cta_title', 'cta_description', 'cta_button_text1', 'cta_button_text2', 'cta_button_text3']
 
+        # About Page Sub-sections
+        about_hero = ['hero_title', 'hero_subtitle']
+        about_content = ['about_label', 'about_heading', 'about_image', 'about_description_1', 'about_description_2', 'about_description_3']
+        about_mission = ['mission_title', 'mission_description']
+        about_why = ['why_choose_title', 'why_point_1', 'why_point_2', 'why_point_3', 'why_point_4', 'why_point_5']
+        about_serve = ['serve_title', 'serve_subtitle']
+        about_cta = ['cta_title', 'cta_description', 'cta_button_text']
+
         # --- Model Routing ---
         if model_name == 'landingpagecontent':
             if section == 'hero': fields = hero_fields
@@ -430,6 +438,15 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
             elif section == 'cta': fields = contact_cta
             elif section == 'seo': fields = seo_fields
             else: fields = contact_hero + contact_cards + contact_form + contact_why + contact_cta + seo_fields
+            
+        elif model_name == 'aboutpagecontent':
+            if section == 'hero': fields = about_hero
+            elif section == 'content': fields = about_content
+            elif section == 'mission': fields = about_mission
+            elif section == 'why_choose': fields = about_why
+            elif section == 'serve': fields = about_serve
+            elif section == 'cta': fields = about_cta
+            else: fields = about_hero + about_content + about_mission + about_why + about_serve + about_cta
         
         else: fields = '__all__'
         
@@ -448,13 +465,17 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
                 'solution': 'Solutions', 'usp': 'USP Features', 'how_it_works': 'How It Works',
                 'who_is_this_for': 'Who Is This For', 'pricing': 'Pricing Plan', 'referral': 'Referral Perks',
                 'comparison': 'Comparisons', 'testimonials': 'Testimonials', 'faq': 'FAQs', 'cta': 'Final CTA',
-                'contact_cards': 'Contact Cards', 'form': 'Contact Form', 'why_choose': 'Why Choose Us', 'seo': 'SEO Metadata'
+                'contact_cards': 'Contact Cards', 'form': 'Contact Form', 'why_choose': 'Why Choose Us', 'seo': 'SEO Metadata',
+                'content': 'About Details', 'mission': 'Our Mission', 'serve': 'Who We Serve'
             }
             context['section_title'] = titles.get(section, section.replace('_', ' ').title())
         
         if 'careerpage' in model_name: context.update({'is_career_page': True, 'culture_formset': CultureFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object), 'perk_formset': PerkFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object), 'job_formset': OpenPositionFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
         elif 'childjobposition' in model_name: context.update({'is_child_job_position': True, 'description_formset': JobDescriptionFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object), 'skill_formset': JobSkillFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
-        elif 'aboutpagecontent' in model_name: context.update({'is_about_page': True, 'serve_formset': ServeItemFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
+        elif 'aboutpagecontent' in model_name:
+            context.update({'is_about_page': True})
+            if not section or section == 'serve':
+                context.update({'serve_formset': ServeItemFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
         elif 'referralprogramcontent' in model_name: context.update({'is_referral_program': True, 'referral_formset': ReferralPerkFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
         elif 'challengecontent' in model_name: context.update({'is_challenge_section': True, 'challenge_formset': ChallengeProblemFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
         elif 'solutioncontent' in model_name: context.update({'is_solution_section': True, 'solution_formset': SolutionFeatureFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
@@ -466,7 +487,6 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         elif 'faqcontent' in model_name: context.update({'is_faq_section': True, 'faq_formset': FAQContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
         elif 'trustcontent' in model_name: context.update({'is_trust_section': True, 'trust_formset': TrustContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
         elif 'pricingcontent' in model_name: context.update({'is_pricing_section': True, 'pricing_formset': PricingFeatureFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
-        elif 'aboutpagecontent' in model_name: context.update({'is_about_page': True, 'serve_formset': ServeItemFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
         elif 'landingpagecontent' in model_name:
             context.update({'is_landing_page': True})
             if self.request.GET.get('master') == '1':

@@ -159,7 +159,7 @@
         <div class="row">
             {% if request.session.is_admin %}
             <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse shadow-lg">
-                <div class="position-sticky">
+                <div class="position-sticky" id="sidebarAccordion">
                     <div class="px-4 mb-4 d-flex align-items-center">
                         <div class="bg-primary bg-opacity-10 p-2 rounded-3 me-2">
                             <i class="bi bi-box-fill text-primary fs-4"></i>
@@ -179,13 +179,13 @@
                     <ul class="nav flex-column mb-1">
                         <!-- Collapsible Landing Page Content -->
                         <li class="nav-item">
-                            <a class="nav-link d-flex justify-content-between align-items-center" 
+                            <a class="nav-link d-flex justify-content-between align-items-center collapsed" 
                                data-bs-toggle="collapse" href="#landingPageCollapse" role="button" 
-                               aria-expanded="true" aria-controls="landingPageCollapse">
+                               aria-expanded="false" aria-controls="landingPageCollapse">
                                 <span><i class="bi bi-browser-safari"></i> Landing Page</span>
                                 <i class="bi bi-chevron-down"></i>
                             </a>
-                            <div class="collapse show" id="landingPageCollapse">
+                            <div class="collapse" id="landingPageCollapse" data-bs-parent="#sidebarAccordion">
                                 <div class="sub-nav">
                                     <a href="{% url 'custom_admin:page_sections' 'landing' %}" class="fw-bold text-primary border-bottom pb-2 mb-2">
                                         <i class="bi bi-grid-1x2-fill"></i> Manage Sections
@@ -241,7 +241,7 @@
                                 <span><i class="bi bi-envelope-at-fill"></i> Contact Page</span>
                                 <i class="bi bi-chevron-down"></i>
                             </a>
-                            <div class="collapse" id="contactPageCollapse">
+                            <div class="collapse" id="contactPageCollapse" data-bs-parent="#sidebarAccordion">
                                 <div class="sub-nav">
                                     <a href="{% url 'custom_admin:page_sections' 'contact' %}" class="fw-bold text-primary border-bottom pb-2 mb-2">
                                         <i class="bi bi-grid-1x2-fill"></i> Manage Sections
@@ -273,7 +273,7 @@
                                 <span><i class="bi bi-info-circle-fill"></i> About Page</span>
                                 <i class="bi bi-chevron-down"></i>
                             </a>
-                            <div class="collapse" id="aboutPageCollapse">
+                            <div class="collapse" id="aboutPageCollapse" data-bs-parent="#sidebarAccordion">
                                 <div class="sub-nav">
                                     <a href="{% url 'custom_admin:edit_singleton' 'aboutpagecontent' %}?section=hero">
                                         <i class="bi bi-app-indicator"></i> Hero Section
@@ -305,7 +305,7 @@
                                 <span><i class="bi bi-file-earmark-lock2-fill"></i> Policies</span>
                                 <i class="bi bi-chevron-down"></i>
                             </a>
-                            <div class="collapse" id="policiesCollapse">
+                            <div class="collapse" id="policiesCollapse" data-bs-parent="#sidebarAccordion">
                                 <div class="sub-nav">
                                     <a href="{% url 'custom_admin:model_list' 'website' 'policy' %}">
                                         <i class="bi bi-card-list"></i> All Policies
@@ -325,7 +325,7 @@
                                 <span><i class="bi bi-journal-richtext"></i> Blog Page</span>
                                 <i class="bi bi-chevron-down"></i>
                             </a>
-                            <div class="collapse" id="blogCollapse">
+                            <div class="collapse" id="blogCollapse" data-bs-parent="#sidebarAccordion">
                                 <div class="sub-nav">
                                     <a href="{% url 'custom_admin:model_list' 'website' 'blogpost' %}">
                                         <i class="bi bi-card-list"></i> All Posts
@@ -348,7 +348,7 @@
                                 <span><i class="bi bi-file-earmark-text-fill"></i> Other Pages</span>
                                 <i class="bi bi-chevron-down"></i>
                             </a>
-                            <div class="collapse" id="otherPagesCollapse">
+                            <div class="collapse" id="otherPagesCollapse" data-bs-parent="#sidebarAccordion">
                                 <div class="sub-nav">
                                     <a href="{% url 'custom_admin:edit_singleton' 'footer' %}">
                                         <i class="bi bi-window-sidebar"></i> Footer
@@ -367,7 +367,7 @@
                                 <span><i class="bi bi-briefcase-fill"></i> Hiring</span>
                                 <i class="bi bi-chevron-down"></i>
                             </a>
-                            <div class="collapse" id="careerCollapse">
+                            <div class="collapse" id="careerCollapse" data-bs-parent="#sidebarAccordion">
                                 <div class="sub-nav">
                                     <a href="{% url 'custom_admin:edit_singleton' 'careerpage' %}"><i class="bi bi-file-earmark-person"></i> Career Page</a>
                                     <a href="{% url 'custom_admin:model_list' 'website' 'childjobposition' %}"><i class="bi bi-person-badge"></i> Open Positions</a>
@@ -395,7 +395,7 @@
                                 <span><i class="bi bi-hdd-network-fill"></i> Forms Data</span>
                                 <i class="bi bi-chevron-down"></i>
                             </a>
-                            <div class="collapse" id="formsDataCollapse">
+                            <div class="collapse" id="formsDataCollapse" data-bs-parent="#sidebarAccordion">
                                 <div class="sub-nav">
                                     <a href="{% url 'custom_admin:model_list' 'website' 'demorequest' %}"><i class="bi bi-envelope-paper-fill"></i> Demo Requests</a>
                                     <a href="{% url 'custom_admin:model_list' 'website' 'jobapplication' %}"><i class="bi bi-person-lines-fill"></i> Job Apps</a>

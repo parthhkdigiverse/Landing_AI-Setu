@@ -74,7 +74,8 @@ class StoreTypeSerializer(serializers.ModelSerializer):
     id = ObjectIdField()
     class Meta:
         model = StoreType
-        fields = ['id', 'title', 'icon', 'order', 'is_active']
+        fields = ['id', 'title', 'icon', 'image', 'order', 'is_active']
+
 
 class ReferralPerkSerializer(serializers.ModelSerializer):
     id = ObjectIdField()
@@ -216,17 +217,6 @@ class JobPositionSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class CareerPageSerializer(serializers.ModelSerializer):
-
-    id = ObjectIdField()
-    cultures = CultureSerializer(many=True)
-    perks = PerkSerializer(many=True)
-    jobs = JobPositionSerializer(many=True)
-
-    class Meta:
-        model = CareerPage
-        fields = "__all__"
-
 class JobDescriptionSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -242,7 +232,7 @@ class JobSkillSerializer(serializers.ModelSerializer):
 
 
 class ChildJobPositionSerializer(serializers.ModelSerializer):
-
+    job_slug = serializers.CharField(source='slug', read_only=True)
     descriptions = JobDescriptionSerializer(many=True)
     skills = JobSkillSerializer(many=True)
 
@@ -251,6 +241,7 @@ class ChildJobPositionSerializer(serializers.ModelSerializer):
         fields = [
             "title",
             "slug",
+            "job_slug",
             "location",
             "experience",
             "descriptions",
@@ -259,6 +250,18 @@ class ChildJobPositionSerializer(serializers.ModelSerializer):
             "seo_description",
             "seo_keywords"
         ]
+
+
+class CareerPageSerializer(serializers.ModelSerializer):
+
+    id = ObjectIdField()
+    cultures = CultureSerializer(many=True)
+    perks = PerkSerializer(many=True)
+    jobs = ChildJobPositionSerializer(many=True)
+
+    class Meta:
+        model = CareerPage
+        fields = "__all__"
 
 # class ObjectIdField(serializers.Field):
 #     def to_representation(self, value):

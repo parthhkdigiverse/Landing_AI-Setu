@@ -31,30 +31,8 @@ const AboutUs = () => {
     const handler = (event: MessageEvent) => {
       if (event.data?.source === "django-admin") {
         if (event.data.model === 'AboutPageContent') {
-          
-        const payload = event.data.payload;
-        const serve_items: any[] = [];
-
-        Object.keys(payload).forEach(key => {
-            if (key.includes('TOTAL_FORMS') || key.includes('INITIAL_FORMS') || key.includes('MAX_NUM_FORMS') || key.includes('MIN_NUM_FORMS')) return;
-
-            if (key.startsWith('serve_items-')) {
-                const parts = key.split('-');
-                if (parts.length >= 3) {
-                    const idx = parseInt(parts[1], 10);
-                    const field = parts.slice(2).join('-');
-                    if (!serve_items[idx]) serve_items[idx] = {};
-                    serve_items[idx][field] = payload[key];
-                }
-            }
-        });
-
-        const parsedPayload = { 
-            ...payload, 
-            serve_items: serve_items.filter(Boolean)
-        };
-
-        setLivePreview((prev: any) => ({ ...prev, ...parsedPayload }));
+          const payload = event.data.payload;
+          setLivePreview((prev: any) => ({ ...prev, ...payload }));
         }
 
         if (event.data.scrollTarget) {

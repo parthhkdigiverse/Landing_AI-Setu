@@ -1,7 +1,10 @@
-import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseForbidden
+import random, string, json
+from django.core.mail import send_mail
+from django.utils import timezone
+from datetime import timedelta
 from django.apps import apps
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.utils.decorators import method_decorator
@@ -74,6 +77,90 @@ def custom_logout(request):
     request.session.flush()
     return redirect('custom_admin:login')
 
+def forgot_password(request):
+    if request.method == "POST":
+        email = request.POST.get('email')
+        
+        try:
+            admin = AdminUser.objects.get(email=email)
+            otp = ''.join(random.choices(string.digits, k=6))
+            admin.otp = otp
+            admin.otp_created_at = timezone.now()
+            admin.save()
+            
+            # Send Email
+            from django.conf import settings
+            subject = 'Your Admin Password Reset OTP'
+            message = f'Your OTP for password reset is: {otp}. It is valid for 10 minutes.'
+            from_email = settings.EMAIL_HOST_USER
+            recipient_list = [email]
+            
+            try:
+                send_mail(subject, message, from_email, recipient_list)
+            except Exception as e:
+                return render(request, 'custom_admin/forgot_password.html', {'error': f'Failed to send email: {str(e)}. Please ensure your Google App Password is correct in settings.py.'})
+
+            request.session['reset_email'] = email
+            return redirect('custom_admin:verify_otp')
+        except AdminUser.DoesNotExist:
+            return render(request, 'custom_admin/forgot_password.html', {'error': 'Admin user not found.'})
+            
+    return render(request, 'custom_admin/forgot_password.html')
+
+def verify_otp(request):
+    email = request.session.get('reset_email')
+    if not email:
+        return redirect('custom_admin:forgot_password')
+        
+    if request.method == "POST":
+        otp_input = request.POST.get('otp')
+        try:
+            admin = AdminUser.objects.get(email=email)
+            if admin.otp == otp_input:
+                # Check expiry (10 minutes)
+                if timezone.now() < admin.otp_created_at + timedelta(minutes=10):
+                    request.session['otp_verified'] = True
+                    return redirect('custom_admin:reset_password')
+                else:
+                    return render(request, 'custom_admin/verify_otp.html', {'error': 'OTP has expired.'})
+            else:
+                return render(request, 'custom_admin/verify_otp.html', {'error': 'Invalid OTP.'})
+        except AdminUser.DoesNotExist:
+            return redirect('custom_admin:forgot_password')
+            
+    return render(request, 'custom_admin/verify_otp.html', {'email': email})
+
+def reset_password(request):
+    email = request.session.get('reset_email')
+    verified = request.session.get('otp_verified')
+    
+    if not email or not verified:
+        return redirect('custom_admin:forgot_password')
+        
+    if request.method == "POST":
+        new_password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        if new_password != confirm_password:
+            return render(request, 'custom_admin/reset_password.html', {'error': 'Passwords do not match.'})
+            
+        try:
+            admin = AdminUser.objects.get(email=email)
+            admin.password = new_password
+            admin.otp = None
+            admin.otp_created_at = None
+            admin.save()
+            
+            # Clear session
+            del request.session['reset_email']
+            del request.session['otp_verified']
+            
+            return render(request, 'custom_admin/login.html', {'success': 'Password updated successfully. Please login.'})
+        except AdminUser.DoesNotExist:
+            return redirect('custom_admin:forgot_password')
+            
+    return render(request, 'custom_admin/reset_password.html')
+
 @custom_admin_required
 def dashboard(request):
     from website.models import JobApplication
@@ -136,6 +223,8 @@ class CustomAdminListView(AdminRequiredMixin, DynamicModelMixin, ListView):
         elif 'testimonialcontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=testimonials", 'scroll_target': 'testimonials'})
         elif 'comparisoncontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=comparison", 'scroll_target': 'comparison'})
         elif 'faqcontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=faq", 'scroll_target': 'faq'})
+        
+        elif 'storetype' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=who-is-this-for", 'scroll_target': 'who-is-this-for'})
         
         readonly_models = ['demorequest', 'jobapplication', 'pricingsignup', 'contactsubmission', 'payment']
         context['is_readonly'] = model_name in readonly_models
@@ -200,20 +289,22 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
         elif 'pricingcontent' in model_name: context.update({'is_pricing_section': True, 'pricing_formset': PricingFeatureFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None))})
         elif 'policy' == model_name: context.update({'is_policy': True, 'section_formset': PolicySectionFormSet(self.request.POST or None, self.request.FILES or None)})
         elif 'landingpagecontent' in model_name:
-            context.update({
-                'is_landing_page': True,
-                'is_challenge_section': True, 'challenge_formset': ChallengeProblemFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
-                'is_solution_section': True, 'solution_formset': SolutionFeatureFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
-                'is_usp_section': True, 'usp_formset': USPContentFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
-                'is_hiw_section': True, 'hiw_formset': HIWStepFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
-                'is_who_section': True, 'who_formset': StoreTypeContentFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
-                'is_pricing_section': True, 'pricing_formset': PricingFeatureFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
-                'is_referral_program': True, 'referral_formset': ReferralPerkFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
-                'is_testimonial_section': True, 'testimonial_formset': TestimonialContentFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
-                'is_comparison_section': True, 'comparison_formset': ComparisonContentFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
-                'is_faq_section': True, 'faq_formset': FAQContentFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
-                'is_trust_section': True, 'trust_formset': TrustContentFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
-            })
+            context.update({'is_landing_page': True})
+            if self.request.GET.get('master') == '1':
+                context.update({
+                    'is_master_editor': True,
+                    'is_challenge_section': True, 'challenge_formset': ChallengeProblemFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
+                    'is_solution_section': True, 'solution_formset': SolutionFeatureFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
+                    'is_usp_section': True, 'usp_formset': USPContentFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
+                    'is_hiw_section': True, 'hiw_formset': HIWStepFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
+                    'is_who_section': True, 'who_formset': StoreTypeContentFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
+                    'is_pricing_section': True, 'pricing_formset': PricingFeatureFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
+                    'is_referral_program': True, 'referral_formset': ReferralPerkFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
+                    'is_testimonial_section': True, 'testimonial_formset': TestimonialContentFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
+                    'is_comparison_section': True, 'comparison_formset': ComparisonContentFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
+                    'is_faq_section': True, 'faq_formset': FAQContentFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
+                    'is_trust_section': True, 'trust_formset': TrustContentFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None)),
+                })
         
         # Preview URL logic
         scheme, host = self.request.scheme, self.request.get_host()
@@ -234,7 +325,7 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
         elif 'pricingcontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=pricing", 'scroll_target': 'pricing'})
         elif 'careerpage' in model_name: context['preview_url'] = f"{base_url}/career"
         elif 'contactpagecontent' in model_name: context['preview_url'] = f"{base_url}/contact"
-        elif 'childjobposition' in model_name: context['preview_url'] = f"{base_url}/career/new-job"
+        elif 'childjobposition' in model_name: context.update({'preview_url': f"{base_url}/career/?is_preview=1&section=open_positions", 'scroll_target': 'open_positions'})
         elif 'policy' == model_name: context['preview_url'] = f"{base_url}/policy/new-policy"
         elif 'blogpost' in model_name: context['preview_url'] = f"{base_url}/blog"
         elif 'footer' == model_name: context['preview_url'] = f"{base_url}/"
@@ -316,30 +407,39 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         elif 'faqcontent' in model_name: context.update({'is_faq_section': True, 'faq_formset': FAQContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
         elif 'trustcontent' in model_name: context.update({'is_trust_section': True, 'trust_formset': TrustContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
         elif 'pricingcontent' in model_name: context.update({'is_pricing_section': True, 'pricing_formset': PricingFeatureFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
+        elif 'aboutpagecontent' in model_name: context.update({'is_about_page': True, 'serve_formset': ServeItemFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
         elif 'landingpagecontent' in model_name:
-            context.update({
-                'is_landing_page': True,
-                'is_challenge_section': True, 'challenge_formset': ChallengeProblemFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
-                'is_solution_section': True, 'solution_formset': SolutionFeatureFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
-                'is_usp_section': True, 'usp_formset': USPContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
-                'is_hiw_section': True, 'hiw_formset': HIWStepFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
-                'is_who_section': True, 'who_formset': StoreTypeContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
-                'is_pricing_section': True, 'pricing_formset': PricingFeatureFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
-                'is_referral_program': True, 'referral_formset': ReferralPerkFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
-                'is_testimonial_section': True, 'testimonial_formset': TestimonialContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
-                'is_comparison_section': True, 'comparison_formset': ComparisonContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
-                'is_faq_section': True, 'faq_formset': FAQContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
-                'is_trust_section': True, 'trust_formset': TrustContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
-            })
+            context.update({'is_landing_page': True})
+            if self.request.GET.get('master') == '1':
+                context.update({
+                    'is_master_editor': True,
+                    'is_challenge_section': True, 'challenge_formset': ChallengeProblemFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
+                    'is_solution_section': True, 'solution_formset': SolutionFeatureFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
+                    'is_usp_section': True, 'usp_formset': USPContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
+                    'is_hiw_section': True, 'hiw_formset': HIWStepFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
+                    'is_who_section': True, 'who_formset': StoreTypeContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
+                    'is_pricing_section': True, 'pricing_formset': PricingFeatureFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
+                    'is_referral_program': True, 'referral_formset': ReferralPerkFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
+                    'is_testimonial_section': True, 'testimonial_formset': TestimonialContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
+                    'is_comparison_section': True, 'comparison_formset': ComparisonContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
+                    'is_faq_section': True, 'faq_formset': FAQContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
+                    'is_trust_section': True, 'trust_formset': TrustContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
+                })
         elif 'policy' == model_name: context.update({'is_policy': True, 'section_formset': PolicySectionFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
         
         scheme, host = self.request.scheme, self.request.get_host()
         base_url = f"{scheme}://{host}"
         if 'aboutpagecontent' in model_name: context['preview_url'] = f"{base_url}/about"
-        elif 'landingpagecontent' in model_name: context['preview_url'] = f"{base_url}/?is_preview=1"
+        elif 'landingpagecontent' in model_name: 
+            context['preview_url'] = f"{base_url}/?is_preview=1"
+            if not context.get('is_master_editor'):
+                context['preview_url'] += "&section=hero"
+                context['scroll_target'] = 'hero'
+
         elif 'ctacontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=cta", 'scroll_target': 'cta'})
         elif 'trustcontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=trusted-retailers", 'scroll_target': 'trusted-retailers'})
-        elif 'referralprogramcontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=referral", 'scroll_target': 'referral'})
+        elif 'referralprogramcontent' in model_name: context.update({'preview_url': f"{base_url}/referral?is_preview=1", 'scroll_target': 'referral'})
+
         elif 'challengecontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=problem", 'scroll_target': 'problem'})
         elif 'solutioncontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=solution", 'scroll_target': 'solution'})
         elif 'uspcontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=usp", 'scroll_target': 'usp'})
@@ -351,7 +451,7 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         elif 'pricingcontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=pricing", 'scroll_target': 'pricing'})
         elif 'careerpage' in model_name: context['preview_url'] = f"{base_url}/career"
         elif 'contactpagecontent' in model_name: context['preview_url'] = f"{base_url}/contact"
-        elif 'childjobposition' in model_name: context['preview_url'] = f"{base_url}/career/new-job"
+        elif 'childjobposition' in model_name: context['preview_url'] = f"{base_url}/career/{self.object.slug}"
         elif 'policy' == model_name: context['preview_url'] = f"{base_url}/policy/new-policy"
         elif 'blogpost' in model_name: context['preview_url'] = f"{base_url}/blog"
         elif 'footer' == model_name: context['preview_url'] = f"{base_url}/"

@@ -33,16 +33,43 @@ const Referral = () => {
 
   // LIVE ADMIN PREVIEW
   useEffect(() => {
+    const previewChannel = new BroadcastChannel('aisetu_preview');
+
     const handler = (event: any) => {
-      if (event.data && event.data.source === 'django-admin') {
+      if (event.data && typeof event.data === 'object' && event.data.source === 'django-admin') {
+        const payload = event.data.payload;
+        
         setContent((prev: any) => ({
           ...prev,
-          ...event.data.payload
+          ...payload
+        }));
+
+        // Broadcast to other tabs
+        previewChannel.postMessage({
+          type: 'LIVE_PREVIEW_UPDATE',
+          model: event.data.model,
+          content: payload
+        });
+      }
+    };
+
+    const channelHandler = (event: MessageEvent) => {
+      if (event.data?.type === 'LIVE_PREVIEW_UPDATE') {
+        setContent((prev: any) => ({
+          ...prev,
+          ...event.data.content
         }));
       }
     };
+
     window.addEventListener("message", handler);
-    return () => window.removeEventListener("message", handler);
+    previewChannel.addEventListener("message", channelHandler);
+
+    return () => {
+      window.removeEventListener("message", handler);
+      previewChannel.removeEventListener("message", channelHandler);
+      previewChannel.close();
+    };
   }, []);
 
   const isPreview = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('is_preview') === '1' : false;
@@ -66,19 +93,11 @@ const Referral = () => {
           <div className="container">
 
             <h1 className="text-4xl lg:text-5xl font-extrabold mb-4">
-
-              {livePreview?.referral_title ||
-                content?.referral_main_title ||
-                "Referral Program"}
-
+              {content?.referral_main_title || "Referral Program"}
             </h1>
 
             <p className="text-primary-foreground/70 max-w-lg mx-auto">
-
-              {livePreview?.referral_description ||
-                content?.referral_main_desc ||
-                "Earn money by referring retailers to AI-Setu ERP."}
-
+              {content?.referral_main_desc || "Earn money by referring retailers to AI-Setu ERP."}
             </p>
 
           </div>
@@ -86,12 +105,16 @@ const Referral = () => {
         </div>
 
         <ReferralSection />
-        <SolutionSection />
-        <USPSection />
-        <ComparisonSection />
+        {!isPreview && (
+          <>
+            <SolutionSection />
+            <USPSection />
+            <ComparisonSection />
+          </>
+        )}
       </main>
 
-      <Footer />
+      {!isPreview && <Footer />}
 
     </>
   );

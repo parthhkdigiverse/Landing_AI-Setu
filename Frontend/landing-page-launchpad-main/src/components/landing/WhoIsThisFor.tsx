@@ -49,19 +49,48 @@ const WhoIsThisFor = () => {
 
   // Live preview listener
   useEffect(() => {
+    const previewChannel = new BroadcastChannel('aisetu_preview');
+
     const handler = (event: any) => {
-      if (event.data && event.data.source === 'django-admin') {
+      if (event.data && typeof event.data === 'object' && event.data.source === 'django-admin') {
+        const payload = event.data.payload;
+        
         if (event.data.model === 'LandingPageContent' || event.data.model === 'WhoIsThisForContent') {
-          setContent((prev: any) => ({ ...prev, ...event.data.payload }));
+          setContent((prev: any) => ({ ...prev, ...payload }));
         } else if (event.data.model === 'StoreType') {
-          const item = event.data.payload;
           const pk = event.data.pk;
-          setTypes(prev => prev.map(t => (t.id === parseInt(pk) || t.id === pk) ? { ...t, ...item } : t));
+          setTypes(prev => prev.map(t => (t.id === parseInt(pk) || t.id === pk) ? { ...t, ...payload } : t));
+        }
+
+        // Broadcast to other tabs
+        previewChannel.postMessage({
+          type: 'LIVE_PREVIEW_UPDATE',
+          model: event.data.model,
+          pk: event.data.pk,
+          content: payload
+        });
+      }
+    };
+
+    const channelHandler = (event: MessageEvent) => {
+      if (event.data?.type === 'LIVE_PREVIEW_UPDATE') {
+        const { model, content: payload, pk } = event.data;
+        if (model === 'LandingPageContent' || model === 'WhoIsThisForContent') {
+          setContent((prev: any) => ({ ...prev, ...payload }));
+        } else if (model === 'StoreType') {
+          setTypes(prev => prev.map(t => (t.id === parseInt(pk) || t.id === pk) ? { ...t, ...payload } : t));
         }
       }
     };
+
     window.addEventListener("message", handler);
-    return () => window.removeEventListener("message", handler);
+    previewChannel.addEventListener("message", channelHandler);
+
+    return () => {
+      window.removeEventListener("message", handler);
+      previewChannel.removeEventListener("message", channelHandler);
+      previewChannel.close();
+    };
   }, []);
 
   return (
@@ -90,8 +119,12 @@ const WhoIsThisFor = () => {
                 transition={{ delay: i * 0.08 }}
                 className="bg-card rounded-xl p-6 text-center shadow-card border border-border hover:shadow-card-hover transition-shadow"
               >
-                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                  {Icon && <Icon className="h-7 w-7 text-primary" />}
+                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3 overflow-hidden">
+                  {t.image ? (
+                    <img src={t.image} alt={t.title} className="w-full h-full object-cover" />
+                  ) : (
+                    Icon && <Icon className="h-7 w-7 text-primary" />
+                  )}
                 </div>
 
                 <h3 className="font-heading font-semibold text-sm text-foreground">

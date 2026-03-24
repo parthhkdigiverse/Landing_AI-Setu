@@ -183,6 +183,13 @@
         </div>
         {% endif %}
 
+        {% if success %}
+        <div class="alert alert-success d-flex align-items-center" style="border-radius: 12px; font-size: 0.9rem;">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <div>{{ success }}</div>
+        </div>
+        {% endif %}
+
         <form method="post" action="{% url 'custom_admin:login' %}">
             {% csrf_token %}
             <div class="mb-4">
@@ -191,7 +198,10 @@
             </div>
             
             <div class="mb-5">
-                <label class="form-label" for="password">Password</label>
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="form-label mb-0" for="password">Password</label>
+                    <a href="{% url 'custom_admin:forgot_password' %}" class="text-primary text-decoration-none fw-600" style="font-size: 0.8rem;">Forgot Password?</a>
+                </div>
                 <div class="password-wrapper">
                     <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" style="padding-right: 3rem;" required>
                     <button type="button" id="togglePassword" class="toggle-password" aria-label="Toggle password visibility">

@@ -47,19 +47,48 @@ const ReferralSection = () => {
 
   // Live preview listener
   useEffect(() => {
+    const previewChannel = new BroadcastChannel('aisetu_preview');
+
     const handler = (event: any) => {
-      if (event.data && event.data.source === 'django-admin') {
+      if (event.data && typeof event.data === 'object' && event.data.source === 'django-admin') {
+        const payload = event.data.payload;
+        
         if (event.data.model === 'LandingPageContent' || event.data.model === 'ReferralProgramContent') {
-          setContent((prev: any) => ({ ...prev, ...event.data.payload }));
+          setContent((prev: any) => ({ ...prev, ...payload }));
         } else if (event.data.model === 'ReferralPerk') {
-          const item = event.data.payload;
           const pk = event.data.pk;
-          setPerks(prev => prev.map(p => (p.id === parseInt(pk) || p.id === pk) ? { ...p, ...item } : p));
+          setPerks(prev => prev.map(p => (p.id === parseInt(pk) || p.id === pk) ? { ...p, ...payload } : p));
+        }
+
+        // Broadcast to other tabs
+        previewChannel.postMessage({
+          type: 'LIVE_PREVIEW_UPDATE',
+          model: event.data.model,
+          pk: event.data.pk,
+          content: payload
+        });
+      }
+    };
+
+    const channelHandler = (event: MessageEvent) => {
+      if (event.data?.type === 'LIVE_PREVIEW_UPDATE') {
+        const { model, content: payload, pk } = event.data;
+        if (model === 'LandingPageContent' || model === 'ReferralProgramContent') {
+          setContent((prev: any) => ({ ...prev, ...payload }));
+        } else if (model === 'ReferralPerk') {
+          setPerks(prev => prev.map(p => (p.id === parseInt(pk) || p.id === pk) ? { ...p, ...payload } : p));
         }
       }
     };
+
     window.addEventListener("message", handler);
-    return () => window.removeEventListener("message", handler);
+    previewChannel.addEventListener("message", channelHandler);
+
+    return () => {
+      window.removeEventListener("message", handler);
+      previewChannel.removeEventListener("message", channelHandler);
+      previewChannel.close();
+    };
   }, []);
 
   // Robust copy function with fallback for non-HTTPS/non-secure contexts

@@ -26,56 +26,89 @@ const CareerPage = () => {
   }, []);
 
   useEffect(() => {
+    const previewChannel = new BroadcastChannel('aisetu_preview');
+
     const handleMessage = (event: MessageEvent) => {
       if (event.data === "reload_full_data") {
         fetchCareerPageContent().then((data) => data && setContent(data));
       } else if (event.data && typeof event.data === 'object' && event.data.source === 'django-admin') {
         
         const payload = event.data.payload;
-        
-        // Deserialize dynamic Inline Formsets into structural React Arrays
-        const cultures: any[] = [];
-        const perks: any[] = [];
-        const jobs: any[] = [];
+        const model = event.data.model;
+        let parsedPayload = { ...payload };
 
-        Object.keys(payload).forEach(key => {
-            if (key.includes('TOTAL_FORMS') || key.includes('INITIAL_FORMS') || key.includes('MAX_NUM_FORMS') || key.includes('MIN_NUM_FORMS')) return;
+        if (model === 'CareerPage' || model === 'CareerPageContent') {
+          // Deserialize dynamic Inline Formsets into structural React Arrays
+          const cultures: any[] = [];
+          const perks: any[] = [];
+          const jobs: any[] = [];
 
-            if (key.startsWith('cultures-')) {
-                const parts = key.split('-');
-                if (parts.length >= 3) {
-                    const idx = parseInt(parts[1], 10);
-                    const field = parts.slice(2).join('-');
-                    if (!cultures[idx]) cultures[idx] = {};
-                    cultures[idx][field] = payload[key];
-                }
-            } else if (key.startsWith('perks-')) {
-                const parts = key.split('-');
-                if (parts.length >= 3) {
-                    const idx = parseInt(parts[1], 10);
-                    const field = parts.slice(2).join('-');
-                    if (!perks[idx]) perks[idx] = {};
-                    perks[idx][field] = payload[key];
-                }
-            } else if (key.startsWith('jobs-')) {
-                const parts = key.split('-');
-                if (parts.length >= 3) {
-                    const idx = parseInt(parts[1], 10);
-                    const field = parts.slice(2).join('-');
-                    if (!jobs[idx]) jobs[idx] = {};
-                    jobs[idx][field] = payload[key];
-                }
-            }
-        });
+          Object.keys(payload).forEach(key => {
+              if (key.includes('TOTAL_FORMS') || key.includes('INITIAL_FORMS') || key.includes('MAX_NUM_FORMS') || key.includes('MIN_NUM_FORMS')) return;
 
-        const parsedPayload = { 
-            ...payload, 
-            cultures: cultures.filter(Boolean),
-            perks: perks.filter(Boolean),
-            jobs: jobs.filter(Boolean)
-        };
+              if (key.startsWith('cultures-')) {
+                  const parts = key.split('-');
+                  if (parts.length >= 3) {
+                      const idx = parseInt(parts[1], 10);
+                      const field = parts.slice(2).join('-');
+                      if (!cultures[idx]) cultures[idx] = {};
+                      cultures[idx][field] = payload[key];
+                  }
+              } else if (key.startsWith('perks-')) {
+                  const parts = key.split('-');
+                  if (parts.length >= 3) {
+                      const idx = parseInt(parts[1], 10);
+                      const field = parts.slice(2).join('-');
+                      if (!perks[idx]) perks[idx] = {};
+                      perks[idx][field] = payload[key];
+                  }
+              } else if (key.startsWith('jobs-')) {
+                  const parts = key.split('-');
+                  if (parts.length >= 3) {
+                      const idx = parseInt(parts[1], 10);
+                      const field = parts.slice(2).join('-');
+                      if (!jobs[idx]) jobs[idx] = {};
+                      jobs[idx][field] = payload[key];
+                  }
+              }
+          });
 
-        setLivePreview((prev: any) => ({ ...prev, ...parsedPayload }));
+          parsedPayload = { 
+              ...payload, 
+              cultures: cultures.filter(Boolean),
+              perks: perks.filter(Boolean),
+              jobs: jobs.filter(Boolean)
+          };
+
+          setLivePreview((prev: any) => ({ ...prev, ...parsedPayload }));
+          
+          // Broadcast to other tabs
+          previewChannel.postMessage({
+              type: 'LIVE_PREVIEW_UPDATE',
+              model: 'CareerPage',
+              content: parsedPayload
+          });
+
+        } else if (model === 'ChildJobPosition') {
+          // Handle specific job position update in the list
+          setLivePreview((prev: any) => {
+            const currentJobs = prev?.jobs || content?.jobs || [];
+            const updatedJobs = currentJobs.map((j: any) => 
+               (j.slug === payload.slug || j.job_slug === payload.slug) ? { ...j, ...payload } : j
+            );
+            
+            const newPreview = { ...prev, jobs: updatedJobs };
+            
+            // Broadcast the update
+            previewChannel.postMessage({
+              type: 'LIVE_PREVIEW_UPDATE',
+              model: 'ChildJobPosition',
+              content: payload
+            });
+            
+            return newPreview;
+          });
+        }
 
         if (event.data.scrollTarget) {
             setTimeout(() => {
@@ -86,9 +119,32 @@ const CareerPage = () => {
       }
     };
 
+    const handleChannelMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'LIVE_PREVIEW_UPDATE') {
+        if (event.data.model === 'CareerPage') {
+          setLivePreview((prev: any) => ({ ...prev, ...event.data.content }));
+        } else if (event.data.model === 'ChildJobPosition') {
+          const payload = event.data.content;
+          setLivePreview((prev: any) => {
+            const currentJobs = prev?.jobs || content?.jobs || [];
+            const updatedJobs = currentJobs.map((j: any) => 
+               (j.slug === payload.slug || j.job_slug === payload.slug) ? { ...j, ...payload } : j
+            );
+            return { ...prev, jobs: updatedJobs };
+          });
+        }
+      }
+    };
+
     window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, []);
+    previewChannel.addEventListener("message", handleChannelMessage);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      previewChannel.removeEventListener("message", handleChannelMessage);
+      previewChannel.close();
+    };
+  }, [content]);
 
   useEffect(() => {
     if (location.hash === "#openings") {

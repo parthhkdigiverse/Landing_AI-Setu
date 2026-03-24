@@ -25,6 +25,8 @@ class UserLogin(models.Model):
 class AdminUser(models.Model):
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
+    otp = models.CharField(max_length=6, blank=True, null=True)
+    otp_created_at = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.email
@@ -1143,6 +1145,8 @@ class StoreType(models.Model):
     title = models.CharField(max_length=200)
 
     icon = models.CharField(max_length=50)
+    image = models.ImageField(upload_to="store_types/", blank=True, null=True)
+
 
     order = models.PositiveIntegerField(default=0)
 
@@ -1329,7 +1333,7 @@ class JobPosition(models.Model):
     career_page = models.ForeignKey(
         CareerPage,
         on_delete=models.CASCADE,
-        related_name="jobs"
+        related_name="old_jobs"
     )
     title = models.CharField(max_length=200)
     job_slug = models.SlugField(unique=True, blank=True, null=True)
@@ -1363,7 +1367,7 @@ class ChildJobPosition(models.Model):
     career_page = models.ForeignKey(
         CareerPage,
         on_delete=models.CASCADE,
-        related_name="job"
+        related_name="jobs"
     )
 
     title = models.CharField(max_length=200)

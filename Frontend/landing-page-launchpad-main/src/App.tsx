@@ -55,7 +55,6 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/pricing-signup" element={<PricingSignup />} />
             <Route path="/career/apply/:jobId" element={<ApplyJob />} />
-            <Route path="/referral" element={<ReferralPage />} />
             <Route path="/demo-success" element={<DemoSuccess />} />
             <Route path="/reviews" element={<AllTestimonials />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />

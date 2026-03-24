@@ -100,6 +100,12 @@ const Index = () => {
   const isPreview = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('is_preview') === '1' : false;
   const sectionParam = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('section') : null;
 
+  // Helper to determine if a section should be shown
+  const shouldShow = (id: string) => {
+    if (!isPreview || !sectionParam) return true;
+    return sectionParam === id;
+  };
+
   // Mount scroll to section param
   useEffect(() => {
     if (sectionParam) {
@@ -121,22 +127,22 @@ const Index = () => {
       <Header />
 
       <main>
-        <div id="hero"><HeroSection /></div>
-        <div id="trusted-retailers"><TrustStrip /></div>
-        <div id="problem"><ProblemSection /></div>
-        <div id="solution"><SolutionSection /></div>
-        <div id="usp"><USPSection /></div>
-        <div id="how-it-works"><HowItWorks /></div>
-        <div id="who-is-this-for"><WhoIsThisFor /></div>
-        <div id="pricing"><PricingSection /></div>
-        <div id="referral"><ReferralSection /></div>
-        <div id="comparison"><ComparisonSection /></div>
-        <div id="testimonials"><TestimonialsSection /></div>
-        <div id="faq"><FAQSection /></div>
-        <div id="cta"><FinalCTA /></div>
+        {shouldShow('hero') && <div id="hero"><HeroSection /></div>}
+        {shouldShow('trusted-retailers') && <div id="trusted-retailers"><TrustStrip /></div>}
+        {shouldShow('problem') && <div id="problem"><ProblemSection /></div>}
+        {shouldShow('solution') && <div id="solution"><SolutionSection /></div>}
+        {shouldShow('usp') && <div id="usp"><USPSection /></div>}
+        {shouldShow('how-it-works') && <div id="how-it-works"><HowItWorks /></div>}
+        {shouldShow('who-is-this-for') && <div id="who-is-this-for"><WhoIsThisFor /></div>}
+        {shouldShow('pricing') && <div id="pricing"><PricingSection /></div>}
+        {shouldShow('referral') && <div id="referral"><ReferralSection /></div>}
+        {shouldShow('comparison') && <div id="comparison"><ComparisonSection /></div>}
+        {shouldShow('testimonials') && <div id="testimonials"><TestimonialsSection /></div>}
+        {shouldShow('faq') && <div id="faq"><FAQSection /></div>}
+        {shouldShow('cta') && <div id="cta"><FinalCTA /></div>}
       </main>
 
-      <Footer />
+      {(!isPreview || !sectionParam) && <Footer />}
     </>
   );
 };

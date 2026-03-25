@@ -306,9 +306,12 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
             elif model_name == 'careerculturecontent': section = 'culture'
             elif model_name == 'careerperkscontent': section = 'perks'
             elif model_name == 'careerjobscontent': section = 'jobs'
+            elif model_name == 'career Jobscontent': section = 'jobs'
             elif model_name == 'careerctacontent': section = 'cta'
             else: section = 'all'
             context.update({'is_career_page': True, 'career_section': section})
+            if section and section != 'all':
+                context['scroll_target'] = 'open_positions' if section == 'jobs' else section
             if section in ['all', 'culture']: context['culture_formset'] = CultureFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None))
             if section in ['all', 'perks']: context['perk_formset'] = PerkFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None))
             if section in ['all', 'jobs']: context['job_formset'] = OpenPositionFormSet(self.request.POST or None, self.request.FILES or None, instance=getattr(self, 'object', None))
@@ -371,7 +374,7 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
             if section and section != 'all':
                 context['preview_url'] += f"&section={section}"
         elif 'landingpagecontent' in model_name: context['preview_url'] = f"{base_url}/?is_preview=1"
-        elif 'ctacontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=cta", 'scroll_target': 'cta'})
+        elif model_name == 'ctacontent': context.update({'preview_url': f"{base_url}/?is_preview=1&section=cta", 'scroll_target': 'cta'})
         elif 'trustcontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=trusted-retailers", 'scroll_target': 'trusted-retailers'})
         elif 'referralprogramcontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=referral", 'scroll_target': 'referral'})
         elif 'challengecontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=problem", 'scroll_target': 'problem'})
@@ -385,7 +388,9 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
         elif 'pricingcontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=pricing", 'scroll_target': 'pricing'})
         elif model_name in ['careerpage', 'careerherocontent', 'careerculturecontent', 'careerperkscontent', 'careerjobscontent', 'careerctacontent']:
             context['preview_url'] = f"{base_url}/career"
-            if section and section != 'all': context['preview_url'] += f"?is_preview=1&section={section}"
+            if section and section != 'all': 
+                context['preview_url'] += f"?is_preview=1&section={section}"
+                context['scroll_target'] = 'open_positions' if section == 'jobs' else section
         elif 'contactpagecontent' in model_name: context['preview_url'] = f"{base_url}/contact"
         elif 'childjobposition' in model_name: context.update({'preview_url': f"{base_url}/career/?is_preview=1&section=jobs", 'scroll_target': 'open_positions'})
         elif 'policy' == model_name: context['preview_url'] = f"{base_url}/policy/new-policy"
@@ -440,6 +445,7 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         
         # --- Field Definitions ---
         hero_fields = ['hero_eyebrow', 'hero_title', 'hero_highlighted_title', 'hero_subtitle', 'hero_highlights', 'primary_cta_text', 'secondary_cta_text', 'trusted_retailers_count', 'hero_stats_label', 'hero_stats_value']
+        cta_fields = ['cta_badge', 'cta_title', 'cta_description', 'cta_button_text', 'cta_small_text']
         seo_fields = ['seo_title', 'seo_description', 'seo_keywords']
         
         about_hero_fields = ['about_label', 'hero_title', 'hero_description']
@@ -600,7 +606,7 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
                 context['scroll_target'] = context['section_param']
             else:
                 context['scroll_target'] = 'hero'
-        elif 'ctacontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=cta", 'scroll_target': 'cta'})
+        elif model_name == 'ctacontent': context.update({'preview_url': f"{base_url}/?is_preview=1&section=cta", 'scroll_target': 'cta'})
         elif 'trustcontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=trusted-retailers", 'scroll_target': 'trusted-retailers'})
         elif 'referralprogramcontent' in model_name: context.update({'preview_url': f"{base_url}/referral?is_preview=1", 'scroll_target': 'referral'})
         elif 'challengecontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=problem", 'scroll_target': 'problem'})
@@ -675,6 +681,7 @@ class ManageAllStoreTypesView(AdminRequiredMixin, TemplateView):
         context['model_slug'] = 'allstoretype'
         context['model_class_name'] = 'AllStoreType'
         context['is_allstoretype_section'] = True
+        context['is_manage_view'] = True
         context['allstoretype_formset'] = AllStoreTypeFormSet(
             self.request.POST or None, 
             queryset=AllStoreType.objects.all().order_by('id')

@@ -33,6 +33,15 @@ const CareerPage = () => {
   };
 
   useEffect(() => {
+    if (targetSection && targetSection !== 'all') {
+      setTimeout(() => {
+        const el = document.getElementById(targetSection);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 800);
+    }
+  }, [targetSection]);
+
+  useEffect(() => {
     const loadData = async () => {
       const data = await fetchCareerPageContent();
       if (data) setContent(data);
@@ -175,7 +184,7 @@ const CareerPage = () => {
         description={content?.seo_description || "Join AI Setu and help us build the future of AI-driven retail solutions. Explore our open positions and grow with us."}
         keywords={content?.seo_keywords || "careers, jobs, AI Setu hiring, retail tech roles"}
       />
-      {!isPreview && <Header />}
+      {(!isPreview || targetSection === 'all' || !targetSection) && <Header />}
 
       <main className="bg-[#F5F6FA]">
 

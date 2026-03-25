@@ -463,24 +463,28 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         elif model_name == 'aboutpagecontent': fields = about_hero_fields + about_story_fields + about_mission_fields + about_why_fields + about_serve_fields + about_cta_fields + seo_fields
         elif model_name == 'landingpagecontent': fields = hero_fields + seo_fields
         elif model_name == 'ctacontent': fields = cta_fields
+        elif model_name == 'referralprogramcontent': fields = ['referral_main_title', 'referral_main_desc', 'referral_label', 'referral_title', 'join_referral']
+        elif model_name == 'challengecontent': fields = ['problem_section_label', 'problem_section_title']
+        elif model_name == 'solutioncontent': fields = ['feature_title', 'feature_title2', 'solution_section_label', 'solution_section_title']
+        elif model_name == 'uspcontent': fields = ['usp_badge_text', 'usp_title', 'usp_description']
+        elif model_name == 'howitworkscontent': fields = ['howitworks_label', 'howitworks_title']
+        elif model_name == 'whoisthisforcontent': fields = ['who_main_title', 'who_title']
+        elif model_name == 'testimonialcontent': fields = ['testimonial_label', 'testimonial_title', 'review_button', 'all_reviews_title', 'all_reviews_desc']
+        elif model_name == 'comparisoncontent': fields = ['comparison_title', 'comparison_subtitle', 'comparison_title1', 'comparison_title2', 'comparison_title3']
+        elif model_name == 'faqcontent': fields = ['faq_label', 'faq_title']
+        elif model_name == 'trustcontent': fields = []
         
         elif model_name == 'contactpagecontent':
-            if section == 'hero': fields = contact_hero
-            elif section == 'contact_cards': fields = contact_cards
-            elif section == 'form': fields = contact_form
-            elif section == 'why_choose': fields = contact_why
-            elif section == 'cta': fields = contact_cta
-            elif section == 'seo': fields = seo_fields
-            else: fields = contact_hero + contact_cards + contact_form + contact_why + contact_cta + seo_fields
+            fields = '__all__'
             
         elif model_name == 'aboutpagecontent':
-            if section == 'hero': fields = about_hero
-            elif section == 'content': fields = about_content
-            elif section == 'mission': fields = about_mission
-            elif section == 'why_choose': fields = about_why
-            elif section == 'serve': fields = about_serve
-            elif section == 'cta': fields = about_cta
-            else: fields = about_hero + about_content + about_mission + about_why + about_serve + about_cta
+            if section == 'hero': fields = about_hero_fields
+            elif section == 'content': fields = about_story_fields
+            elif section == 'mission': fields = about_mission_fields
+            elif section == 'why_choose': fields = about_why_fields
+            elif section == 'serve': fields = about_serve_fields
+            elif section == 'cta': fields = about_cta_fields
+            else: fields = about_hero_fields + about_story_fields + about_mission_fields + about_why_fields + about_serve_fields + about_cta_fields + seo_fields
         
         else: fields = '__all__'
         

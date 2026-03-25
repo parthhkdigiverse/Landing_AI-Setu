@@ -697,62 +697,6 @@ class ManageAllStoreTypesView(AdminRequiredMixin, TemplateView):
             return redirect('custom_admin:manage_allstoretype')
         return self.render_to_response(context)
 
-@custom_admin_required
-def page_sections(request, page_type='landing'):
-    if page_type == 'landing':
-        content = LandingPageContent.objects.first()
-        if not content: content = LandingPageContent.objects.create()
-        title = "Landing Page Sections"
-        sections = [
-            {'id': 'hero', 'name': 'Hero Section', 'toggle_field': 'show_hero', 'is_visible': content.show_hero, 'icon': 'bi-app-indicator', 'edit_url': reverse('custom_admin:edit_singleton', args=['landingpagecontent']) + '?section=hero'},
-            {'id': 'trust_strip', 'name': 'Trust Strip', 'toggle_field': 'show_trust_strip', 'is_visible': content.show_trust_strip, 'icon': 'bi-shield-check', 'edit_url': reverse('custom_admin:edit_singleton', args=['trustcontent'])},
-            {'id': 'problem', 'name': 'The Challenge', 'toggle_field': 'show_problem', 'is_visible': content.show_problem, 'icon': 'bi-exclamation-square', 'edit_url': reverse('custom_admin:edit_singleton', args=['challengecontent'])},
-            {'id': 'solution', 'name': 'Solutions', 'toggle_field': 'show_solution', 'is_visible': content.show_solution, 'icon': 'bi-lightbulb', 'edit_url': reverse('custom_admin:edit_singleton', args=['solutioncontent'])},
-            {'id': 'usp', 'name': 'USP Features', 'toggle_field': 'show_usp', 'is_visible': content.show_usp, 'icon': 'bi-stars', 'edit_url': reverse('custom_admin:edit_singleton', args=['uspcontent'])},
-            {'id': 'how_it_works', 'name': 'How It Works', 'toggle_field': 'show_how_it_works', 'is_visible': content.show_how_it_works, 'icon': 'bi-diagram-3', 'edit_url': reverse('custom_admin:edit_singleton', args=['howitworkscontent'])},
-            {'id': 'who_is_this_for', 'name': 'Who Is This For', 'toggle_field': 'show_who_is_this_for', 'is_visible': content.show_who_is_this_for, 'icon': 'bi-people-fill', 'edit_url': reverse('custom_admin:edit_singleton', args=['whoisthisforcontent'])},
-            {'id': 'pricing', 'name': 'Pricing Plan', 'toggle_field': 'show_pricing', 'is_visible': content.show_pricing, 'icon': 'bi-tags', 'edit_url': reverse('custom_admin:edit_singleton', args=['pricingcontent'])},
-            {'id': 'referral', 'name': 'Referral Perks', 'toggle_field': 'show_referral', 'is_visible': content.show_referral, 'icon': 'bi-gift-fill', 'edit_url': reverse('custom_admin:edit_singleton', args=['referralprogramcontent'])},
-            {'id': 'comparison', 'name': 'Comparisons', 'toggle_field': 'show_comparison', 'is_visible': content.show_comparison, 'icon': 'bi-layers-half', 'edit_url': reverse('custom_admin:edit_singleton', args=['comparisoncontent'])},
-            {'id': 'testimonials', 'name': 'Testimonials', 'toggle_field': 'show_testimonials', 'is_visible': content.show_testimonials, 'icon': 'bi-chat-square-quote', 'edit_url': reverse('custom_admin:edit_singleton', args=['testimonialcontent'])},
-            {'id': 'faq', 'name': 'FAQs', 'toggle_field': 'show_faq', 'is_visible': content.show_faq, 'icon': 'bi-question-diamond', 'edit_url': reverse('custom_admin:edit_singleton', args=['faqcontent'])},
-            {'id': 'cta', 'name': 'Final CTA', 'toggle_field': 'show_cta', 'is_visible': content.show_cta, 'icon': 'bi-bullseye', 'edit_url': reverse('custom_admin:edit_singleton', args=['ctacontent'])},
-        ]
-    else: # contact
-        content = ContactPageContent.objects.first()
-        if not content: content = ContactPageContent.objects.create()
-        title = "Contact Page Sections"
-        sections = [
-            {'id': 'hero', 'name': 'Hero Section', 'toggle_field': 'show_hero', 'is_visible': content.show_hero, 'icon': 'bi-app-indicator', 'edit_url': reverse('custom_admin:edit_singleton', args=['contactpagecontent']) + '?section=hero'},
-            {'id': 'contact_cards', 'name': 'Contact Cards', 'toggle_field': 'show_cards', 'is_visible': content.show_cards, 'icon': 'bi-card-list', 'edit_url': reverse('custom_admin:edit_singleton', args=['contactpagecontent']) + '?section=contact_cards'},
-            {'id': 'form', 'name': 'Contact Form', 'toggle_field': 'show_form', 'is_visible': content.show_form, 'icon': 'bi-envelope-paper', 'edit_url': reverse('custom_admin:edit_singleton', args=['contactpagecontent']) + '?section=form'},
-            {'id': 'why_choose', 'name': 'Why Choose Us', 'toggle_field': 'show_why_choose', 'is_visible': content.show_why_choose, 'icon': 'bi-patch-check', 'edit_url': reverse('custom_admin:edit_singleton', args=['contactpagecontent']) + '?section=why_choose'},
-            {'id': 'cta', 'name': 'Final CTA', 'toggle_field': 'show_cta', 'is_visible': content.show_cta, 'icon': 'bi-bullseye', 'edit_url': reverse('custom_admin:edit_singleton', args=['contactpagecontent']) + '?section=cta'},
-        ]
-    
-    return render(request, 'custom_admin/page_sections.html', {
-        'sections': sections,
-
-        'page_title': title,
-        'page_type': page_type
-    })
-
-@csrf_exempt
-@custom_admin_required
-def toggle_section_visibility(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        page_type = data.get('page_type', 'landing')
-        field_name = data.get('field_name')
-        is_visible = data.get('is_visible')
-        
-        Model = LandingPageContent if page_type == 'landing' else ContactPageContent
-        content = Model.objects.first()
-        if content and hasattr(content, field_name):
-            setattr(content, field_name, is_visible)
-            content.save()
-            return json_response({'status': 'success'})
-    return json_response({'status': 'error'}, status=400)
 
 def json_response(data, status=200):
    return HttpResponse(json.dumps(data), content_type="application/json", status=status)

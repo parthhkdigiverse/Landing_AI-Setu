@@ -7,8 +7,7 @@ urlpatterns = [
     path('', views.dashboard, name='admin_root'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('singleton/<str:model_name>/', views.edit_singleton, name='edit_singleton'),
-    path('page-sections/<str:page_type>/', views.page_sections, name='page_sections'),
-    path('toggle-section-visibility/', views.toggle_section_visibility, name='toggle_section_visibility'),
+
     
     # Generic CRUD paths
     path('login/', views.custom_login, name='login'),

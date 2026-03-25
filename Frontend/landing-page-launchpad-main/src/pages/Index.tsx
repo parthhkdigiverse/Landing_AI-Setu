@@ -101,9 +101,17 @@ const Index = () => {
   const sectionParam = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('section') : null;
 
   // Helper to determine if a section should be shown
-  const shouldShow = (id: string) => {
-    if (!isPreview || !sectionParam) return true;
-    return sectionParam === id;
+  const shouldShow = (id: string, toggle?: boolean) => {
+    // If it's a preview for a specific section, always show it
+    if (isPreview && sectionParam === id) return true;
+    
+    // If we have a toggle from the backend, respect it
+    if (toggle === false) return false;
+
+    // Standard preview logic
+    if (isPreview && sectionParam && sectionParam !== id) return false;
+
+    return true;
   };
 
   // Mount scroll to section param
@@ -123,23 +131,23 @@ const Index = () => {
         description={content?.seo_description || "AI Setu - Empowering your business with AI-driven solutions and seamless automation. Scale your operations effortlessly."}
         keywords={content?.seo_keywords || "AI, automation, business solutions, AI Setu"}
       />
-      <DemoPopup />
-      <Header />
+      {(!isPreview || !sectionParam) && <DemoPopup />}
+      {(!isPreview || !sectionParam) && <Header />}
 
       <main>
-        {shouldShow('hero') && <div id="hero"><HeroSection /></div>}
-        {shouldShow('trusted-retailers') && <div id="trusted-retailers"><TrustStrip /></div>}
-        {shouldShow('problem') && <div id="problem"><ProblemSection /></div>}
-        {shouldShow('solution') && <div id="solution"><SolutionSection /></div>}
-        {shouldShow('usp') && <div id="usp"><USPSection /></div>}
-        {shouldShow('how-it-works') && <div id="how-it-works"><HowItWorks /></div>}
-        {shouldShow('who-is-this-for') && <div id="who-is-this-for"><WhoIsThisFor /></div>}
-        {shouldShow('pricing') && <div id="pricing"><PricingSection /></div>}
-        {shouldShow('referral') && <div id="referral"><ReferralSection /></div>}
-        {shouldShow('comparison') && <div id="comparison"><ComparisonSection /></div>}
-        {shouldShow('testimonials') && <div id="testimonials"><TestimonialsSection /></div>}
-        {shouldShow('faq') && <div id="faq"><FAQSection /></div>}
-        {shouldShow('cta') && <div id="cta"><FinalCTA /></div>}
+        {shouldShow('hero', content?.show_hero) && <div id="hero"><HeroSection /></div>}
+        {shouldShow('trusted-retailers', content?.show_trust_strip) && <div id="trusted-retailers"><TrustStrip /></div>}
+        {shouldShow('problem', content?.show_problem) && <div id="problem"><ProblemSection /></div>}
+        {shouldShow('solution', content?.show_solution) && <div id="solution"><SolutionSection /></div>}
+        {shouldShow('usp', content?.show_usp) && <div id="usp"><USPSection /></div>}
+        {shouldShow('how-it-works', content?.show_how_it_works) && <div id="how-it-works"><HowItWorks /></div>}
+        {shouldShow('who-is-this-for', content?.show_who_is_this_for) && <div id="who-is-this-for"><WhoIsThisFor /></div>}
+        {shouldShow('pricing', content?.show_pricing) && <div id="pricing"><PricingSection /></div>}
+        {shouldShow('referral', content?.show_referral) && <div id="referral"><ReferralSection /></div>}
+        {shouldShow('comparison', content?.show_comparison) && <div id="comparison"><ComparisonSection /></div>}
+        {shouldShow('testimonials', content?.show_testimonials) && <div id="testimonials"><TestimonialsSection /></div>}
+        {shouldShow('faq', content?.show_faq) && <div id="faq"><FAQSection /></div>}
+        {shouldShow('cta', content?.show_cta) && <div id="cta"><FinalCTA /></div>}
       </main>
 
       {(!isPreview || !sectionParam) && <Footer />}

@@ -378,6 +378,21 @@ class LandingPageContent(models.Model):
         
     )
 
+    # Visibility Toggles
+    show_hero = models.BooleanField(default=True)
+    show_trust_strip = models.BooleanField(default=True)
+    show_problem = models.BooleanField(default=True)
+    show_solution = models.BooleanField(default=True)
+    show_usp = models.BooleanField(default=True)
+    show_how_it_works = models.BooleanField(default=True)
+    show_who_is_this_for = models.BooleanField(default=True)
+    show_pricing = models.BooleanField(default=True)
+    show_referral = models.BooleanField(default=True)
+    show_comparison = models.BooleanField(default=True)
+    show_testimonials = models.BooleanField(default=True)
+    show_faq = models.BooleanField(default=True)
+    show_cta = models.BooleanField(default=True)
+
     # SEO Fields
     seo_title = models.CharField(max_length=255, blank=True, null=True, help_text="Meta title for SEO (max 70 chars recommended)")
     seo_description = models.TextField(blank=True, null=True, help_text="Meta description for SEO (max 160 chars recommended)")
@@ -1096,6 +1111,13 @@ class ContactPageContent(models.Model):
         max_length=100,
         default="24/7 Support"
     )
+
+    # Visibility Toggles
+    show_hero = models.BooleanField(default=True)
+    show_cards = models.BooleanField(default=True)
+    show_form = models.BooleanField(default=True)
+    show_why_choose = models.BooleanField(default=True)
+    show_cta = models.BooleanField(default=True)
 
     # SEO Fields
     seo_title = models.CharField(max_length=255, blank=True, null=True, help_text="Meta title for SEO (max 70 chars recommended)")

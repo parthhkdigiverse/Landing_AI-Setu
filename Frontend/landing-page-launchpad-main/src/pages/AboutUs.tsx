@@ -4,6 +4,7 @@ import SEO from "@/components/SEO";
 import { useRef, useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, Variants } from "framer-motion";
+import { useSearchParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -153,6 +154,7 @@ const AboutUs = () => {
           </motion.p>
         </motion.section>
         )}
+        )}
 
         {/* ABOUT */}
         {shouldShowSection('story') && (
@@ -199,6 +201,7 @@ const AboutUs = () => {
           </motion.div>
         </motion.section>
         )}
+        )}
 
         {/* MISSION + WHY */}
         {(shouldShowSection('mission') || shouldShowSection('why')) && (
@@ -239,6 +242,7 @@ const AboutUs = () => {
             </motion.div>
           </motion.div>
         </motion.section>
+        )}
         )}
 
         {/* SERVE */}
@@ -309,6 +313,7 @@ const AboutUs = () => {
           </div>
         </motion.section>
         )}
+        )}
 
         {/* CTA */}
         {shouldShowSection('cta') && (
@@ -333,6 +338,7 @@ const AboutUs = () => {
             </Button>
           </motion.div>
         </motion.section>
+        )}
         )}
 
       </main>

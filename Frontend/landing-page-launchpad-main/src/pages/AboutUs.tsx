@@ -39,6 +39,15 @@ const AboutUs = () => {
   }, []);
 
   useEffect(() => {
+    if (targetSection && targetSection !== 'all') {
+      setTimeout(() => {
+        const el = document.getElementById(targetSection);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 800);
+    }
+  }, [targetSection]);
+
+  useEffect(() => {
     const handler = (event: MessageEvent) => {
       if (event.data?.source === "django-admin") {
         if (event.data.model === 'AboutPageContent' || event.data.model?.toLowerCase().includes('about')) {
@@ -213,13 +222,16 @@ const AboutUs = () => {
         >
           <motion.div
             variants={stagger}
-            className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 px-6"
+            className={`mx-auto grid ${(shouldShowSection('mission') && shouldShowSection('why')) ? 'max-w-6xl md:grid-cols-2 gap-12' : 'max-w-3xl md:grid-cols-1 gap-6'} px-6`}
           >
-            <motion.div variants={fadeUp}>
+            {shouldShowSection('mission') && (
+            <motion.div variants={fadeUp} className={(shouldShowSection('mission') && !shouldShowSection('why')) ? 'text-center' : ''}>
               <h2 className="text-3xl font-bold mb-4">{livePreview?.mission_title || mission?.title}</h2>
               <p className="text-gray-600">{livePreview?.mission_description || mission?.subtitle}</p>
             </motion.div>
+            )}
 
+            {shouldShowSection('why') && (
             <motion.div variants={fadeUp} className="bg-white p-6 rounded-lg shadow" id="why_choose">
               <h3 className="text-xl font-semibold mb-3">{livePreview?.why_choose_title || why?.title}</h3>
               <ul className="space-y-2 text-gray-600">
@@ -238,6 +250,7 @@ const AboutUs = () => {
                 )}
               </ul>
             </motion.div>
+            )}
           </motion.div>
         </motion.section>
         )}

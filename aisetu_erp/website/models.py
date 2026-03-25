@@ -895,6 +895,20 @@ class AboutUsServeItem(models.Model):
     def __str__(self):
         return self.title
 
+class AboutUsWhyChooseItem(models.Model):
+    about_page = models.ForeignKey(AboutPageContent, on_delete=models.CASCADE, related_name="why_choose_items", null=True, blank=True)
+    title = models.CharField(max_length=255)
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    
+    class Meta:
+        ordering = ['order']
+        verbose_name = "About Us Why Choose Item"
+        verbose_name_plural = "About Us Why Choose Items"
+        
+    def __str__(self):
+        return self.title
+
 class ContactPageContent(models.Model):
 
     # HERO SECTION

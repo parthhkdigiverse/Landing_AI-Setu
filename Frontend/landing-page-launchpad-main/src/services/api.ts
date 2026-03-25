@@ -475,7 +475,7 @@ export const fetchJobDetails = async (slug: string) => {
 // ================= TYPES =================
 
 export interface SectionItem {
-  id: number;
+  id: number | string;
   title?: string;
   description?: string;
   image?: string;

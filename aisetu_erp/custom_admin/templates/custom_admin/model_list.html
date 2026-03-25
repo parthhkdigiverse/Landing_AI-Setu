@@ -9,9 +9,14 @@
     }
 
     @media (min-width: 1400px) {
-        .admin-preview-layout {
+        .admin-preview-layout:not(.no-preview) {
             grid-template-columns: 1fr 500px;
         }
+    }
+
+    /* Full screen mode when no preview */
+    .admin-preview-layout.no-preview {
+        grid-template-columns: 1fr;
     }
 
     @media (max-width: 1200px) {
@@ -102,7 +107,7 @@
     }
 </style>
 
-<div class="admin-preview-layout">
+<div class="admin-preview-layout {% if not preview_url %}no-preview{% endif %}">
     <div class="admin-list-section">
 
 <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4">

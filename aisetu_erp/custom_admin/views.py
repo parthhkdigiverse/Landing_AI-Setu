@@ -616,7 +616,7 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         elif 'contactpagecontent' in model_name: context['preview_url'] = f"{base_url}/contact"
         elif 'childjobposition' in model_name: context['preview_url'] = f"{base_url}/career/{self.object.slug}"
         elif 'policy' == model_name: context['preview_url'] = f"{base_url}/policy/new-policy"
-        elif 'blogpost' in model_name: context['preview_url'] = f"{base_url}/blog"
+        elif 'blogpost' in model_name: context['preview_url'] = f"{base_url}/blog/{self.object.slug}?is_preview=1"
         elif 'footer' == model_name: context['preview_url'] = f"{base_url}/"
         return context
 

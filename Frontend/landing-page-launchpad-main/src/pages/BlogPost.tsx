@@ -12,9 +12,11 @@ const BlogPost = () => {
   const [post, setPost] = useState<BlogPostType | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const isPreview = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('is_preview') === '1' : false;
+
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data && typeof event.data === 'object' && event.data.source === 'django-admin' && event.data.model === 'BlogPost') {
+      if (event.data && typeof event.data === 'object' && event.data.source === 'django-admin' && event.data.model?.toLowerCase() === 'blogpost') {
         const payload = event.data.payload;
         setPost((prev: any) => ({
           ...prev,
@@ -40,11 +42,11 @@ const BlogPost = () => {
   if (loading) {
     return (
       <>
-        <Header />
+        {!isPreview && <Header />}
         <main className="min-h-[60vh] flex items-center justify-center bg-[#F5F6FA]">
           <div className="text-gray-500">Loading article...</div>
         </main>
-        <Footer />
+        {!isPreview && <Footer />}
       </>
     );
   }
@@ -52,7 +54,7 @@ const BlogPost = () => {
   if (!post) {
     return (
       <>
-        <Header />
+        {!isPreview && <Header />}
         <main className="min-h-[60vh] flex items-center justify-center bg-gradient-to-br from-[#F5F6FA] to-[#E8ECF4]">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -70,7 +72,7 @@ const BlogPost = () => {
             </Link>
           </motion.div>
         </main>
-        <Footer />
+        {!isPreview && <Footer />}
       </>
     );
   }
@@ -84,7 +86,7 @@ const BlogPost = () => {
         ogImage={post.featured_image_url}
         ogType="article"
       />
-      <Header />
+      {!isPreview && <Header />}
       <main className="bg-gradient-to-br from-[#F5F6FA] via-[#F0F2F9] to-[#E8ECF4] min-h-screen overflow-x-hidden">
         <motion.section
           initial={{ opacity: 0 }}
@@ -203,7 +205,7 @@ const BlogPost = () => {
           </motion.div>
         </motion.section>
       </main>
-      <Footer />
+      {!isPreview && <Footer />}
     </>
   );
 };

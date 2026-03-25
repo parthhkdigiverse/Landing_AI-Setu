@@ -396,7 +396,9 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
                 context['scroll_target'] = 'open_positions' if section == 'jobs' else section
         elif 'contactpagecontent' in model_name: context['preview_url'] = f"{base_url}/contact"
         elif 'childjobposition' in model_name: context.update({'preview_url': f"{base_url}/career/?is_preview=1&section=jobs", 'scroll_target': 'open_positions'})
-        elif 'policy' == model_name: context['preview_url'] = f"{base_url}/policy/new-policy"
+        elif 'policy' == model_name: 
+            # For create view, we might not have a slug yet, use placeholder
+            context['preview_url'] = f"{base_url}/policy/new-policy"
         elif 'blogpost' in model_name: context['preview_url'] = f"{base_url}/blog"
         elif 'footer' == model_name: context['preview_url'] = f"{base_url}/"
         return context
@@ -580,15 +582,22 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
                     'is_faq_section': True, 'faq_formset': FAQContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
                     'is_trust_section': True, 'trust_formset': TrustContentFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
                 })
-        elif 'policy' == model_name: context.update({'is_policy': True, 'section_formset': PolicySectionFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
+        elif 'policy' in model_name: 
+            context.update({
+                'is_policy': True, 
+                'section_formset': PolicySectionFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
+                'is_viewing_policy': True
+            })
         
         scheme, host = self.request.scheme, self.request.get_host()
         base_url = f"{scheme}://{host}"
-        if model_name in ['aboutpagecontent', 'aboutherocontent', 'aboutstorycontent', 'aboutmissioncontent', 'aboutwhychoosecontent', 'aboutservecontent', 'aboutctacontent']:
+        # Consolidated Preview URL Logic
+        if 'policy' in model_name:
+            context['preview_url'] = f"{base_url}/policy/{self.object.slug}?is_preview=1"
+        elif model_name in ['aboutpagecontent', 'aboutherocontent', 'aboutstorycontent', 'aboutmissioncontent', 'aboutwhychoosecontent', 'aboutservecontent', 'aboutctacontent']:
             context['preview_url'] = f"{base_url}/about?is_preview=1"
             if section and section != 'all':
                 context['preview_url'] += f"&section={section}"
-                
                 # Adding scroll_target bindings for About Us
                 if section == 'hero': context['scroll_target'] = 'hero'
                 elif section == 'story': context['scroll_target'] = 'about'
@@ -626,11 +635,10 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         elif model_name in ['careerpage', 'careerherocontent', 'careerculturecontent', 'careerperkscontent', 'careerjobscontent', 'careerctacontent']:
             context['preview_url'] = f"{base_url}/career?is_preview=1"
             if section and section != 'all': context['preview_url'] += f"&section={section}"
-        elif 'contactpagecontent' in model_name: context['preview_url'] = f"{base_url}/contact"
         elif 'childjobposition' in model_name: context['preview_url'] = f"{base_url}/career/{self.object.slug}"
-        elif 'policy' == model_name: context['preview_url'] = f"{base_url}/policy/new-policy"
         elif 'blogpost' in model_name: context['preview_url'] = f"{base_url}/blog/{self.object.slug}?is_preview=1"
         elif 'footer' == model_name: context['preview_url'] = f"{base_url}/"
+        
         return context
 
     def form_valid(self, form):

@@ -30,30 +30,38 @@ const PolicyPage = () => {
       if (event.data && event.data.source === 'django-admin' && event.data.model === 'Policy') {
         const payload = event.data.payload;
         
-        // Parse the dynamic inline formset into a proper array
-        const parsedSections: any[] = [];
-        Object.keys(payload).forEach(key => {
-            if (key.startsWith('sections-') && !key.includes('TOTAL_FORMS') && !key.includes('INITIAL_FORMS') && !key.includes('MAX_NUM_FORMS') && !key.includes('MIN_NUM_FORMS')) {
-                const parts = key.split('-');
-                if (parts.length >= 3) {
-                    const index = parseInt(parts[1], 10);
-                    const fieldName = parts.slice(2).join('-'); // e.g., 'heading' or 'content'
-                    
-                    if (!parsedSections[index]) {
-                        parsedSections[index] = { id: `live-${index}` };
+        if (payload.sections && Array.isArray(payload.sections)) {
+            setLivePreview({
+                title: payload.title,
+                description: payload.description,
+                sections: payload.sections.filter((s: any) => !s.DELETE)
+            });
+        } else {
+            // Parse the dynamic inline formset into a proper array
+            const parsedSections: any[] = [];
+            Object.keys(payload).forEach(key => {
+                if (key.startsWith('sections-') && !key.includes('TOTAL_FORMS') && !key.includes('INITIAL_FORMS') && !key.includes('MAX_NUM_FORMS') && !key.includes('MIN_NUM_FORMS')) {
+                    const parts = key.split('-');
+                    if (parts.length >= 3) {
+                        const index = parseInt(parts[1], 10);
+                        const fieldName = parts.slice(2).join('-'); // e.g., 'heading' or 'content'
+                        
+                        if (!parsedSections[index]) {
+                            parsedSections[index] = { id: `live-${index}` };
+                        }
+                        parsedSections[index][fieldName] = payload[key];
                     }
-                    parsedSections[index][fieldName] = payload[key];
                 }
-            }
-        });
-        
-        const validSections = parsedSections.filter(Boolean);
+            });
+            
+            const validSections = parsedSections.filter(s => s && !s.DELETE);
 
-        setLivePreview({
-            title: payload.title,
-            description: payload.description,
-            sections: validSections
-        });
+            setLivePreview({
+                title: payload.title,
+                description: payload.description,
+                sections: validSections
+            });
+        }
 
         // Optional smooth scrolling
         if (event.data.scrollTarget) {

@@ -52,7 +52,37 @@ const AboutUs = () => {
       if (event.data?.source === "django-admin") {
         if (event.data.model === 'AboutPageContent' || event.data.model?.toLowerCase().includes('about')) {
           const payload = event.data.payload;
-          setLivePreview((prev: any) => ({ ...prev, ...payload }));
+          let parsedPayload = { ...payload };
+
+          const serve_items: any[] = [];
+          const why_choose_items: any[] = [];
+
+          Object.keys(payload).forEach(key => {
+            if (key.includes('TOTAL_FORMS') || key.includes('INITIAL_FORMS') || key.includes('MAX_NUM_FORMS') || key.includes('MIN_NUM_FORMS')) return;
+
+            if (key.startsWith('aboutusserveitem_set-')) {
+                const parts = key.split('-');
+                if (parts.length >= 3) {
+                    const idx = parseInt(parts[1], 10);
+                    const field = parts.slice(2).join('-');
+                    if (!serve_items[idx]) serve_items[idx] = {};
+                    serve_items[idx][field] = payload[key];
+                }
+            } else if (key.startsWith('aboutuswhychooseitem_set-')) {
+                const parts = key.split('-');
+                if (parts.length >= 3) {
+                    const idx = parseInt(parts[1], 10);
+                    const field = parts.slice(2).join('-');
+                    if (!why_choose_items[idx]) why_choose_items[idx] = {};
+                    why_choose_items[idx][field] = payload[key];
+                }
+            }
+          });
+
+          if (serve_items.length > 0) parsedPayload.serve_items = serve_items.filter(Boolean);
+          if (why_choose_items.length > 0) parsedPayload.why_choose_items = why_choose_items.filter(Boolean);
+
+          setLivePreview((prev: any) => ({ ...prev, ...parsedPayload }));
         }
 
         if (event.data.scrollTarget) {

@@ -447,6 +447,12 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         about_serve_fields = ['serve_title', 'serve_subtitle']
         about_cta_fields = ['cta_title', 'cta_description', 'cta_button_text']
         
+        contact_hero = ['hero_title', 'hero_description']
+        contact_cards = ['call_title', 'call_phone', 'call_phone_number', 'call_subtext', 'email_title', 'email_address', 'email_address_link', 'email_subtext', 'visit_title', 'visit_address', 'visit_subtext', 'visit_map_url', 'support_title', 'support_time', 'support_subtext']
+        contact_form = ['form_title', 'name_label', 'name_placeholder', 'phone_label', 'phone_placeholder', 'email_label', 'email_placeholder', 'company_label', 'company_placeholder', 'message_label', 'message_placeholder', 'form_button_text']
+        contact_why = ['why_title', 'why_description', 'feature_1_title', 'feature_2_title', 'feature_3_title', 'feature_4_title']
+        contact_cta = ['cta_title', 'cta_description', 'cta_button_text1', 'cta_button_text2', 'cta_button_text3']
+        
         if model_name == 'pricingcontent':
             fields = ['pricing_main_title', 'pricing_main_desc', 'pricing_label', 'pricing_title', 'pricing_plan_name', 'pricing_old_price', 'pricing_price', 'pricing_price_suffix']
         elif model_name == 'careerherocontent': fields = ['hero_title', 'hero_subtitle']
@@ -475,7 +481,13 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         elif model_name == 'trustcontent': fields = []
         
         elif model_name == 'contactpagecontent':
-            fields = '__all__'
+            if section == 'hero': fields = contact_hero
+            elif section == 'contact_cards': fields = contact_cards
+            elif section == 'form': fields = contact_form
+            elif section == 'why_choose': fields = contact_why
+            elif section == 'cta': fields = contact_cta
+            elif section == 'seo': fields = seo_fields
+            else: fields = contact_hero + contact_cards + contact_form + contact_why + contact_cta + seo_fields
             
         elif model_name == 'aboutpagecontent':
             if section == 'hero': fields = about_hero_fields

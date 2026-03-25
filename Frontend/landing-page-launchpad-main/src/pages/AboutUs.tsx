@@ -27,6 +27,16 @@ const AboutUs = () => {
   const [content, setContent] = useState<AboutPageContent | null>(null);
   const [livePreview, setLivePreview] = useState<any>(null);
 
+  const [targetSection, setTargetSection] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const isPreview = params.get('is_preview');
+    if (isPreview) {
+      setTargetSection(params.get('section') || 'all');
+    }
+  }, []);
+
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       if (event.data?.source === "django-admin") {
@@ -105,6 +115,12 @@ const AboutUs = () => {
   const serve = getSection("serve");
   const cta = getSection("cta");
 
+  // Helper to conditionally render active section
+  const shouldShowSection = (id: string) => {
+    if (!targetSection || targetSection === 'all') return true;
+    return targetSection === id;
+  };
+
   return (
     <>
       <SEO 
@@ -112,11 +128,12 @@ const AboutUs = () => {
         description={content?.seo_description || "Learn more about AI Setu's mission to empower retailers with innovative AI solutions. Meet our team and discover our journey."}
         keywords={content?.seo_keywords || "about AI Setu, company mission, retail innovation team"}
       />
-      <Header />
+      {!targetSection && <Header />}
 
       <main className="bg-[#F5F6FA]">
 
         {/* HERO */}
+        {shouldShowSection('hero') && (
         <motion.section
           id="hero"
           variants={fadeIn}
@@ -125,18 +142,20 @@ const AboutUs = () => {
           className="bg-[#1F2E4D] text-white py-20 text-center"
         >
           <motion.div variants={fadeUp} className="text-[#F4B400] font-bold tracking-wider uppercase mb-4 text-sm">
-            ABOUT US
+            {livePreview?.about_label || (content as any)?.about_label || "ABOUT US"}
           </motion.div>
           <motion.h1 variants={fadeUp} className="text-5xl font-bold mb-4">
             {livePreview?.hero_title || hero?.title || "About AI-Setu ERP"}
           </motion.h1>
 
           <motion.p variants={fadeUp} className="max-w-3xl mx-auto text-gray-300">
-            {livePreview?.hero_description || hero?.subtitle || ""}
+            {livePreview?.hero_description || hero?.subtitle || "AI-Setu ERP empowers retailers with modern technology to simplify store management. We help SMEs automate operations, improve efficiency, and grow faster with intelligent ERP solutions."}
           </motion.p>
         </motion.section>
+        )}
 
         {/* ABOUT */}
+        {shouldShowSection('story') && (
         <motion.section
           id="about"
           variants={fadeIn}
@@ -179,8 +198,10 @@ const AboutUs = () => {
             )}
           </motion.div>
         </motion.section>
+        )}
 
         {/* MISSION + WHY */}
+        {(shouldShowSection('mission') || shouldShowSection('why')) && (
         <motion.section
           id="mission"
           variants={fadeIn}
@@ -218,8 +239,10 @@ const AboutUs = () => {
             </motion.div>
           </motion.div>
         </motion.section>
+        )}
 
         {/* SERVE */}
+        {shouldShowSection('serve') && (
         <motion.section
           id="serve"
           variants={fadeIn}
@@ -285,8 +308,10 @@ const AboutUs = () => {
 
           </div>
         </motion.section>
+        )}
 
         {/* CTA */}
+        {shouldShowSection('cta') && (
         <motion.section
           id="cta"
           variants={fadeUp}
@@ -308,10 +333,11 @@ const AboutUs = () => {
             </Button>
           </motion.div>
         </motion.section>
+        )}
 
       </main>
 
-      <Footer />
+      {!targetSection && <Footer />}
 
       <Dialog open={demoOpen} onOpenChange={setDemoOpen}>
         <DialogContent className="sm:max-w-sm bg-card border border-border">

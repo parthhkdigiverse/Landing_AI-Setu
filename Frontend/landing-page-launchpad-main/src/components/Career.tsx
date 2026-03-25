@@ -3,7 +3,7 @@ import Footer from "@/components/Footer";
 import SEO from "@/components/SEO";
 import { motion } from "framer-motion";
 import { Briefcase, Users, Rocket, HeartHandshake } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { fetchCareerPageContent, CareerPageContent } from "@/services/api";
 
@@ -13,9 +13,24 @@ const CareerPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const openingsRef = useRef<HTMLDivElement>(null);
-
+  const [isPreview, setIsPreview] = useState(false);
+  const [targetSection, setTargetSection] = useState<string | null>(null);
   const [content, setContent] = useState<CareerPageContent | null>(null);
   const [livePreview, setLivePreview] = useState<any>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const isP = params.get('is_preview') === "1";
+    setIsPreview(isP);
+    if (isP) {
+      setTargetSection(params.get('section') || 'all');
+    }
+  }, []);
+
+  const shouldShowSection = (sectionName: string) => {
+    if (!targetSection || targetSection === 'all') return true;
+    return targetSection === sectionName;
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -37,7 +52,8 @@ const CareerPage = () => {
         const model = event.data.model;
         let parsedPayload = { ...payload };
 
-        if (model === 'CareerPage' || model === 'CareerPageContent') {
+        if (model === 'CareerPage' || model === 'CareerPageContent' || 
+            ['careerherocontent', 'careerculturecontent', 'careerperkscontent', 'careerjobscontent', 'careerctacontent'].includes(model.toLowerCase())) {
           // Deserialize dynamic Inline Formsets into structural React Arrays
           const cultures: any[] = [];
           const perks: any[] = [];
@@ -159,11 +175,12 @@ const CareerPage = () => {
         description={content?.seo_description || "Join AI Setu and help us build the future of AI-driven retail solutions. Explore our open positions and grow with us."}
         keywords={content?.seo_keywords || "careers, jobs, AI Setu hiring, retail tech roles"}
       />
-      <Header />
+      {!isPreview && <Header />}
 
       <main className="bg-[#F5F6FA]">
 
         {/* HERO */}
+        {shouldShowSection('hero') && (
         <section id="hero" className="py-24 text-center bg-[#1F2E4D] text-white">
           <motion.h1
             initial={{ opacity: 0, y: -40 }}
@@ -179,8 +196,10 @@ const CareerPage = () => {
               "Join a team building the future of AI powered ERP systems."}
           </p>
         </section>
+        )}
 
         {/* CULTURE */}
+        {shouldShowSection('culture') && (
         <section id="culture" className="py-20 container mx-auto px-6">
           <h2 className="text-4xl font-bold text-center mb-14 text-[#1F2E4D]">
             {livePreview?.culture_title || content?.culture_title || "Our Culture"}
@@ -206,8 +225,10 @@ const CareerPage = () => {
             })}
           </div>
         </section>
+        )}
 
         {/* BENEFITS */}
+        {shouldShowSection('perks') && (
         <section id="perks" className="py-20 bg-white">
           <div className="container mx-auto px-6 text-center">
             <h2 className="text-4xl font-bold mb-12 text-[#1F2E4D]">
@@ -229,8 +250,10 @@ const CareerPage = () => {
             </div>
           </div>
         </section>
+        )}
 
         {/* JOB POSITIONS */}
+        {shouldShowSection('jobs') && (
         <section
           id="open_positions"
           ref={openingsRef}
@@ -261,8 +284,10 @@ const CareerPage = () => {
             ))}
           </div>
         </section>
+        )}
 
         {/* CTA */}
+        {shouldShowSection('cta') && (
         <section id="cta" className="py-20 text-center bg-[#1F2E4D] text-white">
           <h2 className="text-4xl font-bold mb-4">
             {livePreview?.cta_title || content?.cta_title || "Ready to Join AI-Setu?"}
@@ -282,9 +307,10 @@ const CareerPage = () => {
             {livePreview?.cta_button_text || content?.cta_button_text || "View Openings"}
           </button>
         </section>
+        )}
       </main>
 
-      <Footer />
+      {!isPreview && <Footer />}
     </>
   );
 };

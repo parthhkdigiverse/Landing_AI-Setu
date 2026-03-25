@@ -810,6 +810,11 @@ class AboutPageContent(models.Model):
         blank=True
     )
 
+    # SEO Fields
+    seo_title = models.CharField(max_length=255, blank=True, null=True, help_text="Meta title for SEO (max 70 chars recommended)")
+    seo_description = models.TextField(blank=True, null=True, help_text="Meta description for SEO (max 160 chars recommended)")
+    seo_keywords = models.CharField(max_length=255, blank=True, null=True, help_text="Comma-separated SEO keywords")
+
     updated_at = models.DateTimeField(auto_now=True)
 
 
@@ -821,6 +826,49 @@ class AboutPageContent(models.Model):
 
     def __str__(self):
         return "About Page Content"
+
+class AboutHeroContent(AboutPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "About Hero Content"
+        verbose_name_plural = "About Hero Content"
+        app_label = 'website'
+
+class AboutStoryContent(AboutPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "Our Story & Vision"
+        verbose_name_plural = "Our Story & Vision"
+        app_label = 'website'
+
+class AboutMissionContent(AboutPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "Mission & Vision Content"
+        verbose_name_plural = "Mission & Vision Content"
+        app_label = 'website'
+
+class AboutWhyChooseContent(AboutPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "Why Choose AI-Setu Content"
+        verbose_name_plural = "Why Choose AI-Setu Content"
+        app_label = 'website'
+
+class AboutServeContent(AboutPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "Who We Serve Content"
+        verbose_name_plural = "Who We Serve Content"
+        app_label = 'website'
+
+class AboutCTAContent(AboutPageContent):
+    class Meta:
+        proxy = True
+        verbose_name = "About Us CTA Content"
+        verbose_name_plural = "About Us CTA Content"
+        app_label = 'website'
+
 
 class AboutUsServeItem(models.Model):
     about_page = models.ForeignKey(AboutPageContent, on_delete=models.CASCADE, related_name="serve_items", null=True, blank=True)
@@ -1301,6 +1349,41 @@ class CareerPage(models.Model):
 
     def __str__(self):
         return "Career Page"
+
+class CareerHeroContent(CareerPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Career Hero Content"
+        verbose_name_plural = "Career Hero Content"
+        app_label = 'website'
+
+class CareerCultureContent(CareerPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Our Culture Content"
+        verbose_name_plural = "Our Culture Content"
+        app_label = 'website'
+
+class CareerPerksContent(CareerPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Perks & Benefits Content"
+        verbose_name_plural = "Perks & Benefits Content"
+        app_label = 'website'
+
+class CareerJobsContent(CareerPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Open Positions Content"
+        verbose_name_plural = "Open Positions Content"
+        app_label = 'website'
+
+class CareerCTAContent(CareerPage):
+    class Meta:
+        proxy = True
+        verbose_name = "Career CTA Content"
+        verbose_name_plural = "Career CTA Content"
+        app_label = 'website'
 
 
 class Culture(models.Model):

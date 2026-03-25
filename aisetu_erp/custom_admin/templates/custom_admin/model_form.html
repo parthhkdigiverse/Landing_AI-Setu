@@ -1,6 +1,6 @@
 {% extends 'custom_admin/base.html' %}
 {% load crispy_forms_tags %}
-{% block content %}
+{% block admin_content %}
 <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4">
     <h1 class="h3 fw-bold mb-0 text-slate-800">
         <span class="text-primary opacity-75">{% if object %}Edit{% else %}Create{% endif %}</span> 
@@ -163,12 +163,27 @@
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     
+                    {% if is_about_page %}
+                    <div class="mb-4">
+                        <h4 class="section-title">
+                            {% if about_section == 'hero' %}<i class="bi bi-layout-text-window me-2 text-primary"></i> Hero Section
+                            {% elif about_section == 'story' %}<i class="bi bi-book me-2 text-primary"></i> Our Story & Vision
+                            {% elif about_section == 'mission' %}<i class="bi bi-target me-2 text-primary"></i> Mission & Vision
+                            {% elif about_section == 'why' %}<i class="bi bi-patch-question me-2 text-primary"></i> Why Choose AI-Setu?
+                            {% elif about_section == 'serve' %}<i class="bi bi-shop me-2 text-primary"></i> Who We Serve
+                            {% elif about_section == 'cta' %}<i class="bi bi-megaphone me-2 text-primary"></i> Final CTA
+                            {% else %}<i class="bi bi-info-square me-2 text-primary"></i> About Us Content{% endif %}
+                        </h4>
+                        {{ form|crispy }}
+                    </div>
+                    {% else %}
                     <div class="mb-4">
                         <h4 class="section-title">General Information</h4>
                         {{ form|crispy }}
                     </div>
+                    {% endif %}
             
-            {% if is_career_page %}
+            {% if is_career_page and not career_section or career_section == 'all' or career_section == 'culture' %}
                 <div class="mt-5 pt-2">
                     <h4 class="section-title">Cultures</h4>
                     {{ culture_formset.management_form }}
@@ -185,7 +200,7 @@
                 </div>
             {% endif %}
 
-            {% if is_career_page %}
+            {% if is_career_page and not career_section or career_section == 'all' or career_section == 'perks' %}
                 <div class="mt-5 pt-2">
                     <h4 class="section-title">Perks</h4>
                     {{ perk_formset.management_form }}
@@ -202,7 +217,7 @@
                 </div>
             {% endif %}
 
-            {% if is_career_page %}
+            {% if is_career_page and not career_section or career_section == 'all' or career_section == 'jobs' %}
                 <div class="mt-5 pt-2">
                     <h4 class="section-title">Job Positions</h4>
                     {{ job_formset.management_form }}
@@ -253,7 +268,7 @@
                 </div>
             {% endif %}
 
-            {% if is_about_page %}
+            {% if is_about_page and not about_section or about_section == 'serve' %}
                 <div class="mt-5 pt-2">
                     <h4 class="section-title">Who We Serve</h4>
                     {{ serve_formset.management_form }}
@@ -598,7 +613,7 @@
     });
 </script>
 {% endif %}
-{% endblock %}
+{% endblock admin_content %}
 {% block scripts %}
 <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
@@ -722,4 +737,4 @@
         });
     });
 </script>
-{% endblock %}
+{% endblock scripts %}

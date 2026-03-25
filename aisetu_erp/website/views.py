@@ -1108,10 +1108,16 @@ def about_page_api(request):
         "items": []
     })
 
-    # Why Choose
+    # Why Choose (Only Dynamic CRUD)
     why_items = []
-    for i, point in enumerate([content.why_point_1, content.why_point_2, content.why_point_3, content.why_point_4, content.why_point_5]):
-        if point: why_items.append({"id": i, "title": point})
+    
+    # Dynamic points
+    from website.models import AboutUsWhyChooseItem
+    for w_item in AboutUsWhyChooseItem.objects.filter(about_page=content, is_active=True).order_by('order'):
+        why_items.append({
+            "id": str(w_item.id),
+            "title": w_item.title
+        })
 
     data["sections"].append({
         "name": "why_choose",

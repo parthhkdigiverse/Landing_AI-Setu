@@ -23,7 +23,7 @@ from website.models import (
     ChallengeContent, SolutionContent, USPContent,
     HowItWorksContent, WhoIsThisForContent, TestimonialContent,
     ComparisonContent, FAQContent, CTAContent, ContactPageContent, 
-    HeroContent, AboutPageContent, AboutUsServeItem, Policy, PolicySection, AllStoreType
+    HeroContent, AboutPageContent, AboutUsServeItem, AboutUsWhyChooseItem, Policy, PolicySection, AllStoreType
 )
 ReferralPerkFormSet = inlineformset_factory(ReferralProgramContent, ReferralPerk, fk_name='landing_page', fields='__all__', extra=1, can_delete=True)
 
@@ -48,6 +48,7 @@ JobSkillFormSet = inlineformset_factory(ChildJobPosition, JobSkill, fk_name='job
 
 # About & Policy Formsets
 ServeItemFormSet = inlineformset_factory(AboutPageContent, AboutUsServeItem, fk_name='about_page', fields='__all__', extra=1, can_delete=True)
+WhyChooseItemFormSet = inlineformset_factory(AboutPageContent, AboutUsWhyChooseItem, fk_name='about_page', fields='__all__', extra=1, can_delete=True)
 PolicySectionFormSet = inlineformset_factory(Policy, PolicySection, fk_name='policy', fields='__all__', extra=1, can_delete=True)
 
 AllStoreTypeFormSet = modelformset_factory(AllStoreType, fields=('name', 'is_active'), extra=1, can_delete=True)
@@ -264,7 +265,7 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
         about_hero_fields = ['about_label', 'hero_title', 'hero_description']
         about_story_fields = ['about_heading', 'about_image', 'about_description_1', 'about_description_2', 'about_description_3']
         about_mission_fields = ['mission_title', 'mission_description']
-        about_why_fields = ['why_choose_title', 'why_point_1', 'why_point_2', 'why_point_3', 'why_point_4', 'why_point_5']
+        about_why_fields = ['why_choose_title']
         about_serve_fields = ['serve_title', 'serve_subtitle']
         about_cta_fields = ['cta_title', 'cta_description', 'cta_button_text']
         
@@ -330,11 +331,12 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
                 'about_hero_fields': ['about_label', 'hero_title', 'hero_description'],
                 'about_story_fields': ['about_heading', 'about_image', 'about_description_1', 'about_description_2', 'about_description_3'],
                 'about_mission_fields': ['mission_title', 'mission_description'],
-                'about_why_fields': ['why_choose_title', 'why_point_1', 'why_point_2', 'why_point_3', 'why_point_4', 'why_point_5'],
+                'about_why_fields': ['why_choose_title'],
                 'about_serve_fields': ['serve_title', 'serve_subtitle'],
                 'about_cta_fields': ['cta_title', 'cta_description', 'cta_button_text'],
                 'seo_fields': ['seo_title', 'seo_description', 'seo_keywords'],
-                'serve_formset': ServeItemFormSet(self.request.POST or None, self.request.FILES or None)
+                'serve_formset': ServeItemFormSet(self.request.POST or None, self.request.FILES or None),
+                'why_formset': WhyChooseItemFormSet(self.request.POST or None, self.request.FILES or None)
             })
         elif 'referralprogramcontent' in model_name: context.update({'is_referral_program': True, 'referral_formset': ReferralPerkFormSet(self.request.POST or None, self.request.FILES or None)})
         elif 'challengecontent' in model_name: context.update({'is_challenge_section': True, 'challenge_formset': ChallengeProblemFormSet(self.request.POST or None, self.request.FILES or None)})
@@ -407,7 +409,8 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
             'careerperkscontent': ['perk_formset'],
             'careerjobscontent': ['job_formset'],
             'childjobposition': ['description_formset', 'skill_formset'],
-            'aboutpagecontent': ['serve_formset'],
+            'aboutpagecontent': ['serve_formset', 'why_formset'],
+            'aboutwhychoosecontent': ['why_formset'],
             'aboutservecontent': ['serve_formset'],
             'referralprogramcontent': ['referral_formset'],
             'challengecontent': ['challenge_formset'],
@@ -451,7 +454,7 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         about_hero_fields = ['about_label', 'hero_title', 'hero_description']
         about_story_fields = ['about_heading', 'about_image', 'about_description_1', 'about_description_2', 'about_description_3']
         about_mission_fields = ['mission_title', 'mission_description']
-        about_why_fields = ['why_choose_title', 'why_point_1', 'why_point_2', 'why_point_3', 'why_point_4', 'why_point_5']
+        about_why_fields = ['why_choose_title']
         about_serve_fields = ['serve_title', 'serve_subtitle']
         about_cta_fields = ['cta_title', 'cta_description', 'cta_button_text']
         
@@ -541,11 +544,12 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
                 'about_hero_fields': ['about_label', 'hero_title', 'hero_description'],
                 'about_story_fields': ['about_heading', 'about_image', 'about_description_1', 'about_description_2', 'about_description_3'],
                 'about_mission_fields': ['mission_title', 'mission_description'],
-                'about_why_fields': ['why_choose_title', 'why_point_1', 'why_point_2', 'why_point_3', 'why_point_4', 'why_point_5'],
+                'about_why_fields': ['why_choose_title'],
                 'about_serve_fields': ['serve_title', 'serve_subtitle'],
                 'about_cta_fields': ['cta_title', 'cta_description', 'cta_button_text'],
                 'seo_fields': ['seo_title', 'seo_description', 'seo_keywords'],
-                'serve_formset': ServeItemFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)
+                'serve_formset': ServeItemFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object),
+                'why_formset': WhyChooseItemFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)
             })
         elif 'referralprogramcontent' in model_name: context.update({'is_referral_program': True, 'referral_formset': ReferralPerkFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
         elif 'challengecontent' in model_name: context.update({'is_challenge_section': True, 'challenge_formset': ChallengeProblemFormSet(self.request.POST or None, self.request.FILES or None, instance=self.object)})
@@ -637,7 +641,8 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
             'careerperkscontent': ['perk_formset'],
             'careerjobscontent': ['job_formset'],
             'childjobposition': ['description_formset', 'skill_formset'],
-            'aboutpagecontent': ['serve_formset'],
+            'aboutpagecontent': ['serve_formset', 'why_formset'],
+            'aboutwhychoosecontent': ['why_formset'],
             'aboutservecontent': ['serve_formset'],
             'referralprogramcontent': ['referral_formset'],
             'challengecontent': ['challenge_formset'],

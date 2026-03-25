@@ -237,11 +237,10 @@ const AboutUs = () => {
               <ul className="space-y-2 text-gray-600">
                 {livePreview ? (
                   <>
-                    {livePreview.why_point_1 && <li>✔ {livePreview.why_point_1}</li>}
-                    {livePreview.why_point_2 && <li>✔ {livePreview.why_point_2}</li>}
-                    {livePreview.why_point_3 && <li>✔ {livePreview.why_point_3}</li>}
-                    {livePreview.why_point_4 && <li>✔ {livePreview.why_point_4}</li>}
-                    {livePreview.why_point_5 && <li>✔ {livePreview.why_point_5}</li>}
+                    {/* Dynamic points only */}
+                    {livePreview.why_choose_items?.map((item: any, idx: number) => (
+                      !item.DELETE && item.title && <li key={`dynamic-${idx}`}>✔ {item.title}</li>
+                    ))}
                   </>
                 ) : (
                   why?.items?.map((item) => (

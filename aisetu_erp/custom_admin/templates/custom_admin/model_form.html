@@ -299,6 +299,24 @@
                 </div>
             {% endif %}
 
+            {% if is_about_page and not about_section or about_section == 'why' %}
+                <div class="mt-5 pt-2">
+                    <h4 class="section-title">Why Choose AI-Setu? Points</h4>
+                    {{ why_formset.management_form }}
+                    <div id="why-formset-container" class="formset-container" data-prefix="why_choose_items">
+                        {% for form in why_formset %}
+                            <div class="inline-form inline-form-card position-relative">
+                                <button type="button" class="btn-close position-absolute top-0 end-0 m-3 remove-form-btn" aria-label="Close"></button>
+                                {{ form|crispy }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold add-form-btn" data-target="why-formset-container">
+                        <i class="bi bi-plus-lg me-1"></i> Add Point
+                    </button>
+                </div>
+            {% endif %}
+
             {% if is_policy %}
                 <div class="mt-5 pt-2">
                     <h4 class="section-title">Policy Sections (Points)</h4>

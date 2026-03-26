@@ -150,7 +150,7 @@
             {% csrf_token %}
             <div class="mb-4">
                 <label class="form-label" for="email">Email Address</label>
-                <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required autofocus>
+                <input type="email" id="email" name="email" class="form-control" placeholder="admin@aisetuerp.com" required autofocus>
             </div>
             
             <div class="mb-5">
@@ -159,7 +159,7 @@
                     <a href="{% url 'custom_admin:forgot_password' %}" class="text-primary text-decoration-none fw-600" style="font-size: 0.8rem;">Forgot Password?</a>
                 </div>
                 <div class="password-wrapper">
-                    <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" style="padding-right: 3rem;" required>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" style="padding-right: 3rem;" required>
                     <button type="button" id="togglePassword" class="toggle-password" aria-label="Toggle password visibility">
                         <i class="bi bi-eye" id="toggleIcon"></i>
                     </button>

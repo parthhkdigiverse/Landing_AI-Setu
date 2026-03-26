@@ -234,58 +234,22 @@ class CustomAdminListView(AdminRequiredMixin, DynamicModelMixin, ListView):
         elif 'comparisoncontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=comparison", 'scroll_target': 'comparison'})
         elif 'faqcontent' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=faq", 'scroll_target': 'faq'})
         
+        elif 'storetype' in model_name: context.update({'preview_url': f"{base_url}/?is_preview=1&section=who-is-this-for", 'scroll_target': 'who-is-this-for'})
+        elif 'childjobposition' in model_name: context.update({'preview_url': f"{base_url}/career?is_preview=1&section=jobs", 'scroll_target': 'open_positions'})
+        
         readonly_models = ['demorequest', 'jobapplication', 'pricingsignup', 'contactsubmission', 'payment']
         context['is_readonly'] = model_name in readonly_models
         if context['is_readonly']:
-            headers = [f.verbose_name.title() for f in context.get('fields', [])]
-            
-            # Special handling for Payment to extract specific JSON fields
-            if model_name == 'payment':
-                # Remove 'Response Data'
-                try:
-                    rd_idx = headers.index('Response Data')
-                    headers.pop(rd_idx)
-                except ValueError:
-                    rd_idx = None
-                
-                # Remove 'Invoice'
-                try:
-                    inv_idx = headers.index('Invoice')
-                    headers.pop(inv_idx)
-                except ValueError:
-                    inv_idx = None
-                
-                headers.extend(['Merchant Id', 'Merchant Transaction Id', 'State'])
-            
-            context['headers'] = headers
+            context['headers'] = [f.verbose_name.title() for f in context.get('fields', [])]
             rows = []
             for obj in context.get('object_list', []):
                 row_data = []
                 for f in context.get('fields', []):
-                    # Skip the raw response_data and invoice if it's payment
-                    if model_name == 'payment' and f.name in ['response_data', 'invoice']:
-                        continue
-                        
                     val = getattr(obj, f.name, '')
                     if val and hasattr(val, 'url'):
                         val = f"<a href='javascript:void(0)' data-file-url='{val.url}' class='view-file-btn text-decoration-none'><i class='bi bi-file-earmark-text'></i> View</a>"
                     else: val = str(val) if val is not None else ''
                     row_data.append(val)
-                
-                # Append the extracted fields for payment
-                if model_name == 'payment':
-                    rd = getattr(obj, 'response_data', {}) or {}
-                    # Ensure rd is a dict
-                    if isinstance(rd, str):
-                        import json
-                        try: rd = json.loads(rd)
-                        except: rd = {}
-                    
-                    data = rd.get('data', {}) if isinstance(rd, dict) else {}
-                    row_data.append(str(data.get('merchantId', '')))
-                    row_data.append(str(data.get('merchantTransactionId', '')))
-                    row_data.append(str(data.get('state', '')))
-                
                 rows.append({'pk': obj.pk, 'data': row_data})
             context['tabular_rows'] = rows
         return context
@@ -431,10 +395,11 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
                 context['preview_url'] += f"?is_preview=1&section={section}"
                 context['scroll_target'] = 'open_positions' if section == 'jobs' else section
         elif 'contactpagecontent' in model_name: context['preview_url'] = f"{base_url}/contact"
-        elif 'childjobposition' in model_name: context.update({'preview_url': f"{base_url}/career/new-job?is_preview=1"})
+        elif 'childjobposition' in model_name: context.update({'preview_url': f"{base_url}/career?is_preview=1&section=jobs", 'scroll_target': 'open_positions'})
         elif 'policy' == model_name: 
             # For create view, we might not have a slug yet, use placeholder
             context['preview_url'] = f"{base_url}/policy/new-policy"
+        elif 'blogpost' in model_name: context['preview_url'] = f"{base_url}/blog"
         elif 'footer' == model_name: context['preview_url'] = f"{base_url}/"
         return context
 
@@ -670,7 +635,8 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         elif model_name in ['careerpage', 'careerherocontent', 'careerculturecontent', 'careerperkscontent', 'careerjobscontent', 'careerctacontent']:
             context['preview_url'] = f"{base_url}/career?is_preview=1"
             if section and section != 'all': context['preview_url'] += f"&section={section}"
-        elif 'childjobposition' in model_name: context.update({'preview_url': f"{base_url}/career/{self.object.slug}?is_preview=1"})
+        elif 'childjobposition' in model_name: context.update({'preview_url': f"{base_url}/career?is_preview=1&section=jobs", 'scroll_target': 'open_positions'})
+        elif 'blogpost' in model_name: context['preview_url'] = f"{base_url}/blog/{self.object.slug}?is_preview=1"
         elif 'footer' == model_name: context['preview_url'] = f"{base_url}/"
         
         return context

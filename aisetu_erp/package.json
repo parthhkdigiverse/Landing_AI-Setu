@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "axios": "^1.13.6",
-    "lucide-react": "^0.577.0",
-    "react-helmet-async": "^3.0.0"
-  }
-}

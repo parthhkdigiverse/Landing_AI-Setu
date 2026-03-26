@@ -192,7 +192,7 @@ if local_ip:
 PHONEPE_MERCHANT_ID = os.getenv("PHONEPE_MERCHANT_ID", "SU2502131201315075436273")
 PHONEPE_SALT_KEY = os.getenv("PHONEPE_SALT_KEY", "e3ae70f4-eb93-445a-a35a-d074e9060435")
 PHONEPE_SALT_INDEX = os.getenv("PHONEPE_SALT_INDEX", "1")
-PHONEPE_BASE_URL = os.getenv("PHONEPE_BASE_URL", "https://api.phonepe.com/apis/pg")
+PHONEPE_BASE_URL = os.getenv("PHONEPE_BASE_URL", "https://api.phonepe.com/apis/hermes")
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 IMPORT_EXPORT_USE_TRANSACTIONS = True

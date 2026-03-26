@@ -466,7 +466,13 @@ def initiate_payment(request):
             "X-VERIFY": checksum
         }
 
-        url = settings.PHONEPE_BASE_URL + endpoint
+        # Handle potential double 'pg' in URL if base_url already contains it
+        base_url_str = settings.PHONEPE_BASE_URL.rstrip('/')
+        if base_url_str.endswith('/pg') and endpoint.startswith('/pg'):
+             url = base_url_str + endpoint[3:] # Remove the '/pg' from endpoint
+        else:
+             url = base_url_str + endpoint
+        
         print("Requesting PhonePe URL:", url)
 
         # -------------------------------
@@ -480,7 +486,7 @@ def initiate_payment(request):
         )
 
         phonepe_data = phonepe_response.json()
-        print("PhonePe Response:", phonepe_data)
+        print("PhonePe Response Code:", phonepe_data.get("code"))
 
         if not phonepe_data.get("success"):
             return Response({
@@ -531,7 +537,13 @@ def check_phonepe_status_sync(merchant_transaction_id):
             "X-MERCHANT-ID": merchant_id
         }
 
-        url = base_url + endpoint
+        # Handle potential double 'pg' in URL
+        base_url_status = base_url.rstrip('/')
+        if base_url_status.endswith('/pg') and endpoint.startswith('/pg'):
+             url = base_url_status + endpoint[3:]
+        else:
+             url = base_url_status + endpoint
+             
         print(f"Checking PhonePe status at: {url}")
         
         response = requests.get(url, headers=headers, timeout=10)

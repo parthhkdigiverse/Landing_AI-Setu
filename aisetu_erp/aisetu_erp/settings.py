@@ -189,10 +189,10 @@ if local_ip:
 # Instructions for manual override
 # "http://<your-server-ip>:5004", # if you need a specific external IP
 
-PHONEPE_MERCHANT_ID = os.getenv("PHONEPE_MERCHANT_ID", "PGTESTPAYUAT86")
-PHONEPE_SALT_KEY = os.getenv("PHONEPE_SALT_KEY", "96434309-7796-489d-8924-ab56988a6076")
+PHONEPE_MERCHANT_ID = os.getenv("PHONEPE_MERCHANT_ID", "SU2502131201315075436273")
+PHONEPE_SALT_KEY = os.getenv("PHONEPE_SALT_KEY", "e3ae70f4-eb93-445a-a35a-d074e9060435")
 PHONEPE_SALT_INDEX = os.getenv("PHONEPE_SALT_INDEX", "1")
-PHONEPE_BASE_URL = os.getenv("PHONEPE_BASE_URL", "https://api-preprod.phonepe.com/apis/pg-sandbox")
+PHONEPE_BASE_URL = os.getenv("PHONEPE_BASE_URL", "https://api.phonepe.com/apis/pg")
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 IMPORT_EXPORT_USE_TRANSACTIONS = True

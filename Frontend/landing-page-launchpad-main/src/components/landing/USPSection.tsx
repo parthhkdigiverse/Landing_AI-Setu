@@ -65,24 +65,26 @@ const USPSection = () => {
             transition={{ duration: 0.7 }}
           >
             {/* Section Label */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full border border-accent/30 mb-6">
-              <Sparkles className="h-4 w-4 text-accent" />
-              <span className="text-accent font-semibold text-sm uppercase tracking-wider">
-                {livePreview?.usp_badge_text ||
-                  content?.usp_badge_text ||
-                  "AI-Powered (Beta Feature)"}
-              </span>
+            <div className="flex justify-center lg:justify-start">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/20 rounded-full border border-accent/30 mb-6">
+                <Sparkles className="h-4 w-4 text-accent" />
+                <span className="text-accent font-semibold text-sm uppercase tracking-wider">
+                  {livePreview?.usp_badge_text ||
+                    content?.usp_badge_text ||
+                    "AI-Powered (Beta Feature)"}
+                </span>
+              </div>
             </div>
 
             {/* Heading */}
-            <h2 className="text-4xl lg:text-5xl font-bold leading-tight mb-6">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-6 text-center lg:text-left">
               {livePreview?.usp_title ||
                 content?.usp_title ||
                 "No Barcode? No Problem."}
             </h2>
 
             {/* Subheading */}
-            <p className="text-lg text-gray-300 mb-10 max-w-md leading-relaxed">
+            <p className="text-lg text-gray-300 mb-10 max-w-md leading-relaxed mx-auto lg:mx-0 text-center lg:text-left">
               {livePreview?.usp_description ||
                 content?.usp_description ||
                 "Our AI technology identifies products from photos — just snap and bill."}
@@ -116,11 +118,12 @@ const USPSection = () => {
             transition={{ duration: 0.8 }}
             className="relative flex justify-center"
           >
-            <div className="relative w-[420px]">
+            <div className="relative w-full max-w-[420px] group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-accent to-yellow-500 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
               <img
                 src={aiScan}
                 alt="AI Product Scanning"
-                className="rounded-2xl shadow-2xl w-full"
+                className="relative rounded-2xl shadow-2xl w-full object-cover transform hover:scale-[1.02] transition-transform duration-500"
               />
             </div>
           </motion.div>

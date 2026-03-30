@@ -885,7 +885,7 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
 class CustomAdminDeleteView(AdminRequiredMixin, DynamicModelMixin, DeleteView):
     template_name = 'custom_admin/model_confirm_delete.html'
     def get_success_url(self):
-        return reverse('custom_admin:model_list', kwargs={'app_label': self.kwargs.get('app_label', 'website'), 'model_name': self.kwargs.get('model_slug')})
+        return reverse('custom_admin:model_list', kwargs={'app_label': self.kwargs.get('app_label', 'website'), 'model_name': self.kwargs.get('model_name')})
 
 class ManageAllStoreTypesView(AdminRequiredMixin, TemplateView):
     template_name = 'custom_admin/model_form.html'

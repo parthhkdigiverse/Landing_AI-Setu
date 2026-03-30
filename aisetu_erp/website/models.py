@@ -1641,6 +1641,9 @@ class Policy(models.Model):
 
         super().save(*args, **kwargs)
 
+    class Meta:
+        verbose_name_plural = "Policies"
+
     def __str__(self):
         return self.title
 

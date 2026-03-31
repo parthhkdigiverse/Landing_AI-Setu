@@ -35,19 +35,20 @@ SocialLinkFormSet = inlineformset_factory(Footer, SocialLink, fields='__all__', 
 ReferralPerkFormSet = inlineformset_factory(ReferralProgramContent, ReferralPerk, fk_name='landing_page', fields='__all__', extra=1, can_delete=True)
 
 # Challenge Formsets
-ChallengeProblemFormSet = inlineformset_factory(ChallengeContent, Problem, fk_name='landing_page', fields='__all__', extra=1, can_delete=True)
-SolutionFeatureFormSet = inlineformset_factory(SolutionContent, Feature, fk_name='landing_page', fields='__all__', extra=1, can_delete=True)
-USPContentFormSet = inlineformset_factory(USPContent, USPFeature, fk_name='landing_page', fields='__all__', extra=1, can_delete=True)
+ChallengeProblemFormSet = inlineformset_factory(ChallengeContent, Problem, fk_name='landing_page', fields='__all__', extra=1, can_delete=True, widgets={'description': Textarea(attrs={'rows': 2})})
+SolutionFeatureFormSet = inlineformset_factory(SolutionContent, Feature, fk_name='landing_page', fields='__all__', extra=1, can_delete=True, widgets={'description': Textarea(attrs={'rows': 2})})
+
+USPContentFormSet = inlineformset_factory(USPContent, USPFeature, fk_name='landing_page', fields='__all__', extra=1, can_delete=True, widgets={'description': Textarea(attrs={'rows': 2})})
 HIWStepFormSet = inlineformset_factory(HowItWorksContent, HowItWorksStep, fk_name='landing_page', fields='__all__', extra=1, can_delete=True)
 StoreTypeContentFormSet = inlineformset_factory(WhoIsThisForContent, StoreType, fk_name='landing_page', fields='__all__', extra=1, can_delete=True)
-TestimonialContentFormSet = inlineformset_factory(TestimonialContent, Testimonial, fk_name='landing_page', fields='__all__', extra=1, can_delete=True)
+TestimonialContentFormSet = inlineformset_factory(TestimonialContent, Testimonial, fk_name='landing_page', fields='__all__', extra=1, can_delete=True, widgets={'review': Textarea(attrs={'rows': 2})})
 ComparisonContentFormSet = inlineformset_factory(ComparisonContent, ComparisonFeature, fk_name='landing_page', fields='__all__', extra=1, can_delete=True)
-FAQContentFormSet = inlineformset_factory(FAQContent, FAQ, fk_name='landing_page', fields='__all__', extra=1, can_delete=True)
+FAQContentFormSet = inlineformset_factory(FAQContent, FAQ, fk_name='landing_page', fields='__all__', extra=1, can_delete=True, widgets={'answer': Textarea(attrs={'rows': 2})})
 TrustContentFormSet = inlineformset_factory(TrustContent, TrustItem, fk_name='landing_page', fields='__all__', extra=1, can_delete=True)
 PricingFeatureFormSet = inlineformset_factory(PricingContent, PricingFeature, fk_name='landing_page', fields='__all__', extra=1, can_delete=True)
 
 # Career & Job Formsets
-CultureFormSet = inlineformset_factory(CareerPage, Culture, fk_name='career_page', fields='__all__', extra=1, can_delete=True)
+CultureFormSet = inlineformset_factory(CareerPage, Culture, fk_name='career_page', fields='__all__', extra=1, can_delete=True, widgets={'description': Textarea(attrs={'rows': 2})})
 PerkFormSet = inlineformset_factory(CareerPage, Perk, fk_name='career_page', fields='__all__', extra=1, can_delete=True)
 OpenPositionFormSet = inlineformset_factory(CareerPage, ChildJobPosition, fk_name='career_page', fields=['title', 'slug', 'location', 'experience', 'total_positions', 'work_place'], extra=1, can_delete=True)
 JobDescriptionFormSet = inlineformset_factory(ChildJobPosition, JobDescription, fk_name='job', fields='__all__', extra=1, can_delete=True, widgets={'text': Textarea(attrs={'rows': 3})})
@@ -487,6 +488,13 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
         elif model_name == 'aboutpagecontent': fields = about_hero_fields + about_story_fields + about_mission_fields + about_why_fields + about_serve_fields + about_cta_fields + seo_fields
         elif model_name == 'landingpagecontent': fields = hero_fields + seo_fields
         elif model_name == 'ctacontent': fields = cta_fields
+        elif model_name == 'contactpagecontent':
+            contact_hero = ['hero_title', 'hero_description']
+            contact_cards = ['call_title', 'call_phone', 'call_phone_number', 'call_subtext', 'email_title', 'email_address', 'email_address_link', 'email_subtext', 'visit_title', 'visit_address', 'visit_subtext', 'visit_map_url', 'support_title', 'support_time', 'support_subtext']
+            contact_form = ['form_title', 'name_label', 'name_placeholder', 'phone_label', 'phone_placeholder', 'email_label', 'email_placeholder', 'company_label', 'company_placeholder', 'message_label', 'message_placeholder', 'form_button_text']
+            contact_why = ['why_title', 'why_description', 'feature_1_title', 'feature_2_title', 'feature_3_title', 'feature_4_title']
+            contact_cta = ['cta_title', 'cta_description', 'cta_button_text1', 'cta_button_text2', 'cta_button_text3']
+            fields = contact_hero + contact_cards + contact_form + contact_why + contact_cta + seo_fields
         elif model_name == 'referralprogramcontent': fields = ['referral_main_title', 'referral_main_desc', 'referral_label', 'referral_title', 'join_referral']
         elif model_name == 'challengecontent': fields = ['problem_section_label', 'problem_section_title']
         elif model_name == 'solutioncontent': fields = ['feature_title', 'feature_title2', 'solution_section_label', 'solution_section_title']
@@ -498,7 +506,21 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
         elif model_name == 'faqcontent': fields = ['faq_label', 'faq_title']
         elif model_name == 'trustcontent': fields = []
         else: fields = '__all__'
-        return modelform_factory(model, fields=fields)
+        
+        widgets = {}
+        if model_name == 'contactpagecontent' or 'about' in model_name:
+            widgets = {
+                'hero_description': Textarea(attrs={'rows': 3}),
+                'why_description': Textarea(attrs={'rows': 3}),
+                'cta_description': Textarea(attrs={'rows': 3}),
+                'about_description_1': Textarea(attrs={'rows': 3}),
+                'about_description_2': Textarea(attrs={'rows': 3}),
+                'about_description_3': Textarea(attrs={'rows': 3}),
+                'mission_description': Textarea(attrs={'rows': 3}),
+                'seo_description': Textarea(attrs={'rows': 2}),
+            }
+        
+        return modelform_factory(model, fields=fields, widgets=widgets)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -595,7 +617,7 @@ class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
             if section and section != 'all': 
                 context['preview_url'] += f"?is_preview=1&section={section}"
                 context['scroll_target'] = 'open_positions' if section == 'jobs' else section
-        elif 'contactpagecontent' in model_name: context['preview_url'] = f"{base_url}/contact"
+        elif 'contactpagecontent' in model_name: context.update({'is_contact_page': True, 'preview_url': f"{base_url}/contact"})
         elif 'childjobposition' in model_name: context.update({'preview_url': f"{base_url}/career/new-job?is_preview=1"})
         elif 'policy' == model_name: 
             # For create view, we might not have a slug yet, use placeholder
@@ -714,7 +736,20 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
         
         else: fields = '__all__'
         
-        return modelform_factory(model, fields=fields)
+        widgets = {}
+        if model_name == 'contactpagecontent' or 'about' in model_name:
+            widgets = {
+                'hero_description': Textarea(attrs={'rows': 3}),
+                'why_description': Textarea(attrs={'rows': 3}),
+                'cta_description': Textarea(attrs={'rows': 3}),
+                'about_description_1': Textarea(attrs={'rows': 3}),
+                'about_description_2': Textarea(attrs={'rows': 3}),
+                'about_description_3': Textarea(attrs={'rows': 3}),
+                'mission_description': Textarea(attrs={'rows': 3}),
+                'seo_description': Textarea(attrs={'rows': 2}),
+            }
+        
+        return modelform_factory(model, fields=fields, widgets=widgets)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -813,7 +848,7 @@ class CustomAdminUpdateView(AdminRequiredMixin, DynamicModelMixin, UpdateView):
                 context['preview_url'] += "&section=hero"
                 context['scroll_target'] = 'hero'
         elif 'contactpagecontent' in model_name:
-            context['preview_url'] = f"{base_url}/contact?is_preview=1"
+            context.update({'is_contact_page': True, 'preview_url': f"{base_url}/contact?is_preview=1"})
             if context['section_param']:
                 context['preview_url'] += f"&section={context['section_param']}"
                 context['scroll_target'] = context['section_param']

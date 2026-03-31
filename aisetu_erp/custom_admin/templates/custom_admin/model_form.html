@@ -171,13 +171,17 @@
         display: none !important;
     }
 
-    /* Compact textareas for Detailed Openings */
-    {% if is_child_job_position %}
+    /* Compact textareas for Detailed Openings, Challenge, Solution, USP, Testimonial, FAQ, Contact, About, and Careers Sections */
+    {% if is_child_job_position or is_challenge_section or is_solution_section or is_usp_section or is_testimonial_section or is_faq_section or is_contact_page or is_about_page or is_career_page %}
     textarea.form-control {
-        min-height: 100px !important;
+        min-height: 70px !important;
         height: auto !important;
     }
     {% endif %}
+
+
+
+
 </style>
 <div class="admin-preview-layout {% if not preview_url %}no-preview{% endif %}">
     <div class="admin-edit-section">
@@ -765,17 +769,30 @@
 
         function startCKEditors() {
             const isChildJobPosition = {% if is_child_job_position %}true{% else %}false{% endif %};
+            const isChallengeSection = {% if is_challenge_section %}true{% else %}false{% endif %};
+            const isSolutionSection = {% if is_solution_section %}true{% else %}false{% endif %};
+            const isUSPSection = {% if is_usp_section %}true{% else %}false{% endif %};
+            const isTestimonialSection = {% if is_testimonial_section %}true{% else %}false{% endif %};
+            const isFAQSection = {% if is_faq_section %}true{% else %}false{% endif %};
+            const isContactPage = {% if is_contact_page %}true{% else %}false{% endif %};
+            const isAboutPage = {% if is_about_page %}true{% else %}false{% endif %};
+            const isCareerPage = {% if is_career_page %}true{% else %}false{% endif %};
+            
             document.querySelectorAll('textarea').forEach(textarea => {
                 const id = textarea.id;
-                if (id && (id.includes('description') || id.includes('content'))) {
-                    // Skip if it's the Detailed Openings page (ChildJobPosition)
-                    if (isChildJobPosition) {
+                if (id && (id.includes('description') || id.includes('content') || id.includes('review') || id.includes('answer'))) {
+                    // Skip if it's the Detailed Openings page, Challenge, Solution, USP, Testimonial, FAQ, Contact Us, About Us, or Careers Sections
+                    if (isChildJobPosition || isChallengeSection || isSolutionSection || isUSPSection || isTestimonialSection || isFAQSection || isContactPage || isAboutPage || isCareerPage) {
                         return;
                     }
                     initCKEditor(id);
                 }
             });
         }
+
+
+
+
 
         // Try initialization
         setTimeout(startCKEditors, 100);

@@ -484,8 +484,11 @@ def initiate_payment(request):
         print("PhonePe Response:", phonepe_data)
 
         if not phonepe_data.get("success"):
+            print(f"PhonePe Initiation ERROR: {phonepe_data.get('message', 'Unknown Error')}")
+            print(f"Full response: {phonepe_data}")
             return Response({
-                "error": phonepe_data.get("message", "Payment failed")
+                "error": phonepe_data.get("message", "Payment failed"),
+                "details": phonepe_data.get("code", "ERROR")
             }, status=400)
 
         payment_url = phonepe_data["data"]["instrumentResponse"]["redirectInfo"]["url"]

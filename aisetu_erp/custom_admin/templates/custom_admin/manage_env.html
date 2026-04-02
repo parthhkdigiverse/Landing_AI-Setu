@@ -25,9 +25,10 @@
         border-bottom: 1px solid #f1f5f9;
         color: #334155;
         font-size: 0.9375rem;
+        transition: background 0.2s;
     }
 
-    .table-hover tbody tr:hover {
+    .env-row:hover td {
         background-color: #f8fafc;
     }
 
@@ -36,72 +37,95 @@
         font-weight: 600;
         color: var(--primary-color);
         background: rgba(99, 102, 241, 0.05);
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.375rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 0.5rem;
     }
 
     .env-value-wrapper {
         position: relative;
-        max-width: 400px;
+        display: flex;
+        align-items: center;
+        background: #f1f5f9;
+        border-radius: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border: 1px solid transparent;
+        transition: all 0.2s;
+    }
+
+    .env-value-wrapper:focus-within {
+        background: white;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
     }
 
     .env-value-input {
         background: transparent !important;
         border: none !important;
-        padding-right: 2.5rem !important;
         font-family: monospace;
         color: #475569;
+        padding: 0.5rem 0;
+        flex-grow: 1;
+        font-size: 0.9rem;
     }
 
     .env-value-input:focus {
         box-shadow: none !important;
+        color: #1e293b;
     }
 
-    .toggle-value-btn {
-        position: absolute;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.5rem;
+        border: none;
+        background: transparent;
         color: #94a3b8;
-        transition: color 0.2s;
+        transition: all 0.2s;
+        cursor: pointer;
     }
 
-    .toggle-value-btn:hover {
-        color: var(--primary-color);
+    .action-btn:hover {
+        background: #e2e8f0;
+        color: #64748b;
     }
 
-    .search-container {
-        position: relative;
-        max-width: 300px;
+    .btn-save {
+        color: #10b981;
+        background: rgba(16, 185, 129, 0.1);
     }
 
-    .search-container i {
-        position: absolute;
-        left: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #94a3b8;
+    .btn-save:hover {
+        background: #10b981;
+        color: white;
     }
 
-    .search-input {
-        padding-left: 2.5rem !important;
-        border-radius: 2rem !important;
-        background: #f1f5f9 !important;
-        border: 1px solid transparent !important;
+    .save-indicator {
+        display: none;
+        margin-left: 0.5rem;
     }
 
-    .search-input:focus {
-        background: white !important;
-        border-color: var(--primary-color) !important;
+    .is-dirty .save-indicator {
+        display: flex;
     }
 
     .badge-env {
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         font-weight: 800;
-        padding: 0.25rem 0.6rem;
+        padding: 0.2rem 0.5rem;
         border-radius: 2rem;
         text-transform: uppercase;
         letter-spacing: 0.025em;
+    }
+
+    /* Toast styles */
+    #toast-container {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 1060;
     }
 </style>
 
@@ -122,76 +146,75 @@
 </div>
 
 <div class="card card-modern border-0">
-    <div class="card-header bg-white py-3 px-4 border-bottom-0">
+    <div class="card-header bg-white py-4 px-4 border-bottom-0">
         <div class="row align-items-center">
             <div class="col">
-                <h5 class="mb-0 fw-bold text-slate-700">Configuration Keys</h5>
+                <h5 class="mb-0 fw-bold text-slate-700">Configuration Table</h5>
+                <p class="text-muted small mb-0 mt-1">Click on any value below to edit it inline.</p>
             </div>
             <div class="col-auto">
-                <div class="search-container">
-                    <i class="bi bi-search"></i>
-                    <input type="text" id="envSearch" class="form-control search-input" placeholder="Search keys...">
+                <div class="input-group" style="max-width: 300px;">
+                    <span class="input-group-text bg-light border-0 ps-3"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="envSearch" class="form-control bg-light border-0" placeholder="Filter variables...">
                 </div>
             </div>
         </div>
     </div>
     <div class="table-responsive">
-        <table class="table table-hover mb-0 align-middle" id="envTable">
+        <table class="table mb-0 align-middle" id="envTable">
             <thead>
                 <tr>
-                    <th class="px-4 py-3">Variable Name</th>
-                    <th class="px-4 py-3">Current Value</th>
-                    <th class="text-end px-4 py-3">Actions</th>
+                    <th class="px-4 py-3">Configuration Key</th>
+                    <th class="px-4 py-3">Variable Value</th>
+                    <th class="text-end px-4 py-3" style="width: 120px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for key, value in env_vars.items %}
-                <tr class="env-row">
+                <tr class="env-row" data-key="{{ key }}">
                     <td class="px-4 py-3">
-                        <div class="d-flex flex-column">
-                            <span class="env-key mb-1 d-inline-block">{{ key }}</span>
+                        <div class="d-flex flex-column align-items-start">
+                            <span class="env-key mb-1">{{ key }}</span>
                             {% if "KEY" in key or "SECRET" in key or "TOKEN" in key or "PASSWORD" in key or "SALT" in key %}
-                            <span><span class="badge badge-env bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">Secure Key</span></span>
+                            <span class="badge badge-env bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">Secure</span>
                             {% elif "DB" in key or "DATABASE" in key %}
-                            <span><span class="badge badge-env bg-info bg-opacity-10 text-info border border-info border-opacity-25">Database</span></span>
+                            <span class="badge badge-env bg-info bg-opacity-10 text-info border border-info border-opacity-25">Database</span>
                             {% elif "URL" in key or "HOST" in key %}
-                            <span><span class="badge badge-env bg-success bg-opacity-10 text-success border border-success border-opacity-25">Endpoint</span></span>
+                            <span class="badge badge-env bg-success bg-opacity-10 text-success border border-success border-opacity-25">Endpoint</span>
                             {% else %}
-                            <span><span class="badge badge-env bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">Config</span></span>
+                            <span class="badge badge-env bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">Config</span>
                             {% endif %}
                         </div>
                     </td>
                     <td class="px-4 py-3">
                         <div class="env-value-wrapper">
-                            <input type="password" class="form-control env-value-input form-control-sm" value="{{ value }}" readonly>
-                            <button class="btn btn-link toggle-value-btn p-0" type="button">
-                                <i class="bi bi-eye"></i>
-                            </button>
+                            <input type="password" 
+                                   class="form-control env-value-input" 
+                                   value="{{ value }}" 
+                                   data-original-value="{{ value }}"
+                                   spellcheck="false">
+                            
+                            <div class="d-flex align-items-center ms-2">
+                                <button class="action-btn toggle-visibility-btn" title="Toggle Visibility">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="action-btn btn-save save-indicator" title="Save Changes">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                                <div class="spinner-border spinner-border-sm text-primary ms-2 d-none loading-spinner" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
                         </div>
                     </td>
                     <td class="text-end px-4 py-3">
-                        <div class="d-flex gap-2 justify-content-end">
-                            <button class="btn btn-sm btn-light border rounded-pill px-3 fw-bold edit-var-btn" 
-                                    data-key="{{ key }}" 
-                                    data-value="{{ value }}"
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#editVarModal">
-                                <i class="bi bi-pencil-square me-1"></i> Edit
-                            </button>
-                            <button class="btn btn-sm btn-light border rounded-pill px-3 text-danger fw-bold delete-var-btn" 
-                                    data-key="{{ key }}" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#deleteVarModal">
-                                <i class="bi bi-trash3 me-1"></i> Delete
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3" class="text-center py-5 text-muted">
-                        <i class="bi bi-inbox display-4 d-block mb-3 opacity-25"></i>
-                        <p class="mb-0 fw-medium">No environment variables found in .env</p>
+                        <button class="action-btn text-danger delete-var-btn mx-auto" 
+                                data-key="{{ key }}" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#deleteVarModal"
+                                title="Delete Variable">
+                            <i class="bi bi-trash3"></i>
+                        </button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -200,12 +223,12 @@
     </div>
 </div>
 
-<!-- Add Variable Modal -->
+<!-- Modal for ADD-only (to keep table clean) -->
 <div class="modal fade" id="addVarModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <div class="modal-header bg-primary text-white border-0 py-3">
-                <h5 class="modal-title fw-bold">New Configuration Key</h5>
+                <h5 class="modal-title fw-bold">New Environment Key</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST">
@@ -213,50 +236,18 @@
                 <input type="hidden" name="action" value="add">
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase text-muted mb-2">Key Name</label>
-                        <input type="text" name="key" class="form-control form-control-lg border-2" placeholder="e.g. STRIPE_SECRET_KEY" required 
+                        <label class="form-label small fw-bold text-uppercase text-muted">Key Name</label>
+                        <input type="text" name="key" class="form-control form-control-lg border-2" placeholder="e.g. JWT_SECRET" required 
                                style="text-transform: uppercase; font-family: monospace;" oninput="this.value = this.value.toUpperCase().replace(/\s+/g, '_').replace(/[^A-Z0-9_]/g, '')">
-                        <div class="form-text mt-2 small">Use uppercase letters and underscores only.</div>
                     </div>
                     <div class="mb-0">
-                        <label class="form-label small fw-bold text-uppercase text-muted mb-2">Value</label>
-                        <textarea name="value" class="form-control border-2" rows="4" placeholder="Enter configuration value..." required style="font-family: monospace;"></textarea>
+                        <label class="form-label small fw-bold text-uppercase text-muted">Value</label>
+                        <textarea name="value" class="form-control border-2" rows="4" placeholder="Paste value here..." required style="font-family: monospace;"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer bg-light border-0 p-3">
                     <button type="button" class="btn btn-link text-decoration-none text-muted fw-bold" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Add Variable</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Edit Variable Modal -->
-<div class="modal fade" id="editVarModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-            <div class="modal-header bg-slate-800 text-white border-0 py-3" style="background: #1e293b;">
-                <h5 class="modal-title fw-bold">Update Configuration</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="update">
-                <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-uppercase text-muted mb-2">Key Name</label>
-                        <input type="text" id="edit_key_display" class="form-control form-control-lg bg-light border-0 fw-bold" readonly style="font-family: monospace;">
-                        <input type="hidden" name="key" id="edit_key_hidden">
-                    </div>
-                    <div class="mb-0">
-                        <label class="form-label small fw-bold text-uppercase text-muted mb-2">Configuration Value</label>
-                        <textarea name="value" id="edit_value" class="form-control border-2" rows="4" required style="font-family: monospace;"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer bg-light border-0 p-3">
-                    <button type="button" class="btn btn-link text-decoration-none text-muted fw-bold" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Update Key</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Create Variable</button>
                 </div>
             </form>
         </div>
@@ -272,14 +263,14 @@
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="key" id="delete_key">
                 <div class="modal-body text-center p-4">
-                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
-                        <i class="bi bi-exclamation-triangle fs-2"></i>
+                    <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px;">
+                        <i class="bi bi-trash display-6"></i>
                     </div>
-                    <h5 class="fw-bold mb-2">Confirm Delete?</h5>
-                    <p class="text-muted small mb-3">You are about to permanently remove <br><code id="delete_key_display" class="text-danger fw-bold"></code></p>
+                    <h6 class="fw-bold mb-1">Delete Variable?</h6>
+                    <p class="text-muted small mb-4">Confirm removal of <br><code id="delete_key_display" class="text-danger fw-bold"></code></p>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-danger rounded-pill fw-bold py-2">Yes, Remove Key</button>
-                        <button type="button" class="btn btn-light rounded-pill fw-bold py-2" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger rounded-pill fw-bold">Delete Forever</button>
+                        <button type="button" class="btn btn-light rounded-pill fw-bold" data-bs-dismiss="modal">Keep It</button>
                     </div>
                 </div>
             </form>
@@ -287,9 +278,12 @@
     </div>
 </div>
 
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Search Functionality
+    // 1. Search Logic
     const searchInput = document.getElementById('envSearch');
     const tableRows = document.querySelectorAll('.env-row');
     
@@ -301,11 +295,49 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Toggle Password View
-    document.querySelectorAll('.toggle-value-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const input = this.closest('.env-value-wrapper').querySelector('.env-value-input');
-            const icon = this.querySelector('i');
+    // 2. Inline Edit Logic
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    function showToast(message, type = 'success') {
+        const toastId = 'toast-' + Date.now();
+        const toastHtml = `
+            <div id="${toastId}" class="toast align-items-center text-white bg-${type === 'success' ? 'emerald-500' : 'rose-500'} border-0" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: ${type === 'success' ? '#10b981' : '#f43f5e'}">
+                <div class="d-flex">
+                    <div class="toast-body fw-bold">
+                        <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-octagon-fill'} me-2"></i> ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        `;
+        const container = document.getElementById('toast-container');
+        container.insertAdjacentHTML('beforeend', toastHtml);
+        const toastEl = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+        toast.show();
+        toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+    }
+
+    document.querySelectorAll('.env-row').forEach(row => {
+        const input = row.querySelector('.env-value-input');
+        const wrapper = row.querySelector('.env-value-wrapper');
+        const saveBtn = row.querySelector('.btn-save');
+        const spinner = row.querySelector('.loading-spinner');
+        const toggleBtn = row.querySelector('.toggle-visibility-btn');
+        const key = row.dataset.key;
+
+        // Detect changes
+        input.addEventListener('input', function() {
+            if (this.value !== this.dataset.originalValue) {
+                wrapper.classList.add('is-dirty');
+            } else {
+                wrapper.classList.remove('is-dirty');
+            }
+        });
+
+        // Visibility toggle
+        toggleBtn.addEventListener('click', () => {
+            const icon = toggleBtn.querySelector('i');
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.className = 'bi bi-eye-slash';
@@ -314,18 +346,57 @@ document.addEventListener('DOMContentLoaded', function() {
                 icon.className = 'bi bi-eye';
             }
         });
-    });
 
-    // Edit Modal Data
-    document.querySelectorAll('.edit-var-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.getElementById('edit_key_display').value = this.dataset.key;
-            document.getElementById('edit_key_hidden').value = this.dataset.key;
-            document.getElementById('edit_value').value = this.dataset.value;
+        // AJAX Save
+        saveBtn.addEventListener('click', async () => {
+            const newValue = input.value;
+            
+            // Show loading
+            saveBtn.classList.add('d-none');
+            spinner.classList.remove('d-none');
+
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new URLSearchParams({
+                        'ajax': '1',
+                        'action': 'update',
+                        'key': key,
+                        'value': newValue
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    input.dataset.originalValue = newValue;
+                    wrapper.classList.remove('is-dirty');
+                    showToast(result.message);
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                showToast('Network error occurred.', 'error');
+            } finally {
+                spinner.classList.add('d-none');
+                saveBtn.classList.remove('d-none');
+            }
+        });
+
+        // Handle Enter key for save
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && wrapper.classList.contains('is-dirty')) {
+                saveBtn.click();
+            }
         });
     });
 
-    // Delete Modal Data
+    // 3. Delete Modal Data
     document.querySelectorAll('.delete-var-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.getElementById('delete_key').value = this.dataset.key;

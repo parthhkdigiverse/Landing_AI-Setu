@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy, reverse
-from django.http import HttpResponseForbidden, HttpResponse
+from django.http import HttpResponseForbidden, HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import random, string, json, os
 from dotenv import dotenv_values, set_key, unset_key
@@ -467,15 +467,23 @@ def manage_env(request):
         key = request.POST.get('key')
         value = request.POST.get('value')
         
-        if action == "add" or action == "update":
-            if key and value is not None:
-                set_key(str(env_path), key, value)
-                os.environ[key] = value
-        elif action == "delete":
-            if key:
-                unset_key(str(env_path), key)
-                if key in os.environ:
-                    del os.environ[key]
+        try:
+            if action == "add" or action == "update":
+                if key and value is not None:
+                    set_key(str(env_path), key, value)
+                    os.environ[key] = value
+            elif action == "delete":
+                if key:
+                    unset_key(str(env_path), key)
+                    if key in os.environ:
+                        del os.environ[key]
+            
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('ajax') == '1':
+                return JsonResponse({'status': 'success', 'message': f'Variable {key} updated successfully.'})
+        except Exception as e:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('ajax') == '1':
+                return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            raise e
         
         return redirect('custom_admin:manage_env')
 

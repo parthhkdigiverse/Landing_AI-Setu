@@ -5,8 +5,9 @@ from django.http import JsonResponse, HttpResponse
 import json
 import re
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import APIView, api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.decorators import APIView, api_view, permission_classes, authentication_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.response import Response
 from rest_framework import status
 from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactSubmission, DemoVideo, Feature, Footer, HowItWorksStep, JobPosition, LoginLink, Page, Policy, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
@@ -391,161 +392,145 @@ def check_referral(request):
         "status": "new_user" if created else "existing_referral_user"
     })
 
-# MERCHANT_ID = "PGTESTPAYUAT"
-# SALT_KEY = "099eb0cd-02cf-4e2a-8aca-3e6c6aff0399"
-# SALT_INDEX = "1"
+def get_phonepe_access_token():
+    """Helper to fetch a V2 OAuth token from PhonePe."""
+    url = "https://api.phonepe.com/apis/identity-manager/v1/oauth/token"
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    data = {
+        "client_id": settings.PHONEPE_MERCHANT_ID,
+        "client_secret": settings.PHONEPE_SALT_KEY, # In V2, Salt Key acts as Client Secret
+        "client_version": str(settings.PHONEPE_SALT_INDEX), # Salt Index acts as Client Version
+        "grant_type": "client_credentials"
+    }
+    
+    try:
+        response = requests.post(url, data=data, headers=headers, timeout=10)
+        response.raise_for_status()
+        token_data = response.json()
+        return token_data.get("access_token")
+    except Exception as e:
+        print(f"Error fetching PhonePe OAuth token: {e}")
+        if hasattr(e, 'response') and e.response:
+            print(f"Token Error Response: {e.response.text}")
+        return None
 
 @csrf_exempt
 @api_view(["POST"])
+@authentication_classes([SessionAuthentication, BasicAuthentication])
+@permission_classes([AllowAny])
 def initiate_payment(request):
+    """
+    PhonePe PG V2 Payment Initiation (OAuth Based)
+    """
     try:
         signup_id = request.data.get("signup_id")
-        amount = request.data.get("amount")
+        amount_val = request.data.get("amount") # This is in Rupees from frontend
 
-        if not signup_id:
-            return Response({"error": "signup_id is missing"}, status=400)
-        if not amount:
-            return Response({"error": "amount is missing"}, status=400)
+        if not signup_id or not amount_val:
+            return Response({"error": "signup_id or amount is missing"}, status=400)
 
         signup = PricingSignup.objects.filter(id=signup_id).first()
         if not signup:
-            # This is a common cause for 400/404 errors
             return Response({"error": f"Signup with ID {signup_id} not found"}, status=400)
 
-        # -------------------------------
-        # Validate Merchant Keys
-        # -------------------------------
-        print("### ANTIGRAVITY REAL CODE STARTING ###")
-        if not getattr(settings, "PHONEPE_MERCHANT_ID", None) or \
-           not getattr(settings, "PHONEPE_SALT_KEY", None) or \
-           not getattr(settings, "PHONEPE_SALT_INDEX", None) or \
-           not getattr(settings, "PHONEPE_BASE_URL", None):
-            return Response({"error": "PhonePe merchant keys not configured"}, status=500)
-
-        print("Merchant ID:", settings.PHONEPE_MERCHANT_ID)
-        print("Salt Index:", settings.PHONEPE_SALT_INDEX)
-
-        payment = Payment.objects.create(
-            pricing_signup=signup,
-            amount=amount
-        )
-
-        # -------------------------------
-        # Prepare Payload
-        # -------------------------------
-        base_url = request.build_absolute_uri('/')[:-1]
+        # 1. Fetch OAuth Token
+        access_token = get_phonepe_access_token()
+        if not access_token:
+            return Response({"error": "Failed to authenticate with PhonePe (V2)"}, status=500)
+            
+        merchant_transaction_id = str(uuid.uuid4())
+        amount_in_paise = int(float(amount_val) * 100)
+        
+        # 2. Prepare V2 Payload
+        # Use development localhost for testing if needed
+        # base_domain = "https://aisetu.in" 
+        base_domain = "http://localhost:5004" # Current dev environment
+        
+        redirect_url = f"{base_domain}/payment-success/?merchantTransactionId={merchant_transaction_id}"
+        
         payload = {
-            "merchantId": settings.PHONEPE_MERCHANT_ID,
-            "merchantTransactionId": str(payment.transaction_id),
-            "merchantUserId": str(signup.id),
-            "amount": int(amount) * 100,  # in paise
-            "redirectUrl": f"{base_url}/payment-success/?merchantTransactionId={payment.transaction_id}",
-            "redirectMode": "REDIRECT",  # Changed to REDIRECT (GET) for better compatibility
-            "callbackUrl": f"{base_url}/payment-callback/",
-            "paymentInstrument": {
-                "type": "PAY_PAGE"
+            "merchantOrderId": merchant_transaction_id,
+            "amount": amount_in_paise,
+            "expireAfter": 1200, 
+            "paymentFlow": {
+                "type": "PG_CHECKOUT",
+                "message": f"Payment for AI Setu Service (ID: {merchant_transaction_id})",
+                "merchantUrls": {
+                    "redirectUrl": redirect_url
+                }
             }
         }
-        print("Payment Payload:", payload)
-        # PhonePe requires compact JSON (no spaces after commas/colons) for correct checksum
-        payload_json = json.dumps(payload, separators=(',', ':'))
-        payload_base64 = base64.b64encode(payload_json.encode()).decode()
 
-        # -------------------------------
-        # Generate Checksum
-        # -------------------------------
-        endpoint = "/pg/v1/pay"
-        string = payload_base64 + endpoint + settings.PHONEPE_SALT_KEY
-        print(f"String to hash: {string}")
-        
-        sha256 = hashlib.sha256(string.encode()).hexdigest()
-        checksum = sha256 + "###" + str(settings.PHONEPE_SALT_INDEX)
-        print(f"Generated X-VERIFY: {checksum}")
-
+        # 3. Request Pay Page via V2 API
+        pay_url = "https://api.phonepe.com/apis/pg/checkout/v2/pay"
         headers = {
             "Content-Type": "application/json",
-            "X-VERIFY": checksum
+            "Authorization": f"O-Bearer {access_token}"
         }
 
-        url = settings.PHONEPE_BASE_URL + endpoint
-        print("Requesting PhonePe URL:", url)
+        print(f"--- PHONEPE V2 INITIATION ---")
+        print(f"Transaction ID: {merchant_transaction_id}")
+        
+        response = requests.post(pay_url, json=payload, headers=headers, timeout=15)
+        data = response.json()
+        print("PhonePe V2 Response:", data)
 
-        # -------------------------------
-        # Make Request to PhonePe
-        # -------------------------------
-        phonepe_response = requests.post(
-            url,
-            json={"request": payload_base64},
-            headers=headers,
-            timeout=15
-        )
+        if response.status_code == 200 and data.get("redirectUrl"):
+            # Create payment record
+            Payment.objects.create(
+                pricing_signup=signup,
+                transaction_id=merchant_transaction_id,
+                amount=amount_val,
+                status="PENDING"
+            )
 
-        phonepe_data = phonepe_response.json()
-        print("PhonePe Response:", phonepe_data)
-
-        if not phonepe_data.get("success"):
-            print(f"PhonePe Initiation ERROR: {phonepe_data.get('message', 'Unknown Error')}")
-            print(f"Full response: {phonepe_data}")
             return Response({
-                "error": phonepe_data.get("message", "Payment failed"),
-                "details": phonepe_data.get("code", "ERROR")
+                "success": True,
+                "paymentUrl": data.get("redirectUrl"),
+                "merchantTransactionId": merchant_transaction_id
+            })
+        else:
+            return Response({
+                "error": data.get("message", "Payment initiation failed"),
+                "details": data.get("code", "ERROR")
             }, status=400)
 
-        payment_url = phonepe_data["data"]["instrumentResponse"]["redirectInfo"]["url"]
-
-        print("Payment URL:", payment_url)
-
-        return Response({
-            "payment_url": payment_url
-        })
-
     except Exception as e:
-        print("Payment Error:", str(e))
-        return Response({
-            "error": "Internal server error",
-            "details": str(e)
-        }, status=500)
+        print(f"General Initiation Error: {e}")
+        return Response({"error": str(e)}, status=500)
 
 # -------------------------------
 # PhonePe Status Check Utility (Synchronous)
 # -------------------------------
 def check_phonepe_status_sync(merchant_transaction_id):
     """
-    Directly query PhonePe for the status of a transaction.
+    Check status using V2 API
     """
     try:
-        import hashlib
-        import requests
-        from django.conf import settings
+        # 1. Get Token
+        access_token = get_phonepe_access_token()
+        if not access_token:
+            return {"success": False, "message": "Auth failed"}
 
-        merchant_id = settings.PHONEPE_MERCHANT_ID
-        salt_key = settings.PHONEPE_SALT_KEY
-        salt_index = settings.PHONEPE_SALT_INDEX
-        base_url = settings.PHONEPE_BASE_URL
-
-        endpoint = f"/pg/v1/status/{merchant_id}/{merchant_transaction_id}"
-        string_to_hash = endpoint + salt_key
-        
-        sha256 = hashlib.sha256(string_to_hash.encode()).hexdigest()
-        checksum = sha256 + "###" + str(salt_index)
-
+        # 2. Hit V2 Status Endpoint
+        url = f"https://api.phonepe.com/apis/pg/checkout/v2/order/{merchant_transaction_id}/status"
         headers = {
             "Content-Type": "application/json",
-            "X-VERIFY": checksum,
-            "X-MERCHANT-ID": merchant_id
+            "Authorization": f"O-Bearer {access_token}"
         }
-
-        url = base_url + endpoint
-        print(f"Checking PhonePe status at: {url}")
         
         response = requests.get(url, headers=headers, timeout=10)
         data = response.json()
-        print(f"PhonePe Status Response: {json.dumps(data, indent=2)}")
         
-        return data
+        if response.status_code == 200:
+            # V2 Success check
+            if data.get("state") == "COMPLETED":
+                return {"success": True, "data": data}
+            return {"success": False, "status": data.get("state"), "data": data}
+        
+        return {"success": False, "message": data.get("message", "Status check failed")}
     except Exception as e:
-        print(f"Error checking PhonePe status sync: {e}")
-        return None
+        return {"success": False, "message": str(e)}
 
 # -------------------------------
 # PhonePe Callback

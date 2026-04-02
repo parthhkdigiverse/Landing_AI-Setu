@@ -12,9 +12,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+load_dotenv(BASE_DIR / 'aisetu_erp' / '.env')
 
 # Point to the React build folder
 REACT_BUILD_DIR = BASE_DIR.parent / 'Frontend' / 'landing-page-launchpad-main' / 'dist'
@@ -189,10 +193,10 @@ if local_ip:
 # Instructions for manual override
 # "http://<your-server-ip>:5004", # if you need a specific external IP
 
-PHONEPE_MERCHANT_ID = os.getenv("PHONEPE_MERCHANT_ID", "PGTESTPAYUAT86")
-PHONEPE_SALT_KEY = os.getenv("PHONEPE_SALT_KEY", "96434309-7796-489d-8924-ab56988a6076")
-PHONEPE_SALT_INDEX = os.getenv("PHONEPE_SALT_INDEX", "1")
-PHONEPE_BASE_URL = os.getenv("PHONEPE_BASE_URL", "https://api-preprod.phonepe.com/apis/pg-sandbox")
+PHONEPE_MERCHANT_ID = os.getenv("PHONEPE_MERCHANT_ID")
+PHONEPE_SALT_KEY = os.getenv("PHONEPE_SALT_KEY")
+PHONEPE_SALT_INDEX = os.getenv("PHONEPE_SALT_INDEX")
+PHONEPE_BASE_URL = os.getenv("PHONEPE_BASE_URL")
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 IMPORT_EXPORT_USE_TRANSACTIONS = True

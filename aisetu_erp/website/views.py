@@ -12,6 +12,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.response import Response
 from rest_framework import status
 from dotenv import dotenv_values, set_key, unset_key
+import datetime
 from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, ContactSubmission, DemoVideo, Feature, Footer, HowItWorksStep, JobPosition, LoginLink, Page, Policy, PricingSignup, LandingPageContent, Payment, PricingSignup, AdminUser, Problem, ReferralPerk, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost
 from .serializers import AllStoreTypeSerializer, CareerPageSerializer, ChildJobPositionSerializer, ComparisonFeatureSerializer, FAQSerializer, JobPositionSerializer, LandingPageContentSerializer,JobApplicationSerializer, LoginLinkSerializer, PageSerializer, PolicySerializer,ReferralUserSerializer, ContactPageContentSerializer, BlogCategorySerializer, BlogPostSerializer, FooterSerializer
 
@@ -455,16 +456,23 @@ def initiate_payment(request):
         else:
             pay_url = "https://api.phonepe.com/apis/pg/checkout/v2/pay"
 
-        base_domain = "http://localhost:5004" # Current dev environment
+        # Detect host dynamically (localhost or ai-setu.com)
+        base_domain = request.build_absolute_uri('/').rstrip('/')
         redirect_url = f"{base_domain}/payment-success/?merchantTransactionId={merchant_transaction_id}"
         callback_url = f"{base_domain}/payment-callback/"
 
+        # Sanitize Mobile Number (Ensure exactly 10 digits for PhonePe)
+        raw_mobile = str(signup.mobile_number)
+        clean_mobile = re.sub(r'\D', '', raw_mobile) # Only digits
+        if len(clean_mobile) > 10:
+            clean_mobile = clean_mobile[-10:] # Take last 10
+            
         payload = {
             "merchantId": settings.PHONEPE_MERCHANT_ID,
-            "merchantOrderId": merchant_transaction_id.upper(), # Using uppercase for certain PG modules
-            "merchantUserId": f"USER{signup.id}",
+            "merchantTransactionId": merchant_transaction_id.upper(), # PhonePe V2 often uses this key
+            "merchantUserId": f"USER_{signup.id}",
             "amount": amount_in_paise,
-            "mobileNumber": signup.mobile_number,
+            "mobileNumber": clean_mobile,
             "expireAfter": 1200, 
             "paymentFlow": {
                 "type": "PG_CHECKOUT",
@@ -476,6 +484,13 @@ def initiate_payment(request):
             },
             "redirectMode": "REDIRECT"
         }
+
+        # Log initiation attempt
+        log_file = os.path.join(settings.BASE_DIR, 'payment_init_debug.log')
+        with open(log_file, 'a') as f:
+            f.write(f"\n--- INITIATION {datetime.datetime.now()} ---\n")
+            f.write(f"merchantTransactionId: {merchant_transaction_id}\n")
+            f.write(f"Payload: {json.dumps(payload, indent=2)}\n")
 
         # 3. Request Pay Page via V2 API
         # Auto-detect Sandbox vs Production
@@ -498,6 +513,9 @@ def initiate_payment(request):
         response = requests.post(pay_url, json=payload, headers=headers, timeout=15)
         data = response.json()
         print("PhonePe V2 Response:", data)
+        with open(log_file, 'a') as f:
+            f.write(f"Response Status: {response.status_code}\n")
+            f.write(f"Response Body: {json.dumps(data, indent=2)}\n")
 
         if response.status_code == 200 and data.get("redirectUrl"):
             # Create payment record with the final amount

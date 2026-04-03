@@ -3,7 +3,7 @@ import django
 import sys
 
 # Add the project directory to sys.path
-sys.path.append(r'f:\Projects\Landing_AI-Setu\aisetu_erp')
+sys.path.append(os.getcwd())
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'aisetu_erp.settings')
 django.setup()
 

@@ -5,7 +5,7 @@ import { fetchStoreTypes } from "@/services/api";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
 interface WhoIsThisForProps {
-  content?: any;
+  content?: LandingPageContent | null;
 }
 
 const WhoIsThisFor = ({ content: propContent }: WhoIsThisForProps) => {

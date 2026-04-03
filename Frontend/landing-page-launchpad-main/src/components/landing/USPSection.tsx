@@ -7,7 +7,7 @@ import { fetchUSPFeatures } from "@/services/api";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
 interface USPSectionProps {
-  content?: any;
+  content?: LandingPageContent | null;
 }
 
 const USPSection = ({ content: propContent }: USPSectionProps) => {

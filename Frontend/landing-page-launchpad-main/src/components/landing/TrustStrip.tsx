@@ -11,7 +11,7 @@ const defaultItems = [
 ];
 
 interface TrustStripProps {
-  content?: any;
+  content?: LandingPageContent | null;
 }
 
 const TrustStrip = ({ content: propContent }: TrustStripProps) => {

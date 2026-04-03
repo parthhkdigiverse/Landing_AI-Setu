@@ -3,17 +3,17 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { fetchLandingPageContent } from "@/services/api";
+import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
 interface PricingSectionProps {
-  content?: any;
+  content?: LandingPageContent | null;
 }
 
 const PricingSection = ({ content: propContent }: PricingSectionProps) => {
 
   const navigate = useNavigate();
 
-  const [content, setContent] = useState<any>(propContent || null);
+  const [content, setContent] = useState<LandingPageContent | null>(propContent || null);
   const [isLoading, setIsLoading] = useState(!propContent);
 
   // Sync state if prop changes (e.g. from live preview in parent)

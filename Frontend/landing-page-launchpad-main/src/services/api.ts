@@ -59,9 +59,9 @@ export interface LandingPageContent {
     referral_main_title: string;
     referral_main_desc: string;
     referral_label: string;
-    refrerral_title: string;
+    referral_title: string;
     join_referral: string;
-    comparision_title: string;
+    comparison_title: string;
     comparison_subtitle: string;
     comparison_title1: string;
     comparison_title2: string;

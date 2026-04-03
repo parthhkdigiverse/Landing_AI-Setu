@@ -89,8 +89,8 @@ const Pricing = () => {
           <PricingSkeleton />
         ) : (
           <>
-            <PricingSection />
-            <FAQSection />
+            <PricingSection content={content} />
+            <FAQSection content={content} />
           </>
         )}
       </main>

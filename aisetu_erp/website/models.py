@@ -411,6 +411,29 @@ class LandingPageContent(models.Model):
     def __str__(self):
         return "Landing Page Content Settings"
 
+class GlobalSettings(models.Model):
+    # Singleton model for Global Settings (Email, etc.)
+    email_host_user = models.EmailField(
+        max_length=255, 
+        default="hkdigiverse@gmail.com",
+        help_text="The email address to use for sending emails (e.g. your Gmail ID)"
+    )
+    email_host_password = models.CharField(
+        max_length=255, 
+        default="your-app-password",
+        help_text="The App Password for the email account (NOT your regular password)"
+    )
+
+    def save(self, *args, **kwargs):
+        # Ensure only one instance exists
+        if GlobalSettings.objects.exists() and not self.pk:
+            existing = GlobalSettings.objects.first()
+            self.pk = existing.pk
+        super(GlobalSettings, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return "Global Settings (Email Configuration)"
+
 class ContactSubmission(models.Model):
     name = models.CharField(max_length=255)
     # countryCode = models.CharField(max_length=10)

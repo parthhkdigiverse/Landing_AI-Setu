@@ -1,37 +1,40 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { fetchLandingPageContent } from "@/services/api";
+import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
 import { FAQSkeleton } from "@/components/landing/LandingSkeleton";
 
-const FAQSection = () => {
-  const [faqs, setFaqs] = useState<any[]>([]);
-  const [content, setContent] = useState<any>(null);
-  const [livePreview, setLivePreview] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+const FAQSection = ({ content: propContent }: { content?: LandingPageContent | null }) => {
+  const [content, setContent] = useState<LandingPageContent | null>(propContent || null);
+  const [loading, setLoading] = useState(!propContent);
 
-  // 1️⃣ Fetch FAQ list + landing page content
-  const fetchData = async () => {
-    try {
-      const [resFaqs, resContent] = await Promise.all([
-        fetch("/api/faqs/"),
-        fetchLandingPageContent(),
-      ]);
-
-      const faqData = await resFaqs.json();
-      setFaqs(faqData || []);
-      setContent(resContent);
-    } catch (err) {
-      console.error("Failed to load FAQ data:", err);
-    } finally {
+  // Sync state if prop changes (e.g. from live preview in parent)
+  useEffect(() => {
+    if (propContent) {
+      setContent(propContent);
       setLoading(false);
     }
-  };
+  }, [propContent]);
 
+  // Fetch database content only if not provided as prop
   useEffect(() => {
+    if (propContent) return;
+
+    const fetchData = async () => {
+      try {
+        const resContent = await fetchLandingPageContent();
+        if (resContent) {
+          setContent(resContent);
+        }
+      } catch (err) {
+        console.error("Failed to load FAQ data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchData();
-  }, []);
+  }, [propContent]);
 
   // 2️⃣ Live Preview (Admin changes)
   useEffect(() => {
@@ -42,7 +45,11 @@ const FAQSection = () => {
         } else if (event.data.model === 'FAQ') {
           const item = event.data.payload;
           const pk = event.data.pk;
-          setFaqs(prev => prev.map(f => (f.id === parseInt(pk) || f.id === pk) ? { ...f, ...item } : f));
+          setContent((prev: any) => {
+            if (!prev || !prev.faqs) return prev;
+            const updatedFaqs = prev.faqs.map((f: any) => (f.id === parseInt(pk) || f.id === pk) ? { ...f, ...item } : f);
+            return { ...prev, faqs: updatedFaqs };
+          });
         }
       }
     };
@@ -72,15 +79,11 @@ const FAQSection = () => {
         >
 
           <span className="text-accent font-semibold text-sm uppercase tracking-wider">
-            {livePreview?.faq_label ||
-             content?.faq_label ||
-             "FAQ"}
+            {content?.faq_label || "FAQ"}
           </span>
 
           <h2 className="text-3xl lg:text-4xl font-bold mt-2 text-foreground">
-            {livePreview?.faq_title ||
-             content?.faq_title ||
-             "Frequently Asked Questions"}
+            {content?.faq_title || "Frequently Asked Questions"}
           </h2>
 
         </motion.div>
@@ -88,7 +91,7 @@ const FAQSection = () => {
         {/* FAQ Accordion */}
         <Accordion type="single" collapsible className="space-y-3">
 
-          {(content?.faqs || faqs).map((faq, i) => (
+          {content?.faqs?.map((faq: any, i: number) => (
 
             <AccordionItem
               key={faq.id || i}

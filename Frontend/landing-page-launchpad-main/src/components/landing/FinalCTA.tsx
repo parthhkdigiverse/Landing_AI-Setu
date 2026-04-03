@@ -12,18 +12,26 @@ import {
 import DemoForm from "@/components/DemoForm";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
-const FinalCTA = () => {
+const FinalCTA = ({ content: propContent }: { content?: LandingPageContent | null }) => {
   const [demoOpen, setDemoOpen] = useState(false);
-  const [content, setContent] = useState<LandingPageContent | null>(null);
-  
+  const [content, setContent] = useState<LandingPageContent | null>(propContent || null);
+
+  // Sync state if prop changes
+  useEffect(() => {
+    if (propContent) {
+      setContent(propContent);
+    }
+  }, [propContent]);
 
   useEffect(() => {
+    if (propContent) return;
+
     const loadContent = async () => {
       const data = await fetchLandingPageContent();
       if (data) setContent(data);
     };
     loadContent();
-  }, []);
+  }, [propContent]);
 
   // Live preview listener
   useEffect(() => {

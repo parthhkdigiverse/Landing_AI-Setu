@@ -22,7 +22,7 @@ const defaultHighlights = [
 ];
 
 interface HeroSectionProps {
-  content?: any;
+  content?: LandingPageContent | null;
 }
 
 const HeroSection = ({ content: propContent }: HeroSectionProps) => {

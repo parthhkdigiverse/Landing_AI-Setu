@@ -4,7 +4,7 @@ import io
 
 from django.contrib import admin
 from django.http import FileResponse, HttpResponse
-from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, Culture, DemoVideo, Feature, Footer, HowItWorksStep, JobDescription, JobPosition, JobSkill, LandingPageContent, LoginLink, Page, Perk, Policy, PolicySection, Problem, ReferralPerk, Section, SectionItem, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost, DemoRequestProxy, PricingSignupProxy, ContactSubmissionProxy, JobApplicationProxy, PaymentProxy
+from .models import FAQ, AllStoreType, CareerPage, ChildJobPosition, ComparisonFeature, ContactPageContent, Culture, DemoVideo, Feature, Footer, GlobalSettings, HowItWorksStep, JobDescription, JobPosition, JobSkill, LandingPageContent, LoginLink, Page, Perk, Policy, PolicySection, Problem, ReferralPerk, Section, SectionItem, StoreType, Testimonial, USPFeature, BlogCategory, BlogPost, DemoRequestProxy, PricingSignupProxy, ContactSubmissionProxy, JobApplicationProxy, PaymentProxy
 import nested_admin
 
 from import_export.resources import ModelResource
@@ -287,6 +287,18 @@ class AllStoreTypeAdmin(admin.ModelAdmin):
 @admin.register(Footer)
 class FooterAdmin(admin.ModelAdmin):
     list_display = ("email", "phone")
+
+@admin.register(GlobalSettings)
+class GlobalSettingsAdmin(admin.ModelAdmin):
+    list_display = ("email_host_user",)
+
+    def has_add_permission(self, request):
+        if self.model.objects.exists():
+            return False
+        return True
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 class CultureInline(admin.TabularInline):
     model = Culture

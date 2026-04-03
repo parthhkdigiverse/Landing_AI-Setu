@@ -21,18 +21,6 @@ const CareerPage = () => {
 
   // ... (previous effects)
 
-  if (isLoading && !content && !isPreview) {
-    return (
-      <>
-        <Header />
-        <main className="bg-[#F5F6FA] min-h-screen">
-          <JobSkeleton />
-        </main>
-        <Footer />
-      </>
-    );
-  }
-
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const isP = params.get('is_preview') === "1";
@@ -213,6 +201,18 @@ const CareerPage = () => {
       openingsRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [location]);
+
+  if (isLoading && !content && !isPreview) {
+    return (
+      <>
+        <Header />
+        <main className="bg-[#F5F6FA] min-h-screen">
+          <JobSkeleton />
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>

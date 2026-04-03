@@ -5,7 +5,7 @@ import { fetchHowItWorks } from "@/services/api";
 import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
 interface HowItWorksProps {
-  content?: any;
+  content?: LandingPageContent | null;
 }
 
 const HowItWorks = ({ content: propContent }: HowItWorksProps) => {

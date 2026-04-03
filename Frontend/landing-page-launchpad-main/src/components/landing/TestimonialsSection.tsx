@@ -1,19 +1,28 @@
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import { useEffect, useState } from "react";
-import { fetchLandingPageContent, fetchHomeTestimonials } from "@/services/api";
+import { fetchLandingPageContent, fetchHomeTestimonials, LandingPageContent } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
-const TestimonialsSection = () => {
+const TestimonialsSection = ({ content: propContent }: { content?: LandingPageContent | null }) => {
   const navigate = useNavigate();
 
-  const [content, setContent] = useState<any>(null);
-  const [livePreview, setLivePreview] = useState<any>(null);
-  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [content, setContent] = useState<LandingPageContent | null>(propContent || null);
+  const [testimonials, setTestimonials] = useState<any[]>(propContent?.testimonials || []);
 
-  // 1. Fetch Content & Testimonials
+  // Sync state if prop changes (e.g. from live preview in parent)
   useEffect(() => {
+    if (propContent) {
+      setContent(propContent);
+      if (propContent.testimonials) setTestimonials(propContent.testimonials);
+    }
+  }, [propContent]);
+
+  // Fetch only if not provided as prop
+  useEffect(() => {
+    if (propContent) return;
+
     const loadData = async () => {
       const data = await fetchLandingPageContent();
       if (data) setContent(data);
@@ -22,7 +31,7 @@ const TestimonialsSection = () => {
       setTestimonials(tData);
     };
     loadData();
-  }, []);
+  }, [propContent]);
 
   // 2. Live preview listener
   useEffect(() => {
@@ -108,7 +117,7 @@ const TestimonialsSection = () => {
             onClick={() => navigate("/reviews")}
             className="bg-gradient-to-r from-[#F4B400] to-[#E6B800] text-white font-extrabold px-12 py-7 rounded-2xl hover:scale-105 transition-transform shadow-xl shadow-yellow-100"
           >
-            {livePreview?.review_button || content?.review_button || "View More Reviews"}
+            {content?.review_button || "View More Reviews"}
           </Button>
         </div>
       </div>

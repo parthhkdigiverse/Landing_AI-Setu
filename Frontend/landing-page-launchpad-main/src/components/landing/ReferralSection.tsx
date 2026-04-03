@@ -4,14 +4,14 @@ import DynamicIcon from "@/components/DynamicIcon";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
-import { fetchLandingPageContent, fetchReferralPerks } from "@/services/api";
+import { fetchLandingPageContent, fetchReferralPerks, LandingPageContent } from "@/services/api";
 
 interface ReferralSectionProps {
-  content?: any;
+  content?: LandingPageContent | null;
 }
 
 const ReferralSection = ({ content: propContent }: ReferralSectionProps) => {
-  const [content, setContent] = useState<any>(propContent || null);
+  const [content, setContent] = useState<LandingPageContent | null>(propContent || null);
   const [livePreview, setLivePreview] = useState<any>(null);
   const [perks, setPerks] = useState<any[]>(propContent?.referral_perks || []);
   const [mobile, setMobile] = useState("");

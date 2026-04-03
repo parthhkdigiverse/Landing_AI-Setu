@@ -23,7 +23,7 @@ const cardVariants: Variants = {
 };
 
 interface SolutionSectionProps {
-  content?: any;
+  content?: LandingPageContent | null;
 }
 
 const SolutionSection = ({ content: propContent }: SolutionSectionProps) => {

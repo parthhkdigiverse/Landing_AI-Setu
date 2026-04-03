@@ -1,7 +1,7 @@
 import { motion, Variants } from "framer-motion";
 import { Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { fetchLandingPageContent } from "@/services/api";
+import { fetchLandingPageContent, LandingPageContent } from "@/services/api";
 
 const rowVariants: Variants = {
   hidden: { opacity: 0, x: -40 },
@@ -13,12 +13,12 @@ const rowVariants: Variants = {
 };
 
 interface ComparisonSectionProps {
-  content?: any;
+  content?: LandingPageContent | null;
 }
 
 const ComparisonSection = ({ content: propContent }: ComparisonSectionProps) => {
   const [rows, setRows] = useState<any[]>(propContent?.comparison_features || []);
-  const [content, setContent] = useState<any>(propContent || null); // DB static text
+  const [content, setContent] = useState<LandingPageContent | null>(propContent || null); // DB static text
   const [livePreview, setLivePreview] = useState<any>(null);
   const [loading, setLoading] = useState(!propContent);
 

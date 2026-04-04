@@ -109,14 +109,20 @@ export interface LandingPageContent {
     show_cta?: boolean;
 }
 
+const handleJsonResponse = async (response: Response) => {
+  const contentType = response.headers.get("content-type");
+  if (!response.ok || !contentType || !contentType.includes("application/json")) {
+    const errorText = await response.text();
+    console.error("Non-JSON or error response received:", errorText.substring(0, 200));
+    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+  }
+  return await response.json();
+};
+
 export const fetchLandingPageContent = async (): Promise<LandingPageContent | null> => {
     try {
         const response = await fetch(`${API_BASE_URL}/api/landing-content/?t=${Date.now()}`);
-        if (!response.ok) {
-            throw new Error("Network response was not ok");
-        }
-        const data = await response.json();
-        return data;
+        return await handleJsonResponse(response);
     } catch (error) {
         console.error("Failed to fetch landing page content:", error);
         return null;
@@ -126,8 +132,7 @@ export const fetchLandingPageContent = async (): Promise<LandingPageContent | nu
 export const fetchProblems = async (): Promise<any[]> => {
     try {
         const res = await fetch(`${API_BASE_URL}/api/problems/?t=${Date.now()}`);
-        if (!res.ok) throw new Error("Failed to fetch problems");
-        return await res.json();
+        return await handleJsonResponse(res);
     } catch (error) {
         console.error(error);
         return [];
@@ -137,8 +142,7 @@ export const fetchProblems = async (): Promise<any[]> => {
 export const fetchSolutions = async (): Promise<any[]> => {
     try {
         const res = await fetch(`${API_BASE_URL}/api/features/?t=${Date.now()}`);
-        if (!res.ok) throw new Error("Failed to fetch solutions");
-        return await res.json();
+        return await handleJsonResponse(res);
     } catch (error) {
         console.error(error);
         return [];
@@ -148,8 +152,7 @@ export const fetchSolutions = async (): Promise<any[]> => {
 export const fetchUSPFeatures = async (): Promise<any[]> => {
     try {
         const res = await fetch(`${API_BASE_URL}/api/usp-features/?t=${Date.now()}`);
-        if (!res.ok) throw new Error("Failed to fetch USP features");
-        return await res.json();
+        return await handleJsonResponse(res);
     } catch (error) {
         console.error(error);
         return [];
@@ -159,8 +162,7 @@ export const fetchUSPFeatures = async (): Promise<any[]> => {
 export const fetchHowItWorks = async (): Promise<any[]> => {
     try {
         const res = await fetch(`${API_BASE_URL}/api/how-it-works/?t=${Date.now()}`);
-        if (!res.ok) throw new Error("Failed to fetch how it works steps");
-        return await res.json();
+        return await handleJsonResponse(res);
     } catch (error) {
         console.error(error);
         return [];
@@ -170,8 +172,7 @@ export const fetchHowItWorks = async (): Promise<any[]> => {
 export const fetchStoreTypes = async (): Promise<any[]> => {
     try {
         const res = await fetch(`${API_BASE_URL}/api/store-types/?t=${Date.now()}`);
-        if (!res.ok) throw new Error("Failed to fetch store types");
-        return await res.json();
+        return await handleJsonResponse(res);
     } catch (error) {
         console.error(error);
         return [];
@@ -181,8 +182,7 @@ export const fetchStoreTypes = async (): Promise<any[]> => {
 export const fetchReferralPerks = async (): Promise<any[]> => {
     try {
         const res = await fetch(`${API_BASE_URL}/api/referral-perks/?t=${Date.now()}`);
-        if (!res.ok) throw new Error("Failed to fetch referral perks");
-        return await res.json();
+        return await handleJsonResponse(res);
     } catch (error) {
         console.error(error);
         return [];
@@ -192,8 +192,7 @@ export const fetchReferralPerks = async (): Promise<any[]> => {
 export const fetchHomeTestimonials = async (): Promise<any[]> => {
     try {
         const res = await fetch(`${API_BASE_URL}/api/home-testimonials/?t=${Date.now()}`);
-        if (!res.ok) throw new Error("Failed to fetch home testimonials");
-        return await res.json();
+        return await handleJsonResponse(res);
     } catch (error) {
         console.error(error);
         return [];
@@ -203,8 +202,7 @@ export const fetchHomeTestimonials = async (): Promise<any[]> => {
 export const fetchAllTestimonials = async (): Promise<any[]> => {
     try {
         const res = await fetch(`${API_BASE_URL}/api/testimonials/?t=${Date.now()}`);
-        if (!res.ok) throw new Error("Failed to fetch all testimonials");
-        return await res.json();
+        return await handleJsonResponse(res);
     } catch (error) {
         console.error(error);
         return [];
@@ -308,10 +306,8 @@ export interface ContactPageContent {
 
 export const fetchContactPageContent = async (): Promise<ContactPageContent | null> => {
   try {
-    // Adding a timestamp here also helps prevent stale data
     const res = await fetch(`${API_BASE_URL}/api/contactus-page/?t=${Date.now()}`);
-    if (!res.ok) throw new Error("Failed");
-    return await res.json();
+    return await handleJsonResponse(res);
   } catch (error) {
     console.error(error);
     return null;
@@ -346,8 +342,7 @@ export const fetchBlogPosts = async (categorySlug?: string): Promise<BlogPost[]>
             ? `${API_BASE_URL}/api/blogs/?category=${categorySlug}&t=${Date.now()}`
             : `${API_BASE_URL}/api/blogs/?t=${Date.now()}`;
         const response = await fetch(url);
-        if (!response.ok) throw new Error("Failed to fetch blog posts");
-        return await response.json();
+        return await handleJsonResponse(response);
     } catch (error) {
         console.error("Failed to fetch blog posts:", error);
         return [];
@@ -357,8 +352,7 @@ export const fetchBlogPosts = async (categorySlug?: string): Promise<BlogPost[]>
 export const fetchBlogPostDetail = async (slug: string): Promise<BlogPost | null> => {
     try {
         const response = await fetch(`${API_BASE_URL}/api/blogs/${slug}/?t=${Date.now()}`);
-        if (!response.ok) throw new Error("Failed to fetch blog post detail");
-        return await response.json();
+        return await handleJsonResponse(response);
     } catch (error) {
         console.error("Failed to fetch blog post detail:", error);
         return null;
@@ -368,8 +362,7 @@ export const fetchBlogPostDetail = async (slug: string): Promise<BlogPost | null
 export const fetchBlogCategories = async (): Promise<BlogCategory[]> => {
     try {
         const response = await fetch(`${API_BASE_URL}/api/blog-categories/?t=${Date.now()}`);
-        if (!response.ok) throw new Error("Failed to fetch blog categories");
-        return await response.json();
+        return await handleJsonResponse(response);
     } catch (error) {
         console.error("Failed to fetch blog categories:", error);
         return [];
@@ -385,19 +378,11 @@ export interface DemoVideo {
 }
 
 export const fetchDemoVideo = async (): Promise<DemoVideo | null> => {
-
   try {
-
     const res = await fetch(`${API_BASE_URL}/api/demo-video/`)
-
-    const data = await res.json()
-
-    return data
-
+    return await handleJsonResponse(res);
   } catch (error) {
-
     console.error("Failed to load demo video", error)
-
     return null
   }
 }
@@ -463,12 +448,13 @@ export const fetchCareerPageContent = async (): Promise<CareerPageContent | null
 };
 
 export const fetchJobDetails = async (slug: string) => {
-
-  const res = await fetch(
-    `${API_BASE_URL}/api/job/${slug}/`
-  );
-
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/job/${slug}/`);
+    return await handleJsonResponse(res);
+  } catch (error) {
+    console.error("Failed to fetch job details:", error);
+    return null;
+  }
 };
 
 // const API_BASE = "http://127.0.0.1:8000/api";
@@ -508,10 +494,9 @@ export interface AboutPageContent {
 export const fetchAboutPageContent = async (): Promise<AboutPageContent | null> => {
   try {
     const res = await fetch(`${API_BASE}/pages/about/?t=${Date.now()}`);
+    const data = await handleJsonResponse(res);
 
-    if (!res.ok) throw new Error("Failed to fetch");
-
-    const data = await res.json();
+    if (!data) return null;
 
     // ✅ FIX IMAGE URLS
     data.sections = data.sections.map((section: Section) => ({
@@ -565,12 +550,7 @@ export interface Policy {
 const fetchAPI = async (endpoint: string) => {
   try {
     const res = await fetch(`${BASE_URL}${endpoint}`);
-
-    if (!res.ok) {
-      throw new Error(`Error: ${res.status}`);
-    }
-
-    return await res.json();
+    return await handleJsonResponse(res);
   } catch (error) {
     console.error("API ERROR:", error);
     return null;

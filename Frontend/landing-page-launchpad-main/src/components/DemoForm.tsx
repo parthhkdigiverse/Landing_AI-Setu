@@ -16,10 +16,12 @@ const DemoForm = () => {
   useEffect(() => {
     const fetchTypes = async () => {
       try {
-        // Ensure this URL exactly matches your urls.py path
         const response = await fetch(`${API_BASE_URL}/api/all-storetype/`);
+        const contentType = response.headers.get("content-type");
+        if (!response.ok || !contentType || !contentType.includes("application/json")) {
+          throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
         const data = await response.json();
-        console.log("Data from Admin:", data); // Check F12 console
         setStoreTypes(data);
       } catch (error) {
         console.error("Could not load store types from API", error);
@@ -80,7 +82,13 @@ const DemoForm = () => {
       if (response.ok) {
         navigate("/demo-success"); 
       } else {
-        toast.error("Submission failed");
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+           const data = await response.json();
+           toast.error(data.error || "Submission failed");
+        } else {
+           toast.error("Submission failed: Server error");
+        }
       }
     } catch (error) {
       toast.error("Server error");

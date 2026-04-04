@@ -83,6 +83,10 @@ const PricingSignup = () => {
         }),
       });
 
+      const contentType = response.headers.get("content-type");
+      if (!response.ok || !contentType || !contentType.includes("application/json")) {
+          throw new Error("Invalid server response");
+      }
       const data = await response.json();
 
       if (data.valid) {
@@ -206,6 +210,14 @@ const PricingSignup = () => {
         }),
       });
 
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+          const errorText = await response.text();
+          console.error("Non-JSON response from signup:", errorText.substring(0, 200));
+          alert(`Signup failed: Server returned ${response.status}`);
+          setLoading(false);
+          return;
+      }
       const signupData = await response.json();
 
       if (!response.ok || signupData.error) {
@@ -234,6 +246,14 @@ const PricingSignup = () => {
         }
       );
 
+      const paymentContentType = paymentResponse.headers.get("content-type");
+      if (!paymentContentType || !paymentContentType.includes("application/json")) {
+          const errorText = await paymentResponse.text();
+          console.error("Non-JSON response from payment initiation:", errorText.substring(0, 200));
+          alert(`Payment initiation failed: Server returned ${paymentResponse.status}`);
+          setLoading(false);
+          return;
+      }
       const paymentData = await paymentResponse.json();
       console.log("Payment Response:", paymentData);
 

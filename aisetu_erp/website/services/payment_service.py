@@ -14,9 +14,17 @@ class PaymentService:
     def _get_client():
         # Primary source: Database GlobalSettings
         try:
+            # Consolidate GlobalSettings if multiple records exist (Singleton Insurance)
             gs_all = GlobalSettings.objects.all()
-            logger.info(f"Database GlobalSettings record count: {gs_all.count()}")
-            gs = gs_all.first()
+            gs_count = gs_all.count()
+            if gs_count > 1:
+                logger.warning(f"CRITICAL: Found {gs_count} GlobalSettings records. Consolidating into the first one.")
+                gs = gs_all[0]
+                for extra in gs_all[1:]:
+                    extra.delete()
+            else:
+                gs = gs_all.first()
+
             if gs and gs.razorpay_key_id and gs.razorpay_key_secret:
                 logger.info(f"Initializing Razorpay Client using Database Configuration. Key ID starts with: {gs.razorpay_key_id[:10]}...")
                 return razorpay.Client(auth=(gs.razorpay_key_id, gs.razorpay_key_secret))
@@ -54,6 +62,14 @@ class PaymentService:
             if signup.email:
                 customer_payload["email"] = signup.email
 
+            # Calculate expiry (Razorpay requires >= 15 mins. We use 30 mins to be safe)
+            expire_min = getattr(settings, 'RAZORPAY_LINK_EXPIRE_MINUTES', 30)
+            if expire_min < 15:
+                expire_min = 30
+            
+            # Buffer for clock skew
+            expire_by = int(time.time() + (expire_min * 60) + 300) # 30 min + 5 min buffer
+
             payload = {
                 "amount": amount_in_paise,
                 "currency": "INR",
@@ -66,7 +82,7 @@ class PaymentService:
                     "signup_id": str(signup.id),
                     "merchant_transaction_id": merchant_transaction_id
                 },
-                "expire_by": int(time.time()) + (getattr(settings, 'RAZORPAY_LINK_EXPIRE_MINUTES', 15) * 60),
+                "expire_by": expire_by,
                 "callback_url": callback_url,
                 "callback_method": "get"
             }

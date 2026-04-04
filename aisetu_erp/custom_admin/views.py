@@ -472,7 +472,21 @@ def manage_env(request):
         'email_host_password': 'Email App Password',
     }
     
-    gs, created = GlobalSettings.objects.get_or_create()
+    # Singleton Consolidation Logic
+    gs_all = GlobalSettings.objects.all()
+    gs_count = gs_all.count()
+    if gs_count > 1:
+        # Merge values if possible (prioritizing live keys)
+        gs = gs_all[0]
+        for extra in gs_all[1:]:
+            # If the current one is empty but the extra has data, copy it
+            for field in SETTING_FIELDS.keys():
+                if not getattr(gs, field) and getattr(extra, field):
+                    setattr(gs, field, getattr(extra, field))
+            extra.delete()
+        gs.save()
+    else:
+        gs, _ = GlobalSettings.objects.get_or_create()
 
     if request.method == "POST":
         action = request.POST.get('action')

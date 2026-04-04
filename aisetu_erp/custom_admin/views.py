@@ -460,47 +460,37 @@ def export_model_pdf(request, app_label, model_name):
 
 @custom_admin_required
 def manage_env(request):
-    env_path = settings.BASE_DIR / 'aisetu_erp' / '.env'
-    WHITELISTED_KEYS = [
-        'RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET',
-        'EMAIL_HOST_USER', 'EMAIL_HOST_PASSWORD'
-    ]
+    """
+    Manages Global Settings directly from the Database (previously manage_env).
+    No longer interacts with the .env file as per user request.
+    """
+    # Define which model fields we want to expose in this simplified dashboard
+    SETTING_FIELDS = {
+        'razorpay_key_id': 'Razorpay Key ID',
+        'razorpay_key_secret': 'Razorpay Key Secret',
+        'email_host_user': 'Gmail / Email ID',
+        'email_host_password': 'Email App Password',
+    }
     
+    gs, created = GlobalSettings.objects.get_or_create()
+
     if request.method == "POST":
         action = request.POST.get('action')
         key = request.POST.get('key')
-        value = request.POST.get('value')
+        value = request.POST.get('value', '').strip()
         
-        # Security check: only allow updating whitelisted keys
-        if key not in WHITELISTED_KEYS:
-            return JsonResponse({'status': 'error', 'message': 'Permission Denied.'}, status=403)
+        # Security check: only allow updating whitelisted model fields
+        if key not in SETTING_FIELDS:
+            return JsonResponse({'status': 'error', 'message': 'Invalid setting field.'}, status=400)
         
         try:
-            if key and value is not None:
-                # Update .env file
-                set_key(str(env_path), key, value)
-                os.environ[key] = value
-
-                # Update Database (GlobalSettings) - Non-blocking
-                try:
-                    gs, created = GlobalSettings.objects.get_or_create()
-                    if key == 'RAZORPAY_KEY_ID':
-                        gs.razorpay_key_id = value
-                    elif key == 'RAZORPAY_KEY_SECRET':
-                        gs.razorpay_key_secret = value
-                    elif key == 'EMAIL_HOST_USER':
-                        gs.email_host_user = value
-                    elif key == 'EMAIL_HOST_PASSWORD':
-                        gs.email_host_password = value
-                    gs.save()
-                    db_status = "and is now LIVE in the Database (Dynamic)"
-                except Exception as db_err:
-                    # Log but don't fail the whole request
-                    print(f"Database sync failed (likely pending migrations): {db_err}")
-                    db_status = "(Database sync skipped/pending migrations)"
+            # Update the specific field on the singleton model
+            setattr(gs, key, value)
+            gs.save()
             
+            message = f"Setting '{SETTING_FIELDS[key]}' updated successfully in the Database."
             if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('ajax') == '1':
-                return JsonResponse({'status': 'success', 'message': f'Variable {key} updated successfully in .env {db_status}.'})
+                return JsonResponse({'status': 'success', 'message': message})
         except Exception as e:
             if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('ajax') == '1':
                 return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
@@ -508,13 +498,18 @@ def manage_env(request):
         
         return redirect('custom_admin:manage_env')
 
-    # Load only whitelisted keys
-    all_vars = dotenv_values(env_path)
-    env_vars = {k: v for k, v in all_vars.items() if k in WHITELISTED_KEYS}
-    for k in WHITELISTED_KEYS:
-        if k not in env_vars: env_vars[k] = ""
+    # Prepare data for the template (mapping field names to labels and values)
+    env_vars = {}
+    for field_name, label in SETTING_FIELDS.items():
+        env_vars[field_name] = {
+            'label': label,
+            'value': getattr(gs, field_name) or ""
+        }
 
-    return render(request, 'custom_admin/manage_env.html', {'env_vars': env_vars})
+    return render(request, 'custom_admin/manage_env.html', {
+        'settings_data': env_vars,
+        'is_db_driven': True
+    })
 
 class CustomAdminCreateView(AdminRequiredMixin, DynamicModelMixin, CreateView):
     template_name = 'custom_admin/model_form.html'

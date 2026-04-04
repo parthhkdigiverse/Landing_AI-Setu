@@ -143,14 +143,19 @@
 
 <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-4">
     <div>
-        <h1 class="h3 fw-bold mb-1 text-slate-800">Razorpay Configuration</h1>
+        <h1 class="h3 fw-bold mb-1 text-slate-800">Global Settings</h1>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="{% url 'custom_admin:dashboard' %}" class="text-decoration-none text-muted small">Admin</a></li>
                 <li class="breadcrumb-item active small" aria-current="page">Settings</li>
-                <li class="breadcrumb-item active small" aria-current="page">Razorpay</li>
+                <li class="breadcrumb-item active small" aria-current="page">Global</li>
             </ol>
         </nav>
+    </div>
+    <div>
+        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2">
+            <i class="bi bi-database-fill me-1"></i> Database Driven
+        </span>
     </div>
 </div>
 
@@ -158,43 +163,35 @@
     <div class="card-header bg-white py-4 px-4 border-bottom-0">
         <div class="row align-items-center">
             <div class="col">
-                <h5 class="mb-0 fw-bold text-slate-700">Razorpay Credentials</h5>
-                <p class="text-muted small mb-0 mt-1">Update your live or test keys below. Changes take effect on next reload.</p>
+                <h5 class="mb-0 fw-bold text-slate-700">Service Credentials</h5>
+                <p class="text-muted small mb-0 mt-1">Manage your active API keys and email credentials. Changes take effect immediately.</p>
             </div>
         </div>
     </div>
     <div class="table-responsive">
-        <table class="table mb-0 align-middle" id="envTable">
+        <table class="table mb-0 align-middle" id="settingsTable">
             <thead>
                 <tr>
-                    <th class="px-4 py-3">Credential Key</th>
-                    <th class="px-4 py-3">Value</th>
+                    <th class="px-4 py-3">Setting Name</th>
+                    <th class="px-4 py-3">Configuration Value</th>
                     <th class="text-end px-4 py-3" style="width: 60px;"></th>
                 </tr>
             </thead>
             <tbody>
-                {% for key, value in env_vars.items %}
+                {% for key, data in settings_data.items %}
                 <tr class="env-row" data-key="{{ key }}">
                     <td class="px-4 py-3">
                         <div class="d-flex flex-column align-items-start">
-                            <span class="env-key mb-1">{{ key }}</span>
-                            {% if "KEY" in key or "SECRET" in key or "TOKEN" in key or "PASSWORD" in key or "SALT" in key %}
-                            <span class="badge badge-env bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">Secure</span>
-                            {% elif "DB" in key or "DATABASE" in key %}
-                            <span class="badge badge-env bg-info bg-opacity-10 text-info border border-info border-opacity-25">Database</span>
-                            {% elif "URL" in key or "HOST" in key %}
-                            <span class="badge badge-env bg-success bg-opacity-10 text-success border border-success border-opacity-25">Endpoint</span>
-                            {% else %}
-                            <span class="badge badge-env bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">Config</span>
-                            {% endif %}
+                            <span class="env-key mb-1 fw-semibold text-slate-700">{{ data.label }}</span>
+                            <span class="badge badge-env bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">DB Record</span>
                         </div>
                     </td>
                     <td class="px-4 py-3">
                         <div class="env-value-wrapper">
                             <input type="password" 
                                    class="form-control env-value-input" 
-                                   value="{{ value }}" 
-                                   data-original-value="{{ value }}"
+                                   value="{{ data.value }}" 
+                                   data-original-value="{{ data.value }}"
                                    spellcheck="false">
                             
                             <div class="d-flex align-items-center ms-2">

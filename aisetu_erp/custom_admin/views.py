@@ -20,7 +20,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import landscape, letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from website.models import AdminUser, DemoRequest, PricingSignup, Payment, ContactSubmission
+from website.models import AdminUser, DemoRequest, PricingSignup, Payment, ContactSubmission, GlobalSettings
 from website.models import CareerPage, Culture, Perk, JobPosition
 from website.models import (
     LandingPageContent, Problem, Feature, USPFeature, 
@@ -474,11 +474,26 @@ def manage_env(request):
         
         try:
             if key and value is not None:
+                # Update .env file
                 set_key(str(env_path), key, value)
                 os.environ[key] = value
+
+                # Update Database (GlobalSettings) - Non-blocking
+                try:
+                    gs, created = GlobalSettings.objects.get_or_create()
+                    if key == 'RAZORPAY_KEY_ID':
+                        gs.razorpay_key_id = value
+                    elif key == 'RAZORPAY_KEY_SECRET':
+                        gs.razorpay_key_secret = value
+                    gs.save()
+                    db_status = "and Database"
+                except Exception as db_err:
+                    # Log but don't fail the whole request
+                    print(f"Database sync failed (likely pending migrations): {db_err}")
+                    db_status = "(Database sync skipped/pending migrations)"
             
             if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('ajax') == '1':
-                return JsonResponse({'status': 'success', 'message': f'Variable {key} updated successfully.'})
+                return JsonResponse({'status': 'success', 'message': f'Variable {key} updated successfully in .env {db_status}.'})
         except Exception as e:
             if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.POST.get('ajax') == '1':
                 return JsonResponse({'status': 'error', 'message': str(e)}, status=400)

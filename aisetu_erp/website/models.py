@@ -424,6 +424,20 @@ class GlobalSettings(models.Model):
         default="your-app-password",
         help_text="The App Password for the email account (NOT your regular password)"
     )
+    
+    # Razorpay Credentials
+    razorpay_key_id = models.CharField(
+        max_length=255, 
+        blank=True, 
+        null=True,
+        help_text="The Razorpay Key ID (e.g. rzp_test_...)"
+    )
+    razorpay_key_secret = models.CharField(
+        max_length=255, 
+        blank=True, 
+        null=True,
+        help_text="The Razorpay Key Secret"
+    )
 
     def save(self, *args, **kwargs):
         # Ensure only one instance exists
@@ -433,7 +447,7 @@ class GlobalSettings(models.Model):
         super(GlobalSettings, self).save(*args, **kwargs)
 
     def __str__(self):
-        return "Global Settings (Email Configuration)"
+        return "Global Settings (Configuration)"
 
 class ContactSubmission(models.Model):
     name = models.CharField(max_length=255)

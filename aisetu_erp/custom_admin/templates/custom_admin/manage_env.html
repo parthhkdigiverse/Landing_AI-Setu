@@ -102,14 +102,18 @@
         color: white;
     }
 
-    .save-indicator {
+    .save-indicator, .cancel-indicator {
         display: none;
         margin-left: 0.5rem;
     }
 
-    .is-dirty .save-indicator {
+    .env-row.is-dirty .save-indicator,
+    .env-row.is-dirty .cancel-indicator {
         display: flex;
     }
+
+    .btn-save { color: #10b981 !important; }
+    .btn-cancel { color: #ef4444 !important; }
 
     .badge-env {
         font-size: 0.6rem;
@@ -195,6 +199,9 @@
                                 <button class="action-btn btn-save save-indicator" title="Save Changes">
                                     <i class="bi bi-check-lg"></i>
                                 </button>
+                                <button class="action-btn btn-cancel cancel-indicator" title="Cancel Changes">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
                                 <div class="spinner-border spinner-border-sm text-primary ms-2 d-none loading-spinner" role="status">
                                     <span class="visually-hidden">Loading...</span>
                                 </div>
@@ -216,12 +223,13 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // 1. Toast Utility
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const csrfTokenEl = document.querySelector('[name=csrfmiddlewaretoken]');
+    const csrfToken = csrfTokenEl ? csrfTokenEl.value : '';
 
     function showToast(message, type = 'success') {
         const toastId = 'toast-' + Date.now();
         const toastHtml = `
-            <div id="${toastId}" class="toast align-items-center text-white bg-${type === 'success' ? 'emerald-500' : 'rose-500'} border-0" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: ${type === 'success' ? '#10b981' : '#f43f5e'}">
+            <div id="${toastId}" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: ${type === 'success' ? '#10b981' : '#f43f5e'}">
                 <div class="d-flex">
                     <div class="toast-body fw-bold">
                         <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-octagon-fill'} me-2"></i> ${message}
@@ -234,112 +242,149 @@ document.addEventListener('DOMContentLoaded', function() {
         if (container) {
             container.insertAdjacentHTML('beforeend', toastHtml);
             const toastEl = document.getElementById(toastId);
-            const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
-            toast.show();
-            toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+            if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+                const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+                toast.show();
+                toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+            } else {
+                console.error('Bootstrap Toast not loaded');
+                setTimeout(() => toastEl.remove(), 3000);
+            }
         }
     }
 
-    // 2. Inline Edit & Toggle Logic
-    document.querySelectorAll('.env-row').forEach(row => {
-        const input = row.querySelector('.env-value-input');
-        const wrapper = row.querySelector('.env-value-wrapper');
-        const saveBtn = row.querySelector('.btn-save');
-        const spinner = row.querySelector('.loading-spinner');
-        const toggleBtn = row.querySelector('.toggle-visibility-btn');
-        const copyBtn = row.querySelector('.copy-btn');
-        const key = row.dataset.key;
+    // 2. Event Delegation for Row Actions
+    document.addEventListener('click', async function(e) {
+        const toggleBtn = e.target.closest('.toggle-visibility-btn');
+        const copyBtn = e.target.closest('.copy-btn');
+        const saveBtn = e.target.closest('.btn-save');
+        const cancelBtn = e.target.closest('.btn-cancel');
 
-        if (input) {
-            // Visibility toggle
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const icon = toggleBtn.querySelector('i');
-                    if (input.type === 'password') {
-                        input.type = 'text';
-                        icon.className = 'bi bi-eye-slash';
-                    } else {
-                        input.type = 'password';
-                        icon.className = 'bi bi-eye';
-                    }
-                });
+        if (toggleBtn) {
+            e.preventDefault();
+            const row = toggleBtn.closest('.env-row');
+            const input = row.querySelector('.env-value-input');
+            const icon = toggleBtn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'bi bi-eye';
             }
+        }
 
-            // Copy to clipboard
-            if (copyBtn) {
-                copyBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const originalType = input.type;
-                    input.type = 'text';
-                    input.select();
-                    document.execCommand('copy');
-                    input.type = originalType;
-                    
-                    const icon = copyBtn.querySelector('i');
-                    icon.className = 'bi bi-check';
-                    showToast('Copied to clipboard!', 'success');
-                    setTimeout(() => { icon.className = 'bi bi-clipboard'; }, 2000);
-                });
+        if (cancelBtn) {
+            e.preventDefault();
+            const row = cancelBtn.closest('.env-row');
+            const input = row.querySelector('.env-value-input');
+            input.value = input.dataset.originalValue;
+            row.classList.remove('is-dirty');
+        }
+
+        if (copyBtn) {
+            e.preventDefault();
+            const row = copyBtn.closest('.env-row');
+            const input = row.querySelector('.env-value-input');
+            const icon = copyBtn.querySelector('i');
+            
+            const originalType = input.type;
+            input.type = 'text';
+            input.select();
+            try {
+                document.execCommand('copy');
+                const originalIconClass = icon.className;
+                icon.className = 'bi bi-check';
+                showToast('Copied to clipboard!', 'success');
+                setTimeout(() => { icon.className = originalIconClass; }, 2000);
+            } catch (err) {
+                showToast('Failed to copy.', 'error');
             }
+            input.type = originalType;
+        }
 
-            // Detect changes
-            input.addEventListener('input', function() {
-                if (this.value !== this.dataset.originalValue) {
-                    wrapper.classList.add('is-dirty');
+        if (saveBtn) {
+            e.preventDefault();
+            const row = saveBtn.closest('.env-row');
+            const input = row.querySelector('.env-value-input');
+            const wrapper = row.querySelector('.env-value-wrapper');
+            const spinner = row.querySelector('.loading-spinner');
+            const key = row.dataset.key;
+            const newValue = input.value;
+
+            saveBtn.classList.add('d-none');
+            spinner.classList.remove('d-none');
+
+            try {
+                const response = await fetch(window.location.href, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new URLSearchParams({
+                        'csrfmiddlewaretoken': csrfToken,
+                        'ajax': '1',
+                        'action': 'update',
+                        'key': key,
+                        'value': newValue
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.status === 'success') {
+                    input.dataset.originalValue = newValue;
+                    row.classList.remove('is-dirty');
+                    showToast(result.message);
                 } else {
-                    wrapper.classList.remove('is-dirty');
+                    showToast(result.message || 'Save failed (Security Error). Please refresh.', 'error');
                 }
-            });
-
-            // AJAX Save
-            if (saveBtn) {
-                saveBtn.addEventListener('click', async (e) => {
-                    e.preventDefault();
-                    const newValue = input.value;
-                    
-                    saveBtn.classList.add('d-none');
-                    spinner.classList.remove('d-none');
-
-                    try {
-                        const response = await fetch(window.location.href, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                                'X-CSRFToken': csrfToken,
-                                'X-Requested-With': 'XMLHttpRequest'
-                            },
-                            body: new URLSearchParams({
-                                'ajax': '1',
-                                'action': 'update',
-                                'key': key,
-                                'value': newValue
-                            })
-                        });
-
-                        const result = await response.json();
-                        if (result.status === 'success') {
-                            input.dataset.originalValue = newValue;
-                            wrapper.classList.remove('is-dirty');
-                            showToast(result.message);
-                        } else {
-                            showToast(result.message, 'error');
-                        }
-                    } catch (error) {
-                        showToast('Network error occurred.', 'error');
-                    } finally {
-                        spinner.classList.add('d-none');
-                        saveBtn.classList.remove('d-none');
-                    }
-                });
+            } catch (error) {
+                showToast('Save failed. Please check your connection.', 'error');
+                console.error('Save error:', error);
+            } finally {
+                spinner.classList.add('d-none');
+                // Only show save button again if row is still dirty
+                if (row.classList.contains('is-dirty')) {
+                    saveBtn.classList.remove('d-none');
+                }
             }
+        }
+    });
 
-            // Enter to save
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && wrapper.classList.contains('is-dirty')) {
-                    saveBtn.click();
-                }
-            });
+    // 3. Simple Listeners for Input
+    function checkDirty(input) {
+        const row = input.closest('.env-row');
+        if (input.value !== input.dataset.originalValue) {
+            row.classList.add('is-dirty');
+        } else {
+            row.classList.remove('is-dirty');
+        }
+    }
+
+    document.addEventListener('input', (e) => {
+        if (e.target.classList.contains('env-value-input')) checkDirty(e.target);
+    });
+
+    document.addEventListener('keyup', (e) => {
+        if (e.target.classList.contains('env-value-input')) checkDirty(e.target);
+    });
+
+    document.addEventListener('paste', (e) => {
+        if (e.target.classList.contains('env-value-input')) {
+            setTimeout(() => checkDirty(e.target), 0);
+        }
+    });
+
+    document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && e.target.classList.contains('env-value-input')) {
+            const row = e.target.closest('.env-row');
+            const saveBtn = row.querySelector('.btn-save');
+            if (row.classList.contains('is-dirty')) {
+                saveBtn.click();
+            }
         }
     });
 });

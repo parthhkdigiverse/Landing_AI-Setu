@@ -290,7 +290,16 @@ class FooterAdmin(admin.ModelAdmin):
 
 @admin.register(GlobalSettings)
 class GlobalSettingsAdmin(admin.ModelAdmin):
-    list_display = ("email_host_user",)
+    list_display = ("email_host_user", "razorpay_key_id")
+    
+    fieldsets = (
+        ("Email Configuration", {
+            "fields": ("email_host_user", "email_host_password"),
+        }),
+        ("Razorpay Configuration", {
+            "fields": ("razorpay_key_id", "razorpay_key_secret"),
+        }),
+    )
 
     def has_add_permission(self, request):
         if self.model.objects.exists():

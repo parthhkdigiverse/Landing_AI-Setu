@@ -115,7 +115,7 @@ def user_login(request):
     return JsonResponse({"error": "Only POST allowed"}, status=405)
 
 def serve_frontend_with_seo(request, slug=None):
-    from django.conf import settings
+    logger.info(f"FALLBACK HIT: path={request.path}, method={request.method}")
     index_path = settings.REACT_BUILD_DIR / 'index.html'
     
     if not index_path.exists():
@@ -408,10 +408,12 @@ def check_referral(request):
 @csrf_exempt
 @api_view(["POST"])
 @permission_classes([AllowAny])
+@authentication_classes([])
 def initiate_payment(request):
     """
     Unified Payment Initiation (Razorpay Only)
     """
+    logger.info(f"PAYMENT INITIATION HIT: data={request.data}")
     try:
         signup_id = request.data.get("signup_id")
         amount_val = request.data.get("amount")

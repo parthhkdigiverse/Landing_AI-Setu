@@ -117,7 +117,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django_mongodb_backend',
         'NAME': os.getenv('DB_NAME', 'aisetu_db'),
-        'HOST': os.getenv('DB_HOST'),
+        'HOST': os.getenv('DB_URL', os.getenv('DB_HOST')),
     }
 }
 

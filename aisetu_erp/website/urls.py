@@ -2,6 +2,8 @@ from django.urls import path
 from .views import CareerPageAPIView, JobDetailAPIView, PolicyDetailAPIView, PolicyListAPIView, about_page_api, all_store_type, book_demo_api, get_all_testimonials, get_demo_video, get_features, get_footer, get_home_testimonials, get_how_it_works_steps, get_problems, get_referral_perks, get_store_types, get_usp_features,login_view,pricing_signup, landing_page_content_api, submit_contact, apply_job, check_referral, initiate_payment, get_blog_posts, get_blog_post_detail, get_blog_categories, manage_env_api
 from . import views 
 urlpatterns = [    
+    path("api/payment/initiate/", initiate_payment, name="initiate_payment"),
+    path("initiate-payment/", initiate_payment, name="initiate_payment_fallback"),
     path("book-demo/", book_demo_api, name="book_demo_api"),
     path('api/login/', login_view, name='login_view'),
     path('pricing-signup/', pricing_signup, name='pricing_signup'),
@@ -13,7 +15,7 @@ urlpatterns = [
     # path("payment-callback/", payment_callback),
     path("razorpay-callback/", views.razorpay_callback, name="razorpay_callback"),
     path("payment-success/", views.payment_success, name="payment_success"),
-    path("api/payment/initiate/", initiate_payment, name="initiate_payment"),
+    path("payment-success/", views.payment_success, name="payment_success"),
     path("api/payment/status/<str:tid>/", views.check_payment_status_api, name="check_payment_status_api"),
     # path("admin/login/", views.admin_login),
     # path("admin/demos/", views.admin_demo_list),

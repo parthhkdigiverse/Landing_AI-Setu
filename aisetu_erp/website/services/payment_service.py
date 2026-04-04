@@ -14,9 +14,11 @@ class PaymentService:
     def _get_client():
         # Primary source: Database GlobalSettings
         try:
-            gs = GlobalSettings.objects.first()
+            gs_all = GlobalSettings.objects.all()
+            logger.info(f"Database GlobalSettings record count: {gs_all.count()}")
+            gs = gs_all.first()
             if gs and gs.razorpay_key_id and gs.razorpay_key_secret:
-                logger.info("Initializing Razorpay Client using Database Configuration.")
+                logger.info(f"Initializing Razorpay Client using Database Configuration. Key ID starts with: {gs.razorpay_key_id[:10]}...")
                 return razorpay.Client(auth=(gs.razorpay_key_id, gs.razorpay_key_secret))
         except Exception as e:
             logger.warning(f"Database Razorpay lookup failed, falling back to .env: {e}")

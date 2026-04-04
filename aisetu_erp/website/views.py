@@ -64,33 +64,31 @@ import uuid
 from django.conf import settings
 
 
-@csrf_exempt
+@api_view(["POST"])
+@permission_classes([AllowAny])
 def book_demo_api(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
+    try:
+        data = request.data
 
-            name = data.get("name")
-            contact_number = data.get("contact_number")     
-            store_type = data.get("store_type")      
-            city = data.get("city")
+        name = data.get("name")
+        contact_number = data.get("contact_number")     
+        store_type = data.get("store_type")      
+        city = data.get("city")
 
-            if not all([name, contact_number, store_type, city]):
-                return JsonResponse({"error": "All fields required"}, status=400)
+        if not all([name, contact_number, store_type, city]):
+            return Response({"error": "All fields required"}, status=400)
 
-            DemoRequest.objects.create(
-                name=name,
-                contact_number=contact_number,
-                store_type=store_type,
-                city=city,
-            )
+        DemoRequest.objects.create(
+            name=name,
+            contact_number=contact_number,
+            store_type=store_type,
+            city=city,
+        )
 
-            return JsonResponse({"message": "Demo request saved successfully"}, status=201)
+        return Response({"message": "Demo request saved successfully"}, status=201)
 
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
-
-    return JsonResponse({"error": "Only POST allowed"}, status=405)
+    except Exception as e:
+        return Response({"error": str(e)}, status=400)
 
 @csrf_exempt
 def user_login(request):
@@ -222,6 +220,7 @@ def login_view(request):
         
 @csrf_exempt
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def pricing_signup(request):
     shop_name = request.data.get('shop_name')
     owner_name = request.data.get('owner_name')
@@ -365,6 +364,7 @@ def submit_contact(request):
 
 
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def apply_job(request):
 
     serializer = JobApplicationSerializer(data=request.data)
@@ -376,6 +376,7 @@ def apply_job(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def check_referral(request):
 
     logger.info(f"Incoming check_referral data: {request.data}")

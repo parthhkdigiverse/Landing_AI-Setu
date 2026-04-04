@@ -558,6 +558,7 @@ def contactus_page_content(request):
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_problems(request):
     problems = Problem.objects.filter(is_active=True).order_by('order')
     data = []
@@ -572,6 +573,7 @@ def get_problems(request):
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_features(request):
     features = Feature.objects.filter(is_active=True).order_by('order')
     data = []
@@ -585,6 +587,7 @@ def get_features(request):
     return Response(data)
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_usp_features(request):
     features = USPFeature.objects.filter(is_active=True).order_by('order')
     data = []
@@ -598,6 +601,7 @@ def get_usp_features(request):
     return Response(data)
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_how_it_works_steps(request):
     try:
         content = LandingPageContent.objects.first()
@@ -619,6 +623,7 @@ def get_how_it_works_steps(request):
         return Response({"error": str(e)}, status=500)
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_store_types(request):
     stores = StoreType.objects.filter(is_active=True).order_by('order')
     data = []
@@ -631,6 +636,7 @@ def get_store_types(request):
     return Response(data)
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_referral_perks(request):
     perks = ReferralPerk.objects.filter(is_active=True).order_by('order')
     data = []
@@ -676,6 +682,7 @@ def get_all_testimonials(request):
     return Response(data)
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_comparison_features(request):
     features = ComparisonFeature.objects.filter(is_active=True).order_by('order')
     data = []
@@ -689,6 +696,7 @@ def get_comparison_features(request):
     return Response(data)
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_faqs(request):
     faqs = FAQ.objects.filter(is_active=True).order_by('order')
     data = []
@@ -701,6 +709,7 @@ def get_faqs(request):
     return Response(data)
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_login_link(request):
 
     login = LoginLink.objects.filter(is_active=True).first()
@@ -718,6 +727,7 @@ def get_login_link(request):
     return Response(data)
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_demo_video(request):
 
     video = DemoVideo.objects.filter(is_active=True).first()
@@ -735,6 +745,7 @@ def get_demo_video(request):
     
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def all_store_type(request):
 
     stores = AllStoreType.objects.filter(is_active=True).order_by("name")
@@ -744,6 +755,7 @@ def all_store_type(request):
     return Response(serializer.data)
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def get_footer(request):
     footer = Footer.objects.first()
 

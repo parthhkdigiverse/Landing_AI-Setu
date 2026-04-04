@@ -407,7 +407,6 @@ def check_referral(request):
 
 @csrf_exempt
 @api_view(["POST"])
-@authentication_classes([SessionAuthentication, BasicAuthentication])
 @permission_classes([AllowAny])
 def initiate_payment(request):
     """

@@ -59,9 +59,7 @@ class PaymentService:
 
             base_domain = getattr(settings, 'BASE_DOMAIN', 'http://localhost:5004')
             
-            # Prepend prefix for external RZP identifier
-            prefix = gs.razorpay_order_prefix or "RZP_"
-            display_id = f"{prefix}{merchant_transaction_id}"
+            display_id = merchant_transaction_id
             
             callback_url = f"{base_domain}/payment-success/?merchantTransactionId={merchant_transaction_id}"
 
@@ -129,9 +127,7 @@ class PaymentService:
             
             base_domain = getattr(settings, 'BASE_DOMAIN', 'http://localhost:5004')
             
-            # Prepend prefix for external Cashfree identifier
-            prefix = gs.cashfree_order_prefix or "CF_"
-            display_id = f"{prefix}{merchant_transaction_id}"
+            display_id = merchant_transaction_id
             
             return_url = f"{base_domain}/payment-success/?merchantTransactionId={merchant_transaction_id}&gateway=CASHFREE"
 
@@ -241,12 +237,7 @@ class PaymentService:
                 order_status = data.get("order_status")
                 logger.info(f"CASHFREE VERIFY RESPONSE for {display_id}: status={order_status}")
                 
-                # Extract original merchant_transaction_id by stripping prefix
-                prefix = gs.cashfree_order_prefix or "CF_"
-                if display_id.startswith(prefix):
-                    merchant_transaction_id = display_id[len(prefix):]
-                else:
-                    merchant_transaction_id = display_id
+                merchant_transaction_id = display_id
 
                 # Support multiple success indicators (PAID is v3 standard, SUCCESS is sometimes returned)
                 if order_status in ["PAID", "SUCCESS"]:

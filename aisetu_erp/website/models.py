@@ -438,17 +438,6 @@ class GlobalSettings(models.Model):
         null=True,
         help_text="The Razorpay Key Secret"
     )
-    razorpay_merchant_id = models.CharField(
-        max_length=255, 
-        blank=True, 
-        null=True,
-        help_text="Optional: Your Razorpay Merchant ID for reference"
-    )
-    razorpay_order_prefix = models.CharField(
-        max_length=50, 
-        default="RZP_",
-        help_text="Prefix for Razorpay order receipts (e.g. RZP_)"
-    )
 
     # Cashfree Credentials
     cashfree_app_id = models.CharField(
@@ -468,17 +457,6 @@ class GlobalSettings(models.Model):
         default="SANDBOX",
         choices=[("SANDBOX", "Sandbox"), ("PRODUCTION", "Production")],
         help_text="Gateway environment"
-    )
-    cashfree_merchant_id = models.CharField(
-        max_length=255, 
-        blank=True, 
-        null=True,
-        help_text="Optional: Your Cashfree Merchant ID for reference"
-    )
-    cashfree_order_prefix = models.CharField(
-        max_length=50, 
-        default="CF_",
-        help_text="Prefix for Cashfree order IDs (e.g. CF_)"
     )
 
     # Active Gateway

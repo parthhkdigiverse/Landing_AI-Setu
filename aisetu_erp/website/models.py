@@ -424,7 +424,6 @@ class GlobalSettings(models.Model):
         default="your-app-password",
         help_text="The App Password for the email account (NOT your regular password)"
     )
-    
     # Razorpay Credentials
     razorpay_key_id = models.CharField(
         max_length=255, 

@@ -21,6 +21,35 @@ class PaymentService:
             gs = GlobalSettings.objects.create()
         return gs
 
+    @classmethod
+    def _get_base_domain(cls, request=None):
+        """
+        Detects the base domain automatically from the current request.
+        For Cashfree/Razorpay, we prioritize HTTPS for live environments.
+        """
+        if request:
+            try:
+                # 1. Check if we are already on HTTPS via request or proxy headers
+                is_secure = request.is_secure()
+                
+                # 2. Extract base URL
+                url = request.build_absolute_uri('/')[:-1]
+                
+                # 3. AUTO-UPGRADE: If we are NOT on localhost/127.0.0.1, 
+                # we almost certainly should be using HTTPS for payment callbacks.
+                host = request.get_host().lower()
+                if not any(lh in host for lh in ['localhost', '127.0.0.1']):
+                    if not is_secure:
+                        url = url.replace('http://', 'https://')
+                
+                return url
+            except Exception as e:
+                logger.warning(f"Domain detection failed, using fallback: {e}")
+                pass
+                
+        # Hardcoded fallback for orphaned tasks
+        return 'http://localhost:5004'
+
     @staticmethod
     def _get_razorpay_client(gs=None):
         if not gs:
@@ -33,7 +62,7 @@ class PaymentService:
         return razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
     @classmethod
-    def initiate_payment_link(cls, signup, amount_val):
+    def initiate_payment_link(cls, signup, amount_val, request=None):
         """
         Unified entry point for payment initiation.
         Delegates to the active gateway.
@@ -42,12 +71,12 @@ class PaymentService:
         gateway = gs.active_gateway or "RAZORPAY"
         
         if gateway == "CASHFREE":
-            return cls.initiate_cashfree_payment(signup, amount_val, gs)
+            return cls.initiate_cashfree_payment(signup, amount_val, gs, request=request)
         else:
-            return cls.initiate_razorpay_payment(signup, amount_val, gs)
+            return cls.initiate_razorpay_payment(signup, amount_val, gs, request=request)
 
     @classmethod
-    def initiate_razorpay_payment(cls, signup, amount_val, gs):
+    def initiate_razorpay_payment(cls, signup, amount_val, gs, request=None):
         """
         Creates a Razorpay Payment Link.
         """
@@ -57,7 +86,7 @@ class PaymentService:
             total_amount = float(amount_val)
             amount_in_paise = int(total_amount * 100)
 
-            base_domain = getattr(settings, 'BASE_DOMAIN', 'http://localhost:5004')
+            base_domain = cls._get_base_domain(request)
             
             display_id = merchant_transaction_id
             
@@ -110,7 +139,7 @@ class PaymentService:
             raise e
 
     @classmethod
-    def initiate_cashfree_payment(cls, signup, amount_val, gs):
+    def initiate_cashfree_payment(cls, signup, amount_val, gs, request=None):
         """
         Creates a Cashfree Order and returns the payment session/url.
         """
@@ -124,12 +153,11 @@ class PaymentService:
             env = gs.cashfree_environment # SANDBOX or PRODUCTION
             
             url = "https://sandbox.cashfree.com/pg/orders" if env == "SANDBOX" else "https://api.cashfree.com/pg/orders"
-            
-            base_domain = getattr(settings, 'BASE_DOMAIN', 'http://localhost:5004')
+            base_domain = cls._get_base_domain(request)
             
             display_id = merchant_transaction_id
             
-            return_url = f"{base_domain}/payment-success/?merchantTransactionId={merchant_transaction_id}&gateway=CASHFREE"
+            return_url = f"{base_domain.rstrip('/')}/payment-success/?merchantTransactionId={merchant_transaction_id}&gateway=CASHFREE"
 
             clean_mobile = "".join(filter(str.isdigit, signup.mobile_number))
             
@@ -145,7 +173,7 @@ class PaymentService:
                 },
                 "order_meta": {
                     "return_url": return_url,
-                    "notify_url": f"{base_domain}/cashfree-webhook/"
+                    "notify_url": f"{base_domain.rstrip('/')}/cashfree-webhook/"
                 },
                 "order_note": f"AI Setu Service - {signup.shop_name}"
             }

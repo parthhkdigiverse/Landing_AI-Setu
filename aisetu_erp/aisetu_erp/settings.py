@@ -206,6 +206,9 @@ IMPORT_EXPORT_USE_TRANSACTIONS = True
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
+# Security Configuration for Proxies (Cloudflare/Nginx/ngrok)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # Email Configuration
 EMAIL_BACKEND = 'website.email_backends.DynamicEmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'

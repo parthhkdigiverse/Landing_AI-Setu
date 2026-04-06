@@ -425,7 +425,7 @@ def initiate_payment(request):
         if not signup:
             return Response({"error": f"Signup with ID {signup_id} not found"}, status=400)
 
-        payment_data = PaymentService.initiate_payment_link(signup, amount_val)
+        payment_data = PaymentService.initiate_payment_link(signup, amount_val, request=request)
         return Response(payment_data)
 
     except Exception as e:

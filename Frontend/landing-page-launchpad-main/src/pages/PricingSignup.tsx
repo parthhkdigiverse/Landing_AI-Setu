@@ -264,7 +264,22 @@ const PricingSignup = () => {
       }
 
       if (paymentData.payment_url) {
-        window.location.href = paymentData.payment_url;
+        if (paymentData.gateway === "CASHFREE") {
+          // Cashfree SDK Flow
+          try {
+            const cashfree = (window as any).Cashfree({ mode: paymentData.cf_mode || "sandbox" });
+            cashfree.checkout({
+              paymentSessionId: paymentData.payment_url,
+              redirectTarget: "_self",
+            });
+          } catch (sdkError) {
+            console.error("Cashfree SDK Error:", sdkError);
+            alert("Failed to initialize Cashfree checkout. Please try again.");
+          }
+        } else {
+          // Razorpay/Default Redirection Flow
+          window.location.href = paymentData.payment_url;
+        }
       } else {
         alert("Payment URL not received from server");
       }

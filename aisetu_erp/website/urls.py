@@ -14,6 +14,7 @@ urlpatterns = [
     # path("initiate-payment/", initiate_payment),
     # path("payment-callback/", payment_callback),
     path("razorpay-callback/", views.razorpay_callback, name="razorpay_callback"),
+    path("cashfree-webhook/", views.cashfree_webhook, name="cashfree_webhook"),
     path("payment-success/", views.payment_success, name="payment_success"),
     path("payment-success/", views.payment_success, name="payment_success"),
     path("api/payment/status/<str:tid>/", views.check_payment_status_api, name="check_payment_status_api"),

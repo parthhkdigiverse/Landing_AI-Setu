@@ -188,19 +188,30 @@ F{% extends 'custom_admin/base.html' %}
                     </td>
                     <td class="px-4 py-3">
                         <div class="env-value-wrapper">
-                            <input type="password" 
-                                   class="form-control env-value-input" 
-                                   value="{{ data.value }}" 
-                                   data-original-value="{{ data.value }}"
-                                   spellcheck="false">
+                            {% if data.type == 'select' %}
+                                <select class="form-select env-value-input border-0 bg-transparent" 
+                                        data-original-value="{{ data.value }}">
+                                    {% for val, label in data.choices %}
+                                        <option value="{{ val }}" {% if data.value == val %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                <input type="password" 
+                                       class="form-control env-value-input" 
+                                       value="{{ data.value }}" 
+                                       data-original-value="{{ data.value }}"
+                                       spellcheck="false">
+                            {% endif %}
                             
                             <div class="d-flex align-items-center ms-2">
+                                {% if data.type != 'select' %}
                                 <button class="action-btn copy-btn" title="Copy to Clipboard">
                                     <i class="bi bi-clipboard"></i>
                                 </button>
                                 <button class="action-btn toggle-visibility-btn" title="Toggle Visibility">
                                     <i class="bi bi-eye"></i>
                                 </button>
+                                {% endif %}
                                 <button class="action-btn btn-save save-indicator" title="Save Changes">
                                     <i class="bi bi-check-lg"></i>
                                 </button>

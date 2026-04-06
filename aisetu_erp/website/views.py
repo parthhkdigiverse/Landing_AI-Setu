@@ -471,12 +471,31 @@ def payment_success(request):
     # Razorpay Success Parameters
     razorpay_payment_id = request.GET.get('razorpay_payment_id')
     merchant_transaction_id = request.GET.get('merchantTransactionId') or request.GET.get('tid')
+    gateway = request.GET.get('gateway', 'RAZORPAY')
 
     tid = merchant_transaction_id or "UNKNOWN"
 
-    frontend_status = PaymentService.verify_and_update_status(razorpay_payment_id, tid)
+    frontend_status = PaymentService.verify_and_update_status(razorpay_payment_id, tid, gateway=gateway)
 
-    return redirect(f"/payment-success/?status={frontend_status}&tid={tid}")
+    return redirect(f"/payment-success/?status={frontend_status}&tid={tid}&gateway={gateway}")
+
+@csrf_exempt
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def cashfree_webhook(request):
+    """
+    Cashfree Webhook for asynchronous status updates.
+    """
+    try:
+        # Cashfree sends payload in the body
+        payload = request.data
+        logger.info(f"CASHFREE WEBHOOK RECEIVED: {payload}")
+        
+        PaymentService.process_webhook(payload, gateway="CASHFREE")
+        return Response({"status": "OK"}, status=200)
+    except Exception as e:
+        logger.error(f"Cashfree Webhook Error: {e}", exc_info=True)
+        return Response({"error": str(e)}, status=400)
 
 @api_view(["GET"])
 @permission_classes([AllowAny])

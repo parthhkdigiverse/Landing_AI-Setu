@@ -11,6 +11,7 @@ from datetime import timedelta
 from django.apps import apps
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
 from django.utils.decorators import method_decorator
+from django.core.exceptions import ObjectDoesNotExist
 from functools import wraps
 
 from django.forms import inlineformset_factory, modelformset_factory, Textarea
@@ -251,21 +252,10 @@ class CustomAdminListView(AdminRequiredMixin, DynamicModelMixin, ListView):
             
             # Special handling for Payment to extract specific JSON fields
             if model_name == 'payment':
-                # Remove 'Response Data'
-                try:
-                    rd_idx = headers.index('Response Data')
-                    headers.pop(rd_idx)
-                except ValueError:
-                    rd_idx = None
-                
-                # Remove 'Invoice'
-                try:
-                    inv_idx = headers.index('Invoice')
-                    headers.pop(inv_idx)
-                except ValueError:
-                    inv_idx = None
-                
-                headers.extend(['Merchant Id', 'Merchant Transaction Id', 'State'])
+                # Remove 'Response Data' and 'Invoice' as it's too large/internal
+                headers = [h for h in headers if h not in ['Response Data', 'Invoice']]
+                # Add human-readable customer information
+                headers.extend(['Shop Name', 'Owner Name', 'Mobile Number'])
             
             context['headers'] = headers
             rows = []
@@ -276,25 +266,31 @@ class CustomAdminListView(AdminRequiredMixin, DynamicModelMixin, ListView):
                     if model_name == 'payment' and f.name in ['response_data', 'invoice']:
                         continue
                         
-                    val = getattr(obj, f.name, '')
-                    if val and hasattr(val, 'url'):
-                        val = f"<a href='javascript:void(0)' data-file-url='{val.url}' class='view-file-btn text-decoration-none'><i class='bi bi-file-earmark-text'></i> View</a>"
-                    else: val = str(val) if val is not None else ''
+                    try:
+                        val = getattr(obj, f.name, '')
+                        if val and hasattr(val, 'url'):
+                            val = f"<a href='javascript:void(0)' data-file-url='{val.url}' class='view-file-btn text-decoration-none'><i class='bi bi-file-earmark-text'></i> View</a>"
+                        else:
+                            val = str(val) if val is not None else ''
+                    except ObjectDoesNotExist:
+                        val = "<span class='text-muted italic'>(Record Not Found)</span>"
+                    except Exception as e:
+                        val = f"Error: {str(e)}"
                     row_data.append(val)
                 
-                # Append the extracted fields for payment
+                # Append customer information from related PricingSignup
                 if model_name == 'payment':
-                    rd = getattr(obj, 'response_data', {}) or {}
-                    # Ensure rd is a dict
-                    if isinstance(rd, str):
-                        import json
-                        try: rd = json.loads(rd)
-                        except: rd = {}
-                    
-                    data = rd.get('data', {}) if isinstance(rd, dict) else {}
-                    row_data.append(str(data.get('merchantId', '')))
-                    row_data.append(str(data.get('merchantTransactionId', '')))
-                    row_data.append(str(data.get('state', '')))
+                    try:
+                        signup = obj.pricing_signup
+                        row_data.extend([
+                            str(signup.shop_name),
+                            str(signup.owner_name),
+                            str(signup.mobile_number)
+                        ])
+                    except ObjectDoesNotExist:
+                        row_data.extend(["(N/A)", "(N/A)", "(N/A)"])
+                    except Exception:
+                        row_data.extend(["Error", "Error", "Error"])
                 
                 rows.append({'pk': obj.pk, 'data': row_data})
             context['tabular_rows'] = rows
@@ -314,11 +310,9 @@ def export_model_csv(request, app_label, model_name):
     # Special handling for Payment to extract specific JSON fields
     is_payment = model_name.lower() == 'payment'
     if is_payment:
-        try: headers.remove('Response Data')
-        except: pass
-        try: headers.remove('Invoice')
-        except: pass
-        headers.extend(['Merchant Id', 'Merchant Transaction Id', 'State'])
+        # Remove 'Response Data' and 'Invoice'
+        headers = [h for h in headers if h not in ['Response Data', 'Invoice']]
+        headers.extend(['Shop Name', 'Owner Name', 'Mobile Number'])
         
     writer.writerow(headers)
     
@@ -327,20 +321,27 @@ def export_model_csv(request, app_label, model_name):
         for f in fields:
             if is_payment and f.name in ['response_data', 'invoice']:
                 continue
-            val = getattr(obj, f.name, '')
-            if val and hasattr(val, 'url'):
-                val = request.build_absolute_uri(val.url)
-            row_data.append(str(val) if val is not None else '')
-            
+            try:
+                val = getattr(obj, f.name, '')
+                if val and hasattr(val, 'url'):
+                    val = request.build_absolute_uri(val.url)
+                else:
+                    val = str(val) if val is not None else ''
+            except ObjectDoesNotExist:
+                val = "Record Not Found"
+            except:
+                val = "Error"
+            row_data.append(val)
+        
+        # Append customer information for Payment
         if is_payment:
-            rd = getattr(obj, 'response_data', {}) or {}
-            if isinstance(rd, str):
-                try: rd = json.loads(rd)
-                except: rd = {}
-            data = rd.get('data', {}) if isinstance(rd, dict) else {}
-            row_data.append(str(data.get('merchantId', '')))
-            row_data.append(str(data.get('merchantTransactionId', '')))
-            row_data.append(str(data.get('state', '')))
+            try:
+                signup = obj.pricing_signup
+                row_data.extend([str(signup.shop_name), str(signup.owner_name), str(signup.mobile_number)])
+            except ObjectDoesNotExist:
+                row_data.extend(["Record Not Found", "Record Not Found", "Record Not Found"])
+            except:
+                row_data.extend(["Error", "Error", "Error"])
             
         writer.writerow(row_data)
     return response
@@ -382,11 +383,9 @@ def export_model_pdf(request, app_label, model_name):
     
     is_payment = model_name.lower() == 'payment'
     if is_payment:
-        try: headers.remove('Response Data')
-        except: pass
-        try: headers.remove('Invoice')
-        except: pass
-        headers.extend(['Merchant Id', 'Merchant Transaction Id', 'State'])
+        # Remove 'Response Data' and 'Invoice'
+        headers = [h for h in headers if h not in ['Response Data', 'Invoice']]
+        headers.extend(['Shop Name', 'Owner Name', 'Mobile Number'])
     
     data_list = [headers]
     for obj in model.objects.all():
@@ -394,20 +393,28 @@ def export_model_pdf(request, app_label, model_name):
         for f in fields:
             if is_payment and f.name in ['response_data', 'invoice']:
                 continue
-            val = getattr(obj, f.name, '')
-            if val and hasattr(val, 'url'):
-                val = "File Attached"
-            row_data.append(str(val) if val is not None else '')
-            
+            try:
+                val = getattr(obj, f.name, '')
+                if val and hasattr(val, 'url'):
+                    val = "File Attached"
+                else:
+                    val = str(val) if val is not None else ''
+            except ObjectDoesNotExist:
+                val = "Record Not Found"
+            except:
+                val = "Error"
+            row_data.append(val)
+        
+        # Append customer information for Payment
         if is_payment:
-            rd = getattr(obj, 'response_data', {}) or {}
-            if isinstance(rd, str):
-                try: rd = json.loads(rd)
-                except: rd = {}
-            data_dict = rd.get('data', {}) if isinstance(rd, dict) else {}
-            row_data.append(str(data_dict.get('merchantId', '')))
-            row_data.append(str(data_dict.get('merchantTransactionId', '')))
-            row_data.append(str(data_dict.get('state', '')))
+            try:
+                signup = obj.pricing_signup
+                row_data.extend([str(signup.shop_name), str(signup.owner_name), str(signup.mobile_number)])
+            except ObjectDoesNotExist:
+                row_data.extend(["Record Not Found", "Record Not Found", "Record Not Found"])
+            except:
+                row_data.extend(["Error", "Error", "Error"])
+        
         data_list.append(row_data)
 
     # 4. Table Styling
@@ -466,8 +473,16 @@ def manage_env(request):
     """
     # Define which model fields we want to expose in this simplified dashboard
     SETTING_FIELDS = {
+        'active_gateway': 'Active Payment Gateway',
         'razorpay_key_id': 'Razorpay Key ID',
         'razorpay_key_secret': 'Razorpay Key Secret',
+        'razorpay_merchant_id': 'Razorpay Merchant ID',
+        'razorpay_order_prefix': 'Razorpay Order Prefix',
+        'cashfree_app_id': 'Cashfree App ID',
+        'cashfree_secret_key': 'Cashfree Secret Key',
+        'cashfree_merchant_id': 'Cashfree Merchant ID',
+        'cashfree_order_prefix': 'Cashfree Order Prefix',
+        'cashfree_environment': 'Cashfree Environment',
         'email_host_user': 'Gmail / Email ID',
         'email_host_password': 'Email App Password',
     }
@@ -515,9 +530,15 @@ def manage_env(request):
     # Prepare data for the template (mapping field names to labels and values)
     env_vars = {}
     for field_name, label in SETTING_FIELDS.items():
+        # Get choices if applicable
+        field_obj = GlobalSettings._meta.get_field(field_name)
+        choices = getattr(field_obj, 'choices', None)
+        
         env_vars[field_name] = {
             'label': label,
-            'value': getattr(gs, field_name) or ""
+            'value': getattr(gs, field_name) or "",
+            'type': 'select' if choices else 'password',
+            'choices': choices
         }
 
     return render(request, 'custom_admin/manage_env.html', {

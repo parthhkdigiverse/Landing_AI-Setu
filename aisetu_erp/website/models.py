@@ -438,6 +438,56 @@ class GlobalSettings(models.Model):
         null=True,
         help_text="The Razorpay Key Secret"
     )
+    razorpay_merchant_id = models.CharField(
+        max_length=255, 
+        blank=True, 
+        null=True,
+        help_text="Optional: Your Razorpay Merchant ID for reference"
+    )
+    razorpay_order_prefix = models.CharField(
+        max_length=50, 
+        default="RZP_",
+        help_text="Prefix for Razorpay order receipts (e.g. RZP_)"
+    )
+
+    # Cashfree Credentials
+    cashfree_app_id = models.CharField(
+        max_length=255, 
+        blank=True, 
+        null=True,
+        help_text="The Cashfree App ID (e.g. 56262b...)"
+    )
+    cashfree_secret_key = models.CharField(
+        max_length=255, 
+        blank=True, 
+        null=True,
+        help_text="The Cashfree Secret Key"
+    )
+    cashfree_environment = models.CharField(
+        max_length=20, 
+        default="SANDBOX",
+        choices=[("SANDBOX", "Sandbox"), ("PRODUCTION", "Production")],
+        help_text="Gateway environment"
+    )
+    cashfree_merchant_id = models.CharField(
+        max_length=255, 
+        blank=True, 
+        null=True,
+        help_text="Optional: Your Cashfree Merchant ID for reference"
+    )
+    cashfree_order_prefix = models.CharField(
+        max_length=50, 
+        default="CF_",
+        help_text="Prefix for Cashfree order IDs (e.g. CF_)"
+    )
+
+    # Active Gateway
+    active_gateway = models.CharField(
+        max_length=20, 
+        default="RAZORPAY",
+        choices=[("RAZORPAY", "Razorpay"), ("CASHFREE", "Cashfree")],
+        help_text="The payment gateway currently in use"
+    )
 
     def save(self, *args, **kwargs):
         # Ensure only one instance exists
@@ -546,7 +596,11 @@ class Payment(models.Model):
 
     status = models.CharField(max_length=20, default="PENDING")
     
-    gateway = models.CharField(max_length=20, default="RAZORPAY")
+    gateway = models.CharField(
+        max_length=20, 
+        default="RAZORPAY",
+        choices=[("RAZORPAY", "Razorpay"), ("CASHFREE", "Cashfree")]
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 
